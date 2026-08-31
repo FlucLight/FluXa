@@ -1,18 +1,18 @@
 {
-  "name": "js_otw_ferari",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "personal-finance-tracker",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client",
+    "shared"
+  ],
   "scripts": {
-    "dev": "ts-node-dev --respawn src/index.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "cors": "^2.8.6",
-    "dotenv": "^17.4.2",
-    "express": "^5.2.1",
-    "pg": "^8.23.0"
+    "dev": "npm run dev --workspace server",
+    "dev:client": "npm run dev --workspace client",
+    "db:setup": "npm run db:setup --workspace server",
+    "migrate": "npm run migrate --workspace server",
+    "migrate:down": "npm run migrate:down --workspace server",
+    "typecheck": "npm run typecheck --workspaces --if-present"
   }
 }

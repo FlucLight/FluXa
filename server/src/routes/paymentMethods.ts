@@ -1,0 +1,14 @@
+import { Router } from 'express'
+import { createPaymentMethodSchema, updatePaymentMethodSchema } from 'shared'
+import * as ctrl from '../controllers/paymentMethods'
+import { validate } from '../middleware/validate'
+
+const router = Router()
+
+router.get('/', ctrl.list)
+router.get('/:id', ctrl.getOne)
+router.post('/', validate(createPaymentMethodSchema), ctrl.create)
+router.patch('/:id', validate(updatePaymentMethodSchema), ctrl.update)
+router.delete('/:id', ctrl.remove)
+
+export default router
