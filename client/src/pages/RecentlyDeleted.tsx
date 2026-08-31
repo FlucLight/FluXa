@@ -4,7 +4,7 @@ import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { CategorySymbolIcon } from '../components/Icons'
-import { useToast } from '../components/Toast'
+import { useToast } from '../components/useToast'
 import { formatDate, formatRp } from '../utils'
 
 export function RecentlyDeleted() {

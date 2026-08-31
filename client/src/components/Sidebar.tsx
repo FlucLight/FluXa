@@ -22,7 +22,7 @@ const links = [
 
 export function Sidebar() {
   return (
-    <aside className="w-56 shrink-0 bg-[var(--color-surface-raised)] border-r border-[var(--color-border)] flex flex-col justify-between p-3 select-none">
+    <aside className="relative z-30 w-56 shrink-0 bg-[var(--color-surface-raised)] border-r border-[var(--color-border)] flex flex-col justify-between p-3 select-none">
       <div className="flex flex-col gap-1">
         <div className="px-3 py-3 mb-2 flex items-center gap-2.5">
           <div className="w-6 h-6 bg-[var(--color-ink)] rounded-[5px] flex items-center justify-center text-[var(--color-surface-raised)] text-xs font-bold font-display tracking-wider">

@@ -6,7 +6,7 @@ import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { FilterBar } from '../components/FilterBar'
 import { CategorySymbolIcon } from '../components/Icons'
-import { useToast } from '../components/Toast'
+import { useToast } from '../components/useToast'
 import { TransactionForm } from '../components/TransactionForm'
 import {
   formatDate,

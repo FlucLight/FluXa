@@ -7,7 +7,7 @@ import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
 import { CategorySymbolIcon, CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
-import { useToast } from '../components/Toast'
+import { useToast } from '../components/useToast'
 import { formatRp } from '../utils'
 
 export function Recurring() {

@@ -15,7 +15,7 @@ import {
 import { api } from '../api'
 import { FilterBar } from '../components/FilterBar'
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CategorySymbolIcon } from '../components/Icons'
-import { useTheme } from '../components/ThemeContext'
+import { useTheme } from '../components/useTheme'
 import {
   formatRp,
   getPresetDateRange,
