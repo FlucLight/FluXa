@@ -176,3 +176,50 @@ html.dark .card-hover:hover {
 .theme-ink-faint {
   color: var(--color-ink-faint);
 }
+
+#root {
+  min-height: 100%;
+}
+
+html,
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mobile-table-scroll > table {
+  min-width: 720px;
+}
+
+@media (max-width: 639px) {
+  .card-hover:hover {
+    transform: none;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

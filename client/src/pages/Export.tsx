@@ -43,7 +43,7 @@ export function Export() {
   }
 
   return (
-    <div className="p-8 flex flex-col gap-6 max-w-2xl animate-fade-in">
+    <div className="w-full min-w-0 max-w-2xl animate-fade-in p-4 sm:p-6 md:p-8 flex flex-col gap-5 sm:gap-6">
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Export & Backup</h1>
         <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
@@ -55,8 +55,8 @@ export function Export() {
         <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
           Export Data
         </h2>
-        <div className="flex flex-col divide-y divide-[var(--color-border)]">
-          <div className="flex items-center justify-between py-3">
+          <div className="flex flex-col divide-y divide-[var(--color-border)]">
+          <div className="flex flex-col items-start gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold text-[var(--color-ink)]">Spreadsheet CSV</p>
               <p className="text-[11px] text-[var(--color-ink-faint)]">
@@ -65,6 +65,7 @@ export function Export() {
             </div>
             <Button
               variant="secondary"
+              className="w-full sm:w-auto"
               onClick={() => {
                 api.export.csv()
                   .then((b) => {
@@ -78,7 +79,7 @@ export function Export() {
             </Button>
           </div>
 
-          <div className="flex items-center justify-between py-3">
+          <div className="flex flex-col items-start gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="text-xs font-semibold text-[var(--color-ink)]">Backup Penuh (JSON)</p>
               <p className="text-[11px] text-[var(--color-ink-faint)]">
@@ -87,6 +88,7 @@ export function Export() {
             </div>
             <Button
               variant="secondary"
+              className="w-full sm:w-auto"
               onClick={() => {
                 api.export.json()
                   .then((b) => {
@@ -121,6 +123,7 @@ export function Export() {
           />
           <Button
             variant="primary"
+            className="w-full sm:w-auto"
             onClick={() => fileRef.current?.click()}
             disabled={importing}
           >

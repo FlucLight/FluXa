@@ -26,7 +26,7 @@ export function Modal({ title, children, onClose }: Props) {
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-xs transition-opacity duration-200 overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-xs transition-opacity duration-200 sm:p-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -45,7 +45,7 @@ export function Modal({ title, children, onClose }: Props) {
             <CloseIcon size={14} />
           </Button>
         </div>
-        <div className="p-5 max-h-[calc(100vh-140px)] overflow-y-auto">{children}</div>
+        <div className="max-h-[calc(100dvh-120px)] overflow-y-auto p-4 sm:max-h-[calc(100dvh-140px)] sm:p-5">{children}</div>
       </div>
     </div>,
     document.body

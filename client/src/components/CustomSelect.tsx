@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 export interface SelectOption {
   value: string
@@ -30,36 +31,59 @@ export function CustomSelect({
   const [isOpen, setIsOpen] = useState(false)
   const [openUpwards, setOpenUpwards] = useState(false)
   const [search, setSearch] = useState('')
+  const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
   const containerRef = useRef<HTMLDivElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
 
   const selectedOption = options.find((o) => o.value === value)
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-        setSearch('')
-      }
+    if (!isOpen) return
+
+    const updatePosition = () => {
+      const trigger = containerRef.current?.getBoundingClientRect()
+      if (!trigger) return
+
+      const width = Math.min(Math.max(trigger.width, 200), window.innerWidth - 16)
+      const estimatedHeight = Math.min(searchable ? 280 : 240, window.innerHeight - 16)
+      const spaceBelow = window.innerHeight - trigger.bottom
+      const shouldOpenUpwards = spaceBelow < estimatedHeight && trigger.top > estimatedHeight
+      const left = Math.min(Math.max(8, trigger.left), window.innerWidth - width - 8)
+
+      setOpenUpwards(shouldOpenUpwards)
+      setMenuStyle({
+        left,
+        width,
+        maxHeight: estimatedHeight,
+        ...(shouldOpenUpwards
+          ? { bottom: window.innerHeight - trigger.top + 6 }
+          : { top: trigger.bottom + 6 }),
+      })
     }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      if (searchable && searchInputRef.current) {
-        setTimeout(() => searchInputRef.current?.focus(), 50)
-      }
-      // Check available space below
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect()
-        const spaceBelow = window.innerHeight - rect.bottom
-        if (spaceBelow < 240 && rect.top > 240) {
-          setOpenUpwards(true)
-        } else {
-          setOpenUpwards(false)
-        }
-      }
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (containerRef.current?.contains(target) || menuRef.current?.contains(target)) return
+      setIsOpen(false)
+      setSearch('')
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [isOpen, searchable])
+
+    updatePosition()
+    document.addEventListener('mousedown', handleClickOutside)
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+
+    if (searchable) {
+      setTimeout(() => searchInputRef.current?.focus(), 50)
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
+  }, [isOpen, searchable, options.length])
 
   const filteredOptions = searchable && search.trim()
     ? options.filter((o) =>
@@ -70,16 +94,17 @@ export function CustomSelect({
 
   return (
     <div ref={containerRef} className={`relative select-none ${className}`}>
-      {/* Trigger Button */}
       <button
         type="button"
         disabled={disabled}
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
         onClick={() => setIsOpen((prev) => !prev)}
         className={`flex items-center justify-between gap-2 w-full px-3 py-2 text-xs rounded-[6px] transition-all bg-[var(--color-surface-sunken)] border border-[var(--color-border)] text-[var(--color-ink)] hover:border-[var(--color-border-strong)] focus:outline-none focus:ring-1 focus:ring-[var(--color-focus)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
           isOpen ? 'ring-1 ring-[var(--color-focus)] border-[var(--color-border-strong)]' : ''
         }`}
       >
-        <div className="flex items-center gap-2 truncate">
+        <div className="flex min-w-0 items-center gap-2 truncate">
           {selectedOption?.icon && (
             <span className="shrink-0 text-[var(--color-ink-muted)]">
               {selectedOption.icon}
@@ -90,7 +115,7 @@ export function CustomSelect({
           </span>
           {selectedOption?.badge && (
             <span
-              className={`text-[9px] px-1.5 py-0.2 rounded-[3px] font-semibold uppercase tracking-wider ${
+              className={`shrink-0 text-[9px] px-1.5 py-0.2 rounded-[3px] font-semibold uppercase tracking-wider ${
                 selectedOption.badgeColor ?? 'bg-[var(--color-surface)] text-[var(--color-ink-muted)] border border-[var(--color-border)]'
               }`}
             >
@@ -99,7 +124,6 @@ export function CustomSelect({
           )}
         </div>
 
-        {/* Chevron Icon */}
         <svg
           width="12"
           height="12"
@@ -117,11 +141,13 @@ export function CustomSelect({
         </svg>
       </button>
 
-      {/* Dropdown Menu */}
-      {isOpen && (
+      {isOpen && menuStyle.left !== undefined && createPortal(
         <div
-          className={`absolute z-[999] w-full min-w-[200px] max-h-60 overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[8px] shadow-2xl p-1 animate-dropdown-in ${
-            openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+          ref={menuRef}
+          role="listbox"
+          style={menuStyle}
+          className={`fixed z-[9999] min-w-[200px] overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[8px] shadow-2xl p-1 animate-dropdown-in ${
+            openUpwards ? 'origin-bottom' : 'origin-top'
           }`}
         >
           {searchable && (
@@ -132,7 +158,7 @@ export function CustomSelect({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Cari opsi..."
-                className="w-full bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[5px] px-2 py-1 text-xs text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:ring-1 focus:ring-[var(--color-focus)]"
+                className="w-full bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[5px] px-2 py-1.5 text-xs text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:ring-1 focus:ring-[var(--color-focus)]"
               />
             </div>
           )}
@@ -149,18 +175,20 @@ export function CustomSelect({
                   <button
                     key={opt.value}
                     type="button"
+                    role="option"
+                    aria-selected={isSelected}
                     onClick={() => {
                       onChange(opt.value)
                       setIsOpen(false)
                       setSearch('')
                     }}
-                    className={`flex items-center justify-between gap-2 w-full px-2.5 py-1.5 rounded-[5px] text-xs transition-colors cursor-pointer text-left ${
+                    className={`flex items-center justify-between gap-2 w-full px-2.5 py-2 rounded-[5px] text-xs transition-colors cursor-pointer text-left ${
                       isSelected
                         ? 'bg-[var(--color-surface-sunken)] text-[var(--color-ink)] font-semibold'
                         : 'text-[var(--color-ink-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]'
                     }`}
                   >
-                    <div className="flex items-center gap-2 truncate">
+                    <div className="flex min-w-0 items-center gap-2 truncate">
                       {opt.icon && (
                         <span className={`shrink-0 ${isSelected ? 'text-[var(--color-ink)]' : 'text-[var(--color-ink-muted)]'}`}>
                           {opt.icon}
@@ -200,7 +228,8 @@ export function CustomSelect({
               })
             )}
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )

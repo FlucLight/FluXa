@@ -49,16 +49,16 @@ export function QuickInput() {
   }
 
   return (
-    <div className="relative z-20 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-6 py-2.5 flex flex-col gap-2">
-      <div className="flex gap-2 items-center">
-        <span className="text-[var(--color-ink-faint)] flex items-center gap-1 text-[11px] font-mono shrink-0 uppercase tracking-wider">
+    <div className="relative z-20 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-2.5 sm:px-6">
+      <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+        <span className="flex shrink-0 items-center gap-1 text-[11px] font-mono uppercase tracking-wider text-[var(--color-ink-faint)]">
           <ZapIcon size={12} />
-          <span>Quick</span>
+          <span className="hidden sm:inline">Quick</span>
         </span>
         <input
           ref={inputRef}
-          className="flex-1 bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[6px] px-3 py-1.5 text-xs text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-focus)] focus:ring-1 focus:ring-[var(--color-focus)]"
-          placeholder='Ketik cepat... mis. "Nasi goreng 15rb mandiri" lalu Enter'
+          className="min-w-0 flex-1 bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[6px] px-2.5 py-2 text-xs text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-focus)] focus:ring-1 focus:ring-[var(--color-focus)] sm:px-3"
+          placeholder="Catat cepat..."
           value={text}
           onChange={(e) => {
             setText(e.target.value)
@@ -71,6 +71,7 @@ export function QuickInput() {
           variant="secondary"
           onClick={() => parseMutation.mutate()}
           disabled={!text.trim() || parseMutation.isPending}
+          className="shrink-0 !px-2.5 sm:!px-3"
         >
           {parseMutation.isPending ? '...' : 'Preview'}
         </Button>
@@ -79,44 +80,45 @@ export function QuickInput() {
             variant="primary"
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
+            className="shrink-0 !px-2.5 sm:!px-3"
           >
-            {saveMutation.isPending ? 'Menyimpan...' : 'Simpan'}
+            {saveMutation.isPending ? '...' : 'Simpan'}
           </Button>
         )}
       </div>
 
       {preview && (
-        <div className="flex gap-3 text-xs px-1 items-center flex-wrap">
+        <div className="flex flex-wrap items-center gap-2 px-1 pt-2 text-xs">
           {preview.confidence === 'low' && (
-            <span className="bg-[var(--color-warning-soft)] text-[var(--color-warning)] px-1.5 py-0.5 rounded-[4px] font-medium text-[11px]">
+            <span className="rounded-[4px] bg-[var(--color-warning-soft)] px-1.5 py-0.5 text-[11px] font-medium text-[var(--color-warning)]">
               Perlu review
             </span>
           )}
           {preview.amount && (
-            <span className="text-[var(--color-ink)] tabular-nums font-semibold">
+            <span className="font-semibold tabular-nums text-[var(--color-ink)]">
               {formatRp(preview.amount)}
             </span>
           )}
           {preview.category_name && (
-            <span className="text-[var(--color-ink-muted)] bg-[var(--color-surface-sunken)] px-2 py-0.5 rounded-[4px]">
+            <span className="rounded-[4px] bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[var(--color-ink-muted)]">
               {preview.category_name}
             </span>
           )}
           {preview.payment_method_name && (
-            <span className="text-[var(--color-ink-muted)] bg-[var(--color-surface-sunken)] px-2 py-0.5 rounded-[4px]">
+            <span className="rounded-[4px] bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[var(--color-ink-muted)]">
               {preview.payment_method_name}
             </span>
           )}
           {preview.description && (
-            <span className="text-[var(--color-ink-faint)] italic">"{preview.description}"</span>
+            <span className="truncate italic text-[var(--color-ink-faint)]">"{preview.description}"</span>
           )}
-          <span className="text-[var(--color-ink-faint)] ml-auto text-[11px]">
+          <span className="w-full text-[11px] text-[var(--color-ink-faint)] sm:ml-auto sm:w-auto">
             Enter: Simpan · Esc: Batal
           </span>
         </div>
       )}
 
-      {error && <p className="text-xs text-[var(--color-negative)] px-1">{error}</p>}
+      {error && <p className="px-1 pt-2 text-xs text-[var(--color-negative)]">{error}</p>}
     </div>
   )
 }

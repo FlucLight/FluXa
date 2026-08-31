@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { CalendarIcon, CloseIcon } from './Icons'
 
 interface DatePickerProps {
-  value: string // YYYY-MM-DD
+  value: string
   onChange: (value: string) => void
   placeholder?: string
   className?: string
@@ -17,43 +18,61 @@ export function DatePicker({
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [openUpwards, setOpenUpwards] = useState(false)
+  const [popupStyle, setPopupStyle] = useState<React.CSSProperties>({})
   const containerRef = useRef<HTMLDivElement>(null)
+  const popupRef = useRef<HTMLDivElement>(null)
 
-  // Parsing date or default to current
   const parsedDate = value ? new Date(value + 'T00:00:00') : new Date()
   const [viewYear, setViewYear] = useState(parsedDate.getFullYear())
-  const [viewMonth, setViewMonth] = useState(parsedDate.getMonth()) // 0-indexed
+  const [viewMonth, setViewMonth] = useState(parsedDate.getMonth())
 
   useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-      }
+    if (!isOpen) return
+
+    const updatePosition = () => {
+      const trigger = containerRef.current?.getBoundingClientRect()
+      if (!trigger) return
+
+      const width = Math.min(256, window.innerWidth - 24)
+      const estimatedHeight = 290
+      const spaceBelow = window.innerHeight - trigger.bottom
+      const shouldOpenUpwards = spaceBelow < estimatedHeight && trigger.top > estimatedHeight
+      const left = Math.min(Math.max(12, trigger.left), window.innerWidth - width - 12)
+
+      setOpenUpwards(shouldOpenUpwards)
+      setPopupStyle({
+        left,
+        width,
+        ...(shouldOpenUpwards
+          ? { bottom: window.innerHeight - trigger.top + 8 }
+          : { top: trigger.bottom + 8 }),
+      })
     }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside)
-      // Check viewport position to decide whether to open upwards
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect()
-        const spaceBelow = window.innerHeight - rect.bottom
-        // Calendar popup height is ~270px
-        if (spaceBelow < 280 && rect.top > 280) {
-          setOpenUpwards(true)
-        } else {
-          setOpenUpwards(false)
-        }
-      }
+
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node
+      if (containerRef.current?.contains(target) || popupRef.current?.contains(target)) return
+      setIsOpen(false)
     }
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+
+    updatePosition()
+    document.addEventListener('mousedown', handleClickOutside)
+    window.addEventListener('resize', updatePosition)
+    window.addEventListener('scroll', updatePosition, true)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      window.removeEventListener('resize', updatePosition)
+      window.removeEventListener('scroll', updatePosition, true)
+    }
   }, [isOpen])
 
-  // Calendar logic
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
-  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay() // 0 = Sun
+  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay()
 
   const monthNames = [
     'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
   ]
   const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
 
@@ -115,7 +134,6 @@ export function DatePicker({
   const today = new Date()
   const isTodayMonth = today.getFullYear() === viewYear && today.getMonth() === viewMonth
   const todayDay = today.getDate()
-
   const selectedDayNum = value ? parseInt(value.split('-')[2] ?? '0', 10) : 0
   const isSelectedMonth = value ? (
     parseInt(value.split('-')[0] ?? '0', 10) === viewYear &&
@@ -124,15 +142,15 @@ export function DatePicker({
 
   return (
     <div ref={containerRef} className={`relative select-none ${className}`}>
-      {/* Input Trigger */}
       <button
         type="button"
+        aria-expanded={isOpen}
         onClick={() => setIsOpen((prev) => !prev)}
         className={`flex items-center justify-between gap-2 w-full px-3 py-2 text-xs rounded-[6px] transition-all bg-[var(--color-surface-sunken)] border border-[var(--color-border)] text-[var(--color-ink)] hover:border-[var(--color-border-strong)] focus:outline-none focus:ring-1 focus:ring-[var(--color-focus)] cursor-pointer ${
           isOpen ? 'ring-1 ring-[var(--color-focus)] border-[var(--color-border-strong)]' : ''
         }`}
       >
-        <div className="flex items-center gap-2 truncate">
+        <div className="flex min-w-0 items-center gap-2 truncate">
           <CalendarIcon size={13} className="text-[var(--color-ink-muted)] shrink-0" />
           <span className={`truncate font-medium ${!value ? 'text-[var(--color-ink-faint)]' : ''}`}>
             {value ? formatDisplay(value) : placeholder}
@@ -148,22 +166,33 @@ export function DatePicker({
             <CloseIcon size={10} />
           </span>
         ) : (
-          <span className="text-[10px] text-[var(--color-ink-faint)]">▼</span>
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`shrink-0 text-[var(--color-ink-faint)] transition-transform duration-150 ${isOpen ? 'rotate-180' : ''}`}
+          >
+            <path d="m6 9 6 6 6-6" />
+          </svg>
         )}
       </button>
 
-      {/* Calendar Popup */}
-      {isOpen && (
+      {isOpen && popupStyle.left !== undefined && createPortal(
         <div
-          className={`absolute z-[999] w-64 p-3 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-2xl animate-dropdown-in ${
-            openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
-          }`}
+          ref={popupRef}
+          style={popupStyle}
+          className={`fixed z-[9999] max-h-[calc(100dvh-24px)] overflow-y-auto p-3 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-2xl animate-dropdown-in ${openUpwards ? 'origin-bottom' : 'origin-top'}`}
         >
-          {/* Header Month / Year Navigation */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--color-border)]">
             <button
               type="button"
               onClick={handlePrevMonth}
+              aria-label="Bulan sebelumnya"
               className="p-1 rounded-[5px] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -178,6 +207,7 @@ export function DatePicker({
             <button
               type="button"
               onClick={handleNextMonth}
+              aria-label="Bulan berikutnya"
               className="p-1 rounded-[5px] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)] transition-colors cursor-pointer"
             >
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -186,7 +216,6 @@ export function DatePicker({
             </button>
           </div>
 
-          {/* Day Names Grid */}
           <div className="grid grid-cols-7 gap-1 text-center mb-1">
             {dayNames.map((d) => (
               <span key={d} className="text-[10px] font-semibold text-[var(--color-ink-faint)]">
@@ -195,14 +224,11 @@ export function DatePicker({
             ))}
           </div>
 
-          {/* Days Numbers Grid */}
           <div className="grid grid-cols-7 gap-1 text-center">
-            {/* Empty slots for first week padding */}
             {Array.from({ length: firstDayOfWeek }).map((_, idx) => (
               <span key={`empty-${idx}`} />
             ))}
 
-            {/* Days of month */}
             {Array.from({ length: daysInMonth }).map((_, idx) => {
               const day = idx + 1
               const isSelected = isSelectedMonth && selectedDayNum === day
@@ -227,7 +253,6 @@ export function DatePicker({
             })}
           </div>
 
-          {/* Footer Quick Actions */}
           <div className="flex items-center justify-between pt-2 mt-2 border-t border-[var(--color-border)] text-[11px]">
             <button
               type="button"
@@ -244,14 +269,15 @@ export function DatePicker({
               Tutup
             </button>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   )
 }
 
 interface DateTimePickerProps {
-  value: string // ISO string or YYYY-MM-DDTHH:mm
+  value: string
   onChange: (value: string) => void
   className?: string
 }
@@ -278,10 +304,10 @@ export function DateTimePicker({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <div className="flex-1">
+      <div className="min-w-0 flex-1">
         <DatePicker value={datePart} onChange={handleDateChange} placeholder="Pilih tanggal" />
       </div>
-      <div className="w-24">
+      <div className="w-24 shrink-0">
         <input
           type="time"
           value={timePart}

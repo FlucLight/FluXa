@@ -149,7 +149,7 @@ export function Dashboard() {
     .filter((b) => b.spent > 0 || parseFloat(b.limit_amount) > 0)
 
   return (
-    <div className="p-8 flex flex-col gap-6 max-w-6xl animate-fade-in">
+    <div className="w-full min-w-0 max-w-6xl animate-fade-in p-4 sm:p-6 md:p-8 flex flex-col gap-5 sm:gap-6">
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">
           Ringkasan Finansial
@@ -182,7 +182,7 @@ export function Dashboard() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs card-hover">
               <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1">
                 <ArrowUpRightIcon size={12} className="text-[var(--color-positive)]" />
@@ -238,7 +238,7 @@ export function Dashboard() {
 
           {dailyData.length > 0 && (
             <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs card-hover">
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Tren Transaksi per Periode
                 </h2>
@@ -295,7 +295,7 @@ export function Dashboard() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
+            <div className="min-w-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
               <div className="flex items-center justify-between">
                 <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Pengeluaran per Kategori
@@ -384,7 +384,7 @@ export function Dashboard() {
               )}
             </div>
 
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
+            <div className="min-w-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
               <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                 Sumber / Metode Pembayaran
               </h2>
@@ -419,7 +419,7 @@ export function Dashboard() {
               )}
             </div>
 
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
+            <div className="min-w-0 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
               <div className="flex items-center justify-between">
                 <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Status Budget Bulan Ini
