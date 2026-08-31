@@ -133,9 +133,9 @@ export function TransactionForm({ existing, onClose }: Props) {
           />
         </Field>
         {mutation.isError && (
-          <p className="text-[#B23A3A] text-xs">{(mutation.error as Error).message}</p>
+          <p className="text-[var(--color-negative)] text-xs">{(mutation.error as Error).message}</p>
         )}
-        <div className="flex justify-end gap-2 pt-2 border-t border-[#DADAD6]">
+        <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>

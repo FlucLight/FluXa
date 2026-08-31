@@ -1,4 +1,5 @@
 import { NavLink } from 'react-router-dom'
+import { ThemeToggle } from './ThemeToggle'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: '◈' },
@@ -12,14 +13,14 @@ const links = [
 
 export function Sidebar() {
   return (
-    <aside className="w-56 shrink-0 bg-[#FFFFFF] border-r border-[#DADAD6] flex flex-col justify-between p-3">
+    <aside className="w-56 shrink-0 bg-[var(--color-surface-raised)] border-r border-[var(--color-border)] flex flex-col justify-between p-3 select-none">
       <div className="flex flex-col gap-1">
         <div className="px-3 py-3 mb-2 flex items-center gap-2">
-          <div className="w-5 h-5 bg-[#1B1C1F] rounded-[4px] flex items-center justify-center text-white text-xs font-bold font-display">
+          <div className="w-6 h-6 bg-[var(--color-ink)] rounded-[5px] flex items-center justify-center text-[var(--color-surface-raised)] text-xs font-bold font-display">
             F
           </div>
-          <span className="text-[#1B1C1F] font-bold text-sm font-display tracking-tight">
-            Finance
+          <span className="text-[var(--color-ink)] font-bold text-sm font-display tracking-tight">
+            Finance Tracker
           </span>
         </div>
 
@@ -30,10 +31,10 @@ export function Sidebar() {
               to={l.to}
               end={l.to === '/'}
               className={({ isActive }) =>
-                `flex items-center gap-2 px-3 py-1.5 rounded-[6px] text-xs font-medium transition-colors ${
+                `flex items-center gap-2.5 px-3 py-2 rounded-[6px] text-xs font-medium transition-colors ${
                   isActive
-                    ? 'bg-[#ECECE9] text-[#1B1C1F]'
-                    : 'text-[#5A5C61] hover:bg-[#F5F5F3] hover:text-[#1B1C1F]'
+                    ? 'bg-[var(--color-surface-sunken)] text-[var(--color-ink)] font-semibold'
+                    : 'text-[var(--color-ink-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]'
                 }`
               }
             >
@@ -44,8 +45,11 @@ export function Sidebar() {
         </nav>
       </div>
 
-      <div className="px-3 py-2 text-[11px] text-[#8B8D92] border-t border-[#DADAD6]">
-        Personal Tracker
+      <div className="flex flex-col gap-2 pt-2 border-t border-[var(--color-border)]">
+        <ThemeToggle />
+        <div className="px-3 text-[11px] text-[var(--color-ink-faint)]">
+          Personal Finance Tracker
+        </div>
       </div>
     </aside>
   )

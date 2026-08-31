@@ -66,11 +66,11 @@ export function FilterBar({
     Boolean(customTo)
 
   return (
-    <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-4 flex flex-col gap-3">
+    <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-xs">
       {/* Baris 1: Quick Preset Chips / Tabs */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[11px] font-semibold text-[#5A5C61] uppercase tracking-wider mr-1">
+          <span className="text-[11px] font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider mr-1">
             Periode:
           </span>
           {quickPresets.map((p) => {
@@ -84,8 +84,8 @@ export function FilterBar({
                 onClick={() => onPresetChange(p)}
                 className={`text-xs px-2.5 py-1 rounded-[6px] font-medium transition-colors cursor-pointer ${
                   isActive
-                    ? 'bg-[#1B1C1F] text-white shadow-xs'
-                    : 'bg-[#ECECE9] text-[#5A5C61] hover:bg-[#DADAD6] hover:text-[#1B1C1F]'
+                    ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs'
+                    : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-ink)]'
                 }`}
               >
                 {opt.label}
@@ -97,8 +97,8 @@ export function FilterBar({
             onClick={() => onPresetChange('custom')}
             className={`text-xs px-2.5 py-1 rounded-[6px] font-medium transition-colors cursor-pointer ${
               preset === 'custom'
-                ? 'bg-[#1B1C1F] text-white shadow-xs'
-                : 'bg-[#ECECE9] text-[#5A5C61] hover:bg-[#DADAD6] hover:text-[#1B1C1F]'
+                ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs'
+                : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-ink)]'
             }`}
           >
             📅 Kustom...
@@ -109,7 +109,7 @@ export function FilterBar({
           <button
             type="button"
             onClick={onReset}
-            className="text-[11px] text-[#8B8D92] hover:text-[#B23A3A] transition-colors cursor-pointer font-medium"
+            className="text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-negative)] transition-colors cursor-pointer font-medium"
           >
             ✕ Reset Filter
           </button>
@@ -118,35 +118,35 @@ export function FilterBar({
 
       {/* Baris 2: Kustom Tanggal Input jika mode custom aktif */}
       {preset === 'custom' && (
-        <div className="flex items-center gap-2.5 p-2.5 bg-[#F5F5F3] border border-[#DADAD6] rounded-[6px] flex-wrap">
-          <span className="text-xs text-[#5A5C61] font-medium">Rentang Tanggal:</span>
+        <div className="flex items-center gap-2.5 p-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[6px] flex-wrap">
+          <span className="text-xs text-[var(--color-ink-muted)] font-medium">Rentang Tanggal:</span>
           <Input
             type="date"
             value={customFrom}
             onChange={(e) => onCustomFromChange?.(e.target.value)}
-            className="w-36 !bg-[#FFFFFF]"
+            className="w-36 !bg-[var(--color-surface-raised)]"
           />
-          <span className="text-xs text-[#8B8D92]">sampai</span>
+          <span className="text-xs text-[var(--color-ink-faint)]">sampai</span>
           <Input
             type="date"
             value={customTo}
             onChange={(e) => onCustomToChange?.(e.target.value)}
-            className="w-36 !bg-[#FFFFFF]"
+            className="w-36 !bg-[var(--color-surface-raised)]"
           />
         </div>
       )}
 
       {/* Baris 3: Dropdowns (Tipe, Kategori, Metode, Search) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-[#DADAD6]">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-[var(--color-border)]">
         {onTypeFilterChange && (
           <div>
-            <label className="text-[10px] text-[#8B8D92] uppercase tracking-wider font-semibold block mb-1">
+            <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
               Tipe Transaksi
             </label>
             <Select
               value={typeFilter}
               onChange={(e) => onTypeFilterChange(e.target.value)}
-              className="!bg-[#ECECE9]"
+              className="!bg-[var(--color-surface-sunken)]"
             >
               <option value="">Semua Tipe</option>
               <option value="expense">Pengeluaran</option>
@@ -157,13 +157,13 @@ export function FilterBar({
 
         {onCategoryChange && (
           <div>
-            <label className="text-[10px] text-[#8B8D92] uppercase tracking-wider font-semibold block mb-1">
+            <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
               Kategori
             </label>
             <Select
               value={selectedCategory}
               onChange={(e) => onCategoryChange(e.target.value)}
-              className="!bg-[#ECECE9]"
+              className="!bg-[var(--color-surface-sunken)]"
             >
               <option value="">Semua Kategori</option>
               {categories.map((c) => (
@@ -177,13 +177,13 @@ export function FilterBar({
 
         {onPmChange && (
           <div>
-            <label className="text-[10px] text-[#8B8D92] uppercase tracking-wider font-semibold block mb-1">
+            <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
               Metode / Akun
             </label>
             <Select
               value={selectedPm}
               onChange={(e) => onPmChange(e.target.value)}
-              className="!bg-[#ECECE9]"
+              className="!bg-[var(--color-surface-sunken)]"
             >
               <option value="">Semua Metode</option>
               {paymentMethods.map((pm) => (
@@ -197,7 +197,7 @@ export function FilterBar({
 
         {onSearchChange && (
           <div>
-            <label className="text-[10px] text-[#8B8D92] uppercase tracking-wider font-semibold block mb-1">
+            <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
               Pencarian
             </label>
             <Input
@@ -205,7 +205,7 @@ export function FilterBar({
               placeholder="Cari deskripsi..."
               value={search ?? ''}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="!bg-[#ECECE9]"
+              className="!bg-[var(--color-surface-sunken)]"
             />
           </div>
         )}

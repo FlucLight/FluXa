@@ -38,8 +38,8 @@ export function Recurring() {
     <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">Tagihan Berulang</h1>
-          <p className="text-xs text-[#5A5C61] mt-0.5">
+          <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Tagihan Berulang</h1>
+          <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
             Auto-generate transaksi tiap tanggal yang ditentukan setiap bulan
           </p>
         </div>
@@ -48,10 +48,10 @@ export function Recurring() {
         </Button>
       </div>
 
-      {isLoading && <p className="text-xs text-[#8B8D92]">Memuat data...</p>}
+      {isLoading && <p className="text-xs text-[var(--color-ink-faint)]">Memuat data...</p>}
       {!isLoading && items.length === 0 && (
-        <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-8 text-center">
-          <p className="text-xs text-[#5A5C61]">Belum ada jadwal tagihan rutin.</p>
+        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
+          <p className="text-xs text-[var(--color-ink-muted)]">Belum ada jadwal tagihan rutin.</p>
         </div>
       )}
 
@@ -62,29 +62,29 @@ export function Recurring() {
           return (
             <div
               key={item.id}
-              className={`bg-[#FFFFFF] border rounded-[10px] p-4 flex items-center gap-4 transition-opacity ${
-                item.is_active ? 'border-[#DADAD6]' : 'border-[#DADAD6]/60 opacity-60'
+              className={`bg-[var(--color-surface-raised)] border rounded-[10px] p-4 flex items-center gap-4 transition-opacity shadow-xs ${
+                item.is_active ? 'border-[var(--color-border)]' : 'border-[var(--color-border)]/60 opacity-60'
               }`}
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-xs text-[#1B1C1F]">{item.description}</span>
+                  <span className="font-semibold text-xs text-[var(--color-ink)]">{item.description}</span>
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded-[4px] font-medium ${
                       isExpense
-                        ? 'bg-[#F5E5E4] text-[#B23A3A]'
-                        : 'bg-[#E4EFE9] text-[#2E7D5B]'
+                        ? 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]'
+                        : 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]'
                     }`}
                   >
                     {isExpense ? 'Pengeluaran' : 'Pemasukan'}
                   </span>
                   {!item.is_active && (
-                    <span className="text-[10px] text-[#8B8D92] bg-[#ECECE9] px-1.5 py-0.5 rounded-[4px]">
+                    <span className="text-[10px] text-[var(--color-ink-faint)] bg-[var(--color-surface-sunken)] px-1.5 py-0.5 rounded-[4px]">
                       Nonaktif
                     </span>
                   )}
                 </div>
-                <div className="text-[11px] text-[#5A5C61] mt-1">
+                <div className="text-[11px] text-[var(--color-ink-muted)] mt-1">
                   Tanggal {item.day_of_month} tiap bulan · {cat ? `${cat.icon} ${cat.name}` : '-'} ·{' '}
                   {pmMap[item.payment_method_id] ?? '-'}
                 </div>
@@ -92,7 +92,7 @@ export function Recurring() {
 
               <span
                 className={`font-semibold text-xs tabular-nums ${
-                  isExpense ? 'text-[#B23A3A]' : 'text-[#2E7D5B]'
+                  isExpense ? 'text-[var(--color-negative)]' : 'text-[var(--color-positive)]'
                 }`}
               >
                 {isExpense ? '- ' : '+ '}
@@ -241,8 +241,8 @@ function RecurringForm({
             onChange={(e) => set('day_of_month', e.target.value)}
           />
         </Field>
-        {mut.isError && <p className="text-[#B23A3A] text-xs">{(mut.error as Error).message}</p>}
-        <div className="flex justify-end gap-2 pt-2 border-t border-[#DADAD6]">
+        {mut.isError && <p className="text-[var(--color-negative)] text-xs">{(mut.error as Error).message}</p>}
+        <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>

@@ -15,13 +15,18 @@ export function Button({
   disabled,
   className = '',
 }: Props) {
-  const base = 'inline-flex items-center justify-center font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2C2E33] focus-visible:ring-offset-1 rounded-[6px] text-xs px-3 py-1.5'
+  const base =
+    'inline-flex items-center justify-center font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-focus)] focus-visible:ring-offset-1 rounded-[6px] text-xs px-3 py-1.5'
 
   const variants = {
-    primary: 'bg-[#1B1C1F] hover:bg-[#2C2E33] text-white',
-    secondary: 'bg-[#ECECE9] hover:bg-[#DADAD6] text-[#1B1C1F] border border-[#DADAD6]',
-    danger: 'bg-transparent hover:bg-[#F5E5E4] text-[#B23A3A] border border-[#B23A3A]/30',
-    ghost: 'bg-transparent hover:bg-[#ECECE9] text-[#5A5C61] hover:text-[#1B1C1F]',
+    primary:
+      'bg-[var(--color-btn-primary-bg)] hover:opacity-90 text-[var(--color-btn-primary-text)] shadow-xs',
+    secondary:
+      'bg-[var(--color-surface-sunken)] hover:bg-[var(--color-border)] text-[var(--color-ink)] border border-[var(--color-border)]',
+    danger:
+      'bg-transparent hover:bg-[var(--color-negative-soft)] text-[var(--color-negative)] border border-[var(--color-negative)]/30',
+    ghost:
+      'bg-transparent hover:bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]',
   }
 
   return (

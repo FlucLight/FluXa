@@ -28,8 +28,8 @@ export function Transfers() {
     <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">Transfer Dana</h1>
-          <p className="text-xs text-[#5A5C61] mt-0.5">
+          <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Transfer Dana</h1>
+          <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
             Perpindahan uang antar akun/dompet (tidak mempengaruhi total income/expense)
           </p>
         </div>
@@ -38,18 +38,18 @@ export function Transfers() {
         </Button>
       </div>
 
-      {isLoading && <p className="text-xs text-[#8B8D92]">Memuat data...</p>}
+      {isLoading && <p className="text-xs text-[var(--color-ink-faint)]">Memuat data...</p>}
       {!isLoading && transfers.length === 0 && (
-        <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-8 text-center">
-          <p className="text-xs text-[#5A5C61]">Belum ada riwayat transfer.</p>
+        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
+          <p className="text-xs text-[var(--color-ink-muted)]">Belum ada riwayat transfer.</p>
         </div>
       )}
 
       {transfers.length > 0 && (
-        <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] overflow-hidden">
+        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] overflow-hidden shadow-xs">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-[#DADAD6] bg-[#ECECE9] text-[#5A5C61] font-medium">
+              <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] font-medium">
                 <th className="text-left px-4 py-2.5">Tanggal</th>
                 <th className="text-left px-4 py-2.5">Dari Akun</th>
                 <th className="text-left px-4 py-2.5">Ke Akun</th>
@@ -58,20 +58,20 @@ export function Transfers() {
                 <th className="px-4 py-2.5 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#DADAD6]">
+            <tbody className="divide-y divide-[var(--color-border)]">
               {transfers.map((t) => (
-                <tr key={t.id} className="hover:bg-[#F5F5F3] transition-colors">
-                  <td className="px-4 py-3 text-[#5A5C61] whitespace-nowrap tabular-nums">
+                <tr key={t.id} className="hover:bg-[var(--color-surface)] transition-colors">
+                  <td className="px-4 py-3 text-[var(--color-ink-muted)] whitespace-nowrap tabular-nums">
                     {formatDate(t.occurred_at)}
                   </td>
-                  <td className="px-4 py-3 text-[#1B1C1F] font-medium">
+                  <td className="px-4 py-3 text-[var(--color-ink)] font-medium">
                     {pmMap[t.from_payment_method_id] ?? '-'}
                   </td>
-                  <td className="px-4 py-3 text-[#1B1C1F] font-medium">
+                  <td className="px-4 py-3 text-[var(--color-ink)] font-medium">
                     {pmMap[t.to_payment_method_id] ?? '-'}
                   </td>
-                  <td className="px-4 py-3 text-[#5A5C61]">{t.description ?? '-'}</td>
-                  <td className="px-4 py-3 text-right font-semibold text-[#1B1C1F] tabular-nums">
+                  <td className="px-4 py-3 text-[var(--color-ink-muted)]">{t.description ?? '-'}</td>
+                  <td className="px-4 py-3 text-right font-semibold text-[var(--color-ink)] tabular-nums">
                     {formatRp(t.amount)}
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -184,8 +184,8 @@ function TransferForm({
             onChange={(e) => set('occurred_at', e.target.value)}
           />
         </Field>
-        {mut.isError && <p className="text-[#B23A3A] text-xs">{(mut.error as Error).message}</p>}
-        <div className="flex justify-end gap-2 pt-2 border-t border-[#DADAD6]">
+        {mut.isError && <p className="text-[var(--color-negative)] text-xs">{(mut.error as Error).message}</p>}
+        <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>

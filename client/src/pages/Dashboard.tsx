@@ -14,15 +14,21 @@ import {
 } from 'recharts'
 import { api } from '../api'
 import { FilterBar } from '../components/FilterBar'
+import { useTheme } from '../components/ThemeContext'
 import {
   formatRp,
   getPresetDateRange,
   type PeriodPreset,
 } from '../utils'
 
-const GRAY_SHADES = ['#1B1C1F', '#3A3C42', '#5A5C61', '#7A7D84', '#9A9DA4', '#B7B7B2', '#DADAD6']
+const GRAY_SHADES_LIGHT = ['#1B1C1F', '#3A3C42', '#5A5C61', '#7A7D84', '#9A9DA4', '#B7B7B2', '#DADAD6']
+const GRAY_SHADES_DARK = ['#F1F5F9', '#CBD5E1', '#94A3B8', '#64748B', '#475569', '#334155', '#1E293B']
 
 export function Dashboard() {
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  const grayShades = isDark ? GRAY_SHADES_DARK : GRAY_SHADES_LIGHT
+
   const [preset, setPreset] = useState<PeriodPreset>('this_month')
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
@@ -144,15 +150,14 @@ export function Dashboard() {
   return (
     <div className="p-8 flex flex-col gap-6 max-w-6xl">
       <div>
-        <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">
+        <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">
           Ringkasan Finansial
         </h1>
-        <p className="text-xs text-[#5A5C61] mt-0.5">
+        <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
           Analisis arus kas, distribusi pengeluaran, dan status budget
         </p>
       </div>
 
-      {/* Modern Compact Filter Bar */}
       <FilterBar
         preset={preset}
         onPresetChange={setPreset}
@@ -170,74 +175,74 @@ export function Dashboard() {
       />
 
       {isLoading ? (
-        <p className="text-xs text-[#8B8D92]">Memuat ringkasan data...</p>
+        <p className="text-xs text-[var(--color-ink-faint)]">Memuat ringkasan data...</p>
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-4">
-              <span className="text-[11px] font-medium text-[#5A5C61] uppercase tracking-wider">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
+              <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
                 ↑ Total Pemasukan
               </span>
-              <p className="text-xl font-bold text-[#2E7D5B] tabular-nums mt-1 font-display">
+              <p className="text-xl font-bold text-[var(--color-positive)] tabular-nums mt-1 font-display">
                 {formatRp(totalIncome)}
               </p>
-              <p className="text-[11px] text-[#8B8D92] mt-1">
+              <p className="text-[11px] text-[var(--color-ink-faint)] mt-1">
                 {txs.filter((t) => t.type === 'income').length} transaksi
               </p>
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-4">
-              <span className="text-[11px] font-medium text-[#5A5C61] uppercase tracking-wider">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
+              <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
                 ↓ Total Pengeluaran
               </span>
-              <p className="text-xl font-bold text-[#B23A3A] tabular-nums mt-1 font-display">
+              <p className="text-xl font-bold text-[var(--color-negative)] tabular-nums mt-1 font-display">
                 {formatRp(totalExpense)}
               </p>
-              <p className="text-[11px] text-[#8B8D92] mt-1">
+              <p className="text-[11px] text-[var(--color-ink-faint)] mt-1">
                 {txs.filter((t) => t.type === 'expense').length} transaksi
               </p>
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-4">
-              <span className="text-[11px] font-medium text-[#5A5C61] uppercase tracking-wider">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
+              <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
                 Saldo Bersih (Net)
               </span>
               <p
                 className={`text-xl font-bold tabular-nums mt-1 font-display ${
-                  net >= 0 ? 'text-[#1B1C1F]' : 'text-[#B23A3A]'
+                  net >= 0 ? 'text-[var(--color-ink)]' : 'text-[var(--color-negative)]'
                 }`}
               >
                 {formatRp(net)}
               </p>
-              <p className="text-[11px] text-[#8B8D92] mt-1">
+              <p className="text-[11px] text-[var(--color-ink-faint)] mt-1">
                 {net >= 0 ? 'Surplus anggaran' : 'Defisit anggaran'}
               </p>
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-4">
-              <span className="text-[11px] font-medium text-[#5A5C61] uppercase tracking-wider">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
+              <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
                 Rasio Tabungan
               </span>
-              <p className="text-xl font-bold text-[#1B1C1F] tabular-nums mt-1 font-display">
+              <p className="text-xl font-bold text-[var(--color-ink)] tabular-nums mt-1 font-display">
                 {savingsRate.toFixed(1)}%
               </p>
-              <p className="text-[11px] text-[#8B8D92] mt-1">dari total pemasukan</p>
+              <p className="text-[11px] text-[var(--color-ink-faint)] mt-1">dari total pemasukan</p>
             </div>
           </div>
 
           {dailyData.length > 0 && (
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-5">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xs font-semibold text-[#1B1C1F] uppercase tracking-wider">
+                <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Tren Transaksi per Periode
                 </h2>
-                <div className="flex items-center gap-4 text-[11px] text-[#5A5C61]">
+                <div className="flex items-center gap-4 text-[11px] text-[var(--color-ink-muted)]">
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-[2px] bg-[#2E7D5B]" />
+                    <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--color-positive)]" />
                     Pemasukan
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-[2px] bg-[#B23A3A]" />
+                    <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--color-negative)]" />
                     Pengeluaran
                   </span>
                 </div>
@@ -245,51 +250,55 @@ export function Dashboard() {
 
               <ResponsiveContainer width="100%" height={210}>
                 <BarChart data={dailyData} barGap={3}>
-                  <CartesianGrid strokeDasharray="2 2" stroke="#ECECE9" vertical={false} />
+                  <CartesianGrid
+                    strokeDasharray="2 2"
+                    stroke={isDark ? '#334155' : '#ECECE9'}
+                    vertical={false}
+                  />
                   <XAxis
                     dataKey="day"
-                    tick={{ fontSize: 11, fill: '#8B8D92' }}
-                    axisLine={{ stroke: '#DADAD6' }}
+                    tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#8B8D92' }}
+                    axisLine={{ stroke: isDark ? '#334155' : '#DADAD6' }}
                     tickLine={false}
                   />
                   <YAxis
-                    tick={{ fontSize: 11, fill: '#8B8D92' }}
+                    tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#8B8D92' }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
                   />
                   <Tooltip
                     contentStyle={{
-                      background: '#FFFFFF',
-                      border: '1px solid #DADAD6',
+                      background: isDark ? '#1E293B' : '#FFFFFF',
+                      border: `1px solid ${isDark ? '#334155' : '#DADAD6'}`,
                       borderRadius: 6,
                       fontSize: 12,
-                      color: '#1B1C1F',
+                      color: isDark ? '#F1F5F9' : '#1B1C1F',
                     }}
-                    labelStyle={{ color: '#5A5C61', fontWeight: 600, marginBottom: 4 }}
+                    labelStyle={{ color: isDark ? '#94A3B8' : '#5A5C61', fontWeight: 600, marginBottom: 4 }}
                     formatter={(v, name) => [
                       formatRp(Number(v)),
                       name === 'expense' ? 'Pengeluaran' : 'Pemasukan',
                     ]}
                   />
-                  <Bar dataKey="income" fill="#2E7D5B" radius={[3, 3, 0, 0]} maxBarSize={20} />
-                  <Bar dataKey="expense" fill="#B23A3A" radius={[3, 3, 0, 0]} maxBarSize={20} />
+                  <Bar dataKey="income" fill={isDark ? '#34D399' : '#2E7D5B'} radius={[3, 3, 0, 0]} maxBarSize={20} />
+                  <Bar dataKey="expense" fill={isDark ? '#F87171' : '#B23A3A'} radius={[3, 3, 0, 0]} maxBarSize={20} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-5 flex flex-col gap-3">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs">
               <div className="flex items-center justify-between">
-                <h2 className="text-xs font-semibold text-[#1B1C1F] uppercase tracking-wider">
+                <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Pengeluaran per Kategori
                 </h2>
-                <span className="text-[11px] text-[#8B8D92]">{expenseByCategory.length} aktif</span>
+                <span className="text-[11px] text-[var(--color-ink-faint)]">{expenseByCategory.length} aktif</span>
               </div>
 
               {expenseByCategory.length === 0 ? (
-                <p className="text-xs text-[#8B8D92]">Tidak ada data pengeluaran.</p>
+                <p className="text-xs text-[var(--color-ink-faint)]">Tidak ada data pengeluaran.</p>
               ) : (
                 <>
                   <div className="h-36 flex items-center justify-center">
@@ -303,22 +312,23 @@ export function Dashboard() {
                           cy="50%"
                           innerRadius={36}
                           outerRadius={58}
-                          stroke="#FFFFFF"
+                          stroke={isDark ? '#1E293B' : '#FFFFFF'}
                           strokeWidth={2}
                         >
                           {expenseByCategory.map((_, idx) => (
                             <Cell
                               key={`cell-${idx}`}
-                              fill={GRAY_SHADES[idx % GRAY_SHADES.length]}
+                              fill={grayShades[idx % grayShades.length]}
                             />
                           ))}
                         </Pie>
                         <Tooltip
                           contentStyle={{
-                            background: '#FFFFFF',
-                            border: '1px solid #DADAD6',
+                            background: isDark ? '#1E293B' : '#FFFFFF',
+                            border: `1px solid ${isDark ? '#334155' : '#DADAD6'}`,
                             borderRadius: 6,
                             fontSize: 11,
+                            color: isDark ? '#F1F5F9' : '#1B1C1F',
                           }}
                           formatter={(v) => [formatRp(Number(v)), 'Total']}
                         />
@@ -332,31 +342,31 @@ export function Dashboard() {
                       return (
                         <div key={c.id} className="flex flex-col gap-1">
                           <div className="flex items-center justify-between text-xs">
-                            <span className="text-[#1B1C1F] flex items-center gap-1.5 truncate">
+                            <span className="text-[var(--color-ink)] flex items-center gap-1.5 truncate">
                               <span
                                 className="w-2 h-2 rounded-[2px] shrink-0"
                                 style={{
-                                  backgroundColor: GRAY_SHADES[idx % GRAY_SHADES.length],
+                                  backgroundColor: grayShades[idx % grayShades.length],
                                 }}
                               />
                               <span>{c.icon}</span>
                               <span className="truncate">{c.name}</span>
                             </span>
                             <div className="flex items-center gap-2 shrink-0">
-                              <span className="text-[11px] text-[#8B8D92]">
+                              <span className="text-[11px] text-[var(--color-ink-faint)]">
                                 {pct.toFixed(0)}%
                               </span>
-                              <span className="text-[#1B1C1F] tabular-nums font-semibold">
+                              <span className="text-[var(--color-ink)] tabular-nums font-semibold">
                                 {formatRp(c.total)}
                               </span>
                             </div>
                           </div>
-                          <div className="w-full h-1 bg-[#ECECE9] rounded-[2px] overflow-hidden">
+                          <div className="w-full h-1 bg-[var(--color-surface-sunken)] rounded-[2px] overflow-hidden">
                             <div
                               className="h-full rounded-[2px]"
                               style={{
                                 width: `${Math.min(100, pct)}%`,
-                                backgroundColor: GRAY_SHADES[idx % GRAY_SHADES.length],
+                                backgroundColor: grayShades[idx % grayShades.length],
                               }}
                             />
                           </div>
@@ -368,32 +378,32 @@ export function Dashboard() {
               )}
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-5 flex flex-col gap-3">
-              <h2 className="text-xs font-semibold text-[#1B1C1F] uppercase tracking-wider">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs">
+              <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                 Sumber / Metode Pembayaran
               </h2>
               {byPaymentMethod.length === 0 ? (
-                <p className="text-xs text-[#8B8D92]">Tidak ada aktivitas transaksi.</p>
+                <p className="text-xs text-[var(--color-ink-faint)]">Tidak ada aktivitas transaksi.</p>
               ) : (
                 <div className="flex flex-col gap-2.5 max-h-80 overflow-y-auto pr-1">
                   {byPaymentMethod.map((pm) => (
                     <div
                       key={pm.id}
-                      className="border border-[#DADAD6] rounded-[6px] p-2.5 flex flex-col gap-1.5"
+                      className="border border-[var(--color-border)] rounded-[6px] p-2.5 flex flex-col gap-1.5 bg-[var(--color-surface)]"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="font-semibold text-xs text-[#1B1C1F]">
+                        <span className="font-semibold text-xs text-[var(--color-ink)]">
                           {pm.name}
                         </span>
-                        <span className="text-[10px] bg-[#ECECE9] text-[#5A5C61] px-1.5 py-0.2 rounded-[3px] uppercase">
+                        <span className="text-[10px] bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] px-1.5 py-0.2 rounded-[3px] uppercase">
                           {pm.type}
                         </span>
                       </div>
                       <div className="flex justify-between text-[11px] tabular-nums">
-                        <span className="text-[#2E7D5B] font-medium">
+                        <span className="text-[var(--color-positive)] font-medium">
                           +{formatRp(pm.income)}
                         </span>
-                        <span className="text-[#B23A3A] font-medium">
+                        <span className="text-[var(--color-negative)] font-medium">
                           -{formatRp(pm.expense)}
                         </span>
                       </div>
@@ -403,51 +413,51 @@ export function Dashboard() {
               )}
             </div>
 
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-5 flex flex-col gap-3">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs">
               <div className="flex items-center justify-between">
-                <h2 className="text-xs font-semibold text-[#1B1C1F] uppercase tracking-wider">
+                <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Status Budget Bulan Ini
                 </h2>
-                <span className="text-[11px] text-[#8B8D92]">{budgetsWithSpend.length} target</span>
+                <span className="text-[11px] text-[var(--color-ink-faint)]">{budgetsWithSpend.length} target</span>
               </div>
 
               {budgetsWithSpend.length === 0 ? (
-                <p className="text-xs text-[#8B8D92]">Belum ada budget yang ditentukan.</p>
+                <p className="text-xs text-[var(--color-ink-faint)]">Belum ada budget yang ditentukan.</p>
               ) : (
                 <div className="flex flex-col gap-3 max-h-80 overflow-y-auto pr-1">
                   {budgetsWithSpend.map((b) => {
                     const isOver = b.pct >= 100
                     const isNear = b.pct >= 80 && !isOver
                     const barColor = isOver
-                      ? 'bg-[#B23A3A]'
+                      ? 'bg-[var(--color-negative)]'
                       : isNear
-                      ? 'bg-[#A9782E]'
-                      : 'bg-[#2E7D5B]'
+                      ? 'bg-[var(--color-warning)]'
+                      : 'bg-[var(--color-positive)]'
                     return (
                       <div key={b.id} className="flex flex-col gap-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-[#1B1C1F] font-medium truncate">
+                          <span className="text-[var(--color-ink)] font-medium truncate">
                             {b.catName}
                           </span>
                           <span
                             className={`tabular-nums font-semibold text-[11px] ${
                               isOver
-                                ? 'text-[#B23A3A]'
+                                ? 'text-[var(--color-negative)]'
                                 : isNear
-                                ? 'text-[#A9782E]'
-                                : 'text-[#5A5C61]'
+                                ? 'text-[var(--color-warning)]'
+                                : 'text-[var(--color-ink-muted)]'
                             }`}
                           >
                             {b.pct.toFixed(0)}%
                           </span>
                         </div>
-                        <div className="w-full h-1.5 bg-[#ECECE9] rounded-[2px] overflow-hidden">
+                        <div className="w-full h-1.5 bg-[var(--color-surface-sunken)] rounded-[2px] overflow-hidden">
                           <div
                             className={`h-full ${barColor} rounded-[2px]`}
                             style={{ width: `${Math.min(100, b.pct)}%` }}
                           />
                         </div>
-                        <div className="flex justify-between text-[11px] text-[#8B8D92] tabular-nums">
+                        <div className="flex justify-between text-[11px] text-[var(--color-ink-faint)] tabular-nums">
                           <span>{formatRp(b.spent)}</span>
                           <span>limit {formatRp(b.limit_amount)}</span>
                         </div>
@@ -460,24 +470,24 @@ export function Dashboard() {
           </div>
 
           {incomeByCategory.length > 0 && (
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-5">
-              <h2 className="text-xs font-semibold text-[#1B1C1F] uppercase tracking-wider mb-3">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs">
+              <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider mb-3">
                 Sumber Pemasukan
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 {incomeByCategory.map((c) => (
                   <div
                     key={c.id}
-                    className="border border-[#DADAD6] rounded-[6px] p-3 flex flex-col gap-1"
+                    className="border border-[var(--color-border)] rounded-[6px] p-3 flex flex-col gap-1 bg-[var(--color-surface)]"
                   >
-                    <span className="text-xs text-[#5A5C61] flex items-center gap-1">
+                    <span className="text-xs text-[var(--color-ink-muted)] flex items-center gap-1">
                       <span>{c.icon}</span>
                       <span>{c.name}</span>
                     </span>
-                    <p className="text-sm font-bold text-[#2E7D5B] tabular-nums font-display">
+                    <p className="text-sm font-bold text-[var(--color-positive)] tabular-nums font-display">
                       {formatRp(c.total)}
                     </p>
-                    <span className="text-[11px] text-[#8B8D92]">{c.count} kali diterima</span>
+                    <span className="text-[11px] text-[var(--color-ink-faint)]">{c.count} kali diterima</span>
                   </div>
                 ))}
               </div>
@@ -485,9 +495,9 @@ export function Dashboard() {
           )}
 
           {txs.length === 0 && (
-            <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-8 text-center flex flex-col items-center gap-2">
-              <p className="text-sm text-[#5A5C61]">Tidak ada transaksi untuk filter ini.</p>
-              <p className="text-xs text-[#8B8D92]">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center flex flex-col items-center gap-2 shadow-xs">
+              <p className="text-sm text-[var(--color-ink-muted)]">Tidak ada transaksi untuk filter ini.</p>
+              <p className="text-xs text-[var(--color-ink-faint)]">
                 Coba ubah rentang tanggal atau filter kategori di atas.
               </p>
             </div>

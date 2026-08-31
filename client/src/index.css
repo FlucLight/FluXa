@@ -17,6 +17,28 @@
     --color-warning: #A9782E;
     --color-warning-soft: #F1E7D6;
     --color-focus: #2C2E33;
+    --color-btn-primary-bg: #1B1C1F;
+    --color-btn-primary-text: #FFFFFF;
+  }
+
+  html.dark {
+    --color-ink: #F1F5F9;
+    --color-ink-muted: #94A3B8;
+    --color-ink-faint: #64748B;
+    --color-surface: #0F172A;
+    --color-surface-raised: #1E293B;
+    --color-surface-sunken: #141E33;
+    --color-border: #334155;
+    --color-border-strong: #475569;
+    --color-positive: #34D399;
+    --color-positive-soft: rgba(52, 211, 153, 0.15);
+    --color-negative: #F87171;
+    --color-negative-soft: rgba(248, 113, 113, 0.15);
+    --color-warning: #FBBF24;
+    --color-warning-soft: rgba(251, 191, 36, 0.15);
+    --color-focus: #94A3B8;
+    --color-btn-primary-bg: #F1F5F9;
+    --color-btn-primary-text: #0F172A;
   }
 
   * {
@@ -32,6 +54,7 @@
     font-size: 14px;
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    transition: background-color 0.15s ease, color 0.15s ease;
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -47,4 +70,29 @@
   .tabular-nums {
     font-variant-numeric: tabular-nums;
   }
+}
+
+.theme-surface {
+  background-color: var(--color-surface);
+}
+.theme-surface-raised {
+  background-color: var(--color-surface-raised);
+}
+.theme-surface-sunken {
+  background-color: var(--color-surface-sunken);
+}
+.theme-border {
+  border-color: var(--color-border);
+}
+.theme-border-strong {
+  border-color: var(--color-border-strong);
+}
+.theme-ink {
+  color: var(--color-ink);
+}
+.theme-ink-muted {
+  color: var(--color-ink-muted);
+}
+.theme-ink-faint {
+  color: var(--color-ink-faint);
 }

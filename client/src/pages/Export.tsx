@@ -44,21 +44,21 @@ export function Export() {
   return (
     <div className="p-8 flex flex-col gap-6 max-w-2xl">
       <div>
-        <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">Export & Backup</h1>
-        <p className="text-xs text-[#5A5C61] mt-0.5">
+        <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Export & Backup</h1>
+        <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
           Unduh data untuk audit atau simpan salinan lengkap database
         </p>
       </div>
 
-      <section className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-5 flex flex-col gap-4">
-        <h2 className="text-xs font-semibold text-[#1B1C1F] uppercase tracking-wider">
+      <section className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-4 shadow-xs">
+        <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
           Export Data
         </h2>
-        <div className="flex flex-col divide-y divide-[#DADAD6]">
+        <div className="flex flex-col divide-y divide-[var(--color-border)]">
           <div className="flex items-center justify-between py-3">
             <div>
-              <p className="text-xs font-semibold text-[#1B1C1F]">Spreadsheet CSV</p>
-              <p className="text-[11px] text-[#8B8D92]">
+              <p className="text-xs font-semibold text-[var(--color-ink)]">Spreadsheet CSV</p>
+              <p className="text-[11px] text-[var(--color-ink-faint)]">
                 Daftar semua transaksi aktif dalam format kolom tabel
               </p>
             </div>
@@ -72,8 +72,8 @@ export function Export() {
 
           <div className="flex items-center justify-between py-3">
             <div>
-              <p className="text-xs font-semibold text-[#1B1C1F]">Backup Penuh (JSON)</p>
-              <p className="text-[11px] text-[#8B8D92]">
+              <p className="text-xs font-semibold text-[var(--color-ink)]">Backup Penuh (JSON)</p>
+              <p className="text-[11px] text-[var(--color-ink-faint)]">
                 Seluruh data: transaksi, kategori, payment methods, dan budget
               </p>
             </div>
@@ -87,11 +87,11 @@ export function Export() {
         </div>
       </section>
 
-      <section className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-5 flex flex-col gap-3">
-        <h2 className="text-xs font-semibold text-[#1B1C1F] uppercase tracking-wider">
+      <section className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs">
+        <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
           Restore / Import Data
         </h2>
-        <p className="text-xs text-[#5A5C61]">
+        <p className="text-xs text-[var(--color-ink-muted)]">
           Upload file JSON backup sebelumnya. Data yang sudah ada dengan ID sama akan dilewati
           (aman dari duplikasi).
         </p>
@@ -116,8 +116,8 @@ export function Export() {
           <p
             className={`text-xs p-2.5 rounded-[6px] ${
               msg.startsWith('Gagal')
-                ? 'bg-[#F5E5E4] text-[#B23A3A]'
-                : 'bg-[#E4EFE9] text-[#2E7D5B]'
+                ? 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]'
+                : 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]'
             }`}
           >
             {msg}

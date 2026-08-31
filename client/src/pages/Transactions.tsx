@@ -91,8 +91,8 @@ export function Transactions() {
     <div className="p-8 flex flex-col gap-5 flex-1 max-w-6xl">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">Daftar Transaksi</h1>
-          <p className="text-xs text-[#5A5C61] mt-0.5">
+          <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Daftar Transaksi</h1>
+          <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
             Kelola, telusuri, dan saring seluruh transaksi Anda
           </p>
         </div>
@@ -107,7 +107,6 @@ export function Transactions() {
         </Button>
       </div>
 
-      {/* Filter Bar Component */}
       <FilterBar
         preset={preset}
         onPresetChange={setPreset}
@@ -128,30 +127,29 @@ export function Transactions() {
         onReset={handleReset}
       />
 
-      {/* Mini Bar Summary of Filtered View */}
-      <div className="flex items-center justify-between text-xs text-[#5A5C61] px-1">
+      <div className="flex items-center justify-between text-xs text-[var(--color-ink-muted)] px-1">
         <span>
           Menampilkan <b>{filteredTxs.length}</b> dari {txs.length} transaksi
         </span>
         <div className="flex items-center gap-4 tabular-nums font-semibold">
-          <span className="text-[#2E7D5B]">Total Masuk: +{formatRp(totalFilteredIncome)}</span>
-          <span className="text-[#B23A3A]">Total Keluar: -{formatRp(totalFilteredExpense)}</span>
+          <span className="text-[var(--color-positive)]">Total Masuk: +{formatRp(totalFilteredIncome)}</span>
+          <span className="text-[var(--color-negative)]">Total Keluar: -{formatRp(totalFilteredExpense)}</span>
         </div>
       </div>
 
-      {isLoading && <p className="text-xs text-[#8B8D92]">Memuat transaksi...</p>}
+      {isLoading && <p className="text-xs text-[var(--color-ink-faint)]">Memuat transaksi...</p>}
 
       {!isLoading && filteredTxs.length === 0 && (
-        <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-8 text-center">
-          <p className="text-xs text-[#5A5C61]">Tidak ada transaksi yang cocok dengan filter.</p>
+        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
+          <p className="text-xs text-[var(--color-ink-muted)]">Tidak ada transaksi yang cocok dengan filter.</p>
         </div>
       )}
 
       {filteredTxs.length > 0 && (
-        <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] overflow-hidden">
+        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] overflow-hidden shadow-xs">
           <table className="w-full text-xs">
             <thead>
-              <tr className="border-b border-[#DADAD6] bg-[#ECECE9] text-[#5A5C61] font-medium">
+              <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] font-medium">
                 <th className="text-left px-4 py-2.5">Tanggal</th>
                 <th className="text-left px-4 py-2.5">Keterangan</th>
                 <th className="text-left px-4 py-2.5">Kategori</th>
@@ -161,29 +159,29 @@ export function Transactions() {
                 <th className="px-4 py-2.5 text-right">Aksi</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#DADAD6]">
+            <tbody className="divide-y divide-[var(--color-border)]">
               {filteredTxs.map((tx) => {
                 const cat = catMap[tx.category_id]
                 const pm = pmMap[tx.payment_method_id]
                 const isExpense = tx.type === 'expense'
                 return (
-                  <tr key={tx.id} className="hover:bg-[#F5F5F3] transition-colors">
-                    <td className="px-4 py-3 text-[#5A5C61] whitespace-nowrap tabular-nums">
+                  <tr key={tx.id} className="hover:bg-[var(--color-surface)] transition-colors">
+                    <td className="px-4 py-3 text-[var(--color-ink-muted)] whitespace-nowrap tabular-nums">
                       {formatDate(tx.occurred_at)}
                     </td>
-                    <td className="px-4 py-3 text-[#1B1C1F]">
+                    <td className="px-4 py-3 text-[var(--color-ink)]">
                       <div className="flex items-center gap-1.5">
-                        <span>{tx.description ?? <span className="text-[#8B8D92]">-</span>}</span>
+                        <span>{tx.description ?? <span className="text-[var(--color-ink-faint)]">-</span>}</span>
                         {tx.needs_review && (
-                          <span className="text-[10px] bg-[#F1E7D6] text-[#A9782E] px-1.5 py-0.2 rounded-[3px] font-medium">
+                          <span className="text-[10px] bg-[var(--color-warning-soft)] text-[var(--color-warning)] px-1.5 py-0.2 rounded-[3px] font-medium">
                             review
                           </span>
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-[#5A5C61]">
+                    <td className="px-4 py-3 text-[var(--color-ink-muted)]">
                       {cat ? (
-                        <span className="inline-flex items-center gap-1 bg-[#ECECE9] text-[#1B1C1F] px-2 py-0.5 rounded-[4px]">
+                        <span className="inline-flex items-center gap-1 bg-[var(--color-surface-sunken)] text-[var(--color-ink)] px-2 py-0.5 rounded-[4px]">
                           <span>{cat.icon}</span>
                           <span>{cat.name}</span>
                         </span>
@@ -191,11 +189,11 @@ export function Transactions() {
                         '-'
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[#5A5C61]">{pm?.name ?? '-'}</td>
-                    <td className="px-4 py-3 text-[#8B8D92] capitalize">{tx.source}</td>
+                    <td className="px-4 py-3 text-[var(--color-ink-muted)]">{pm?.name ?? '-'}</td>
+                    <td className="px-4 py-3 text-[var(--color-ink-faint)] capitalize">{tx.source}</td>
                     <td
                       className={`px-4 py-3 text-right font-semibold tabular-nums ${
-                        isExpense ? 'text-[#B23A3A]' : 'text-[#2E7D5B]'
+                        isExpense ? 'text-[var(--color-negative)]' : 'text-[var(--color-positive)]'
                       }`}
                     >
                       {isExpense ? '- ' : '+ '}

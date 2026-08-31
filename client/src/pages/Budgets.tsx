@@ -45,10 +45,10 @@ export function Budgets() {
     <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">
+          <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">
             Budget Bulanan
           </h1>
-          <p className="text-xs text-[#5A5C61] mt-0.5">
+          <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
             Periode {now.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}
           </p>
         </div>
@@ -58,8 +58,8 @@ export function Budgets() {
       </div>
 
       {budgetsWithSpend.length === 0 && (
-        <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-8 text-center">
-          <p className="text-xs text-[#5A5C61]">Belum ada limit budget yang diatur bulan ini.</p>
+        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
+          <p className="text-xs text-[var(--color-ink-muted)]">Belum ada limit budget yang diatur bulan ini.</p>
         </div>
       )}
 
@@ -69,23 +69,23 @@ export function Budgets() {
           const isOver = b.pct >= 100
           const isNear = b.pct >= 80 && !isOver
           const barColor = isOver
-            ? 'bg-[#B23A3A]'
+            ? 'bg-[var(--color-negative)]'
             : isNear
-            ? 'bg-[#A9782E]'
-            : 'bg-[#2E7D5B]'
+            ? 'bg-[var(--color-warning)]'
+            : 'bg-[var(--color-positive)]'
           const badgeBg = isOver
-            ? 'bg-[#F5E5E4] text-[#B23A3A]'
+            ? 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]'
             : isNear
-            ? 'bg-[#F1E7D6] text-[#A9782E]'
-            : 'bg-[#E4EFE9] text-[#2E7D5B]'
+            ? 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]'
+            : 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]'
 
           return (
             <div
               key={b.id}
-              className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-4 flex flex-col gap-3"
+              className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-xs"
             >
               <div className="flex items-center justify-between">
-                <span className="font-semibold text-xs text-[#1B1C1F] flex items-center gap-1.5">
+                <span className="font-semibold text-xs text-[var(--color-ink)] flex items-center gap-1.5">
                   <span>{cat?.icon}</span>
                   <span>{cat?.name ?? b.category_id}</span>
                 </span>
@@ -98,23 +98,23 @@ export function Budgets() {
                     onClick={() => {
                       if (confirm('Hapus budget ini?')) deleteMut.mutate(b.id)
                     }}
-                    className="!px-1.5 !py-0.5 text-xs text-[#8B8D92] hover:text-[#B23A3A]"
+                    className="!px-1.5 !py-0.5 text-xs text-[var(--color-ink-faint)] hover:text-[var(--color-negative)]"
                   >
                     ✕
                   </Button>
                 </div>
               </div>
 
-              <div className="w-full h-2 bg-[#ECECE9] rounded-[3px] overflow-hidden">
+              <div className="w-full h-2 bg-[var(--color-surface-sunken)] rounded-[3px] overflow-hidden">
                 <div
                   className={`h-full ${barColor} rounded-[3px] transition-all`}
                   style={{ width: `${Math.min(100, b.pct)}%` }}
                 />
               </div>
 
-              <div className="flex items-center justify-between text-xs text-[#5A5C61] tabular-nums">
+              <div className="flex items-center justify-between text-xs text-[var(--color-ink-muted)] tabular-nums">
                 <span>Terpakai {formatRp(b.spent)}</span>
-                <span className="text-[#8B8D92]">Limit {formatRp(b.limit_amount)}</span>
+                <span className="text-[var(--color-ink-faint)]">Limit {formatRp(b.limit_amount)}</span>
               </div>
             </div>
           )
@@ -201,8 +201,8 @@ function BudgetForm({
             placeholder="500000"
           />
         </Field>
-        {mut.isError && <p className="text-[#B23A3A] text-xs">{(mut.error as Error).message}</p>}
-        <div className="flex justify-end gap-2 pt-2 border-t border-[#DADAD6]">
+        {mut.isError && <p className="text-[var(--color-negative)] text-xs">{(mut.error as Error).message}</p>}
+        <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>
