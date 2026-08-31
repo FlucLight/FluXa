@@ -1,3 +1,4 @@
+import { CalendarIcon, CloseIcon } from './Icons'
 import { Input, Select } from './Form'
 import { PRESET_OPTIONS, type PeriodPreset } from '../utils'
 
@@ -67,7 +68,7 @@ export function FilterBar({
 
   return (
     <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-xs">
-      {/* Baris 1: Quick Preset Chips / Tabs */}
+      {/* Baris 1: Quick Preset Chips */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-[11px] font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider mr-1">
@@ -95,13 +96,14 @@ export function FilterBar({
           <button
             type="button"
             onClick={() => onPresetChange('custom')}
-            className={`text-xs px-2.5 py-1 rounded-[6px] font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-[6px] font-medium transition-colors cursor-pointer ${
               preset === 'custom'
                 ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs'
                 : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-ink)]'
             }`}
           >
-            📅 Kustom...
+            <CalendarIcon size={12} />
+            <span>Kustom</span>
           </button>
         </div>
 
@@ -109,14 +111,15 @@ export function FilterBar({
           <button
             type="button"
             onClick={onReset}
-            className="text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-negative)] transition-colors cursor-pointer font-medium"
+            className="inline-flex items-center gap-1 text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-negative)] transition-colors cursor-pointer font-medium"
           >
-            ✕ Reset Filter
+            <CloseIcon size={10} />
+            <span>Reset Filter</span>
           </button>
         )}
       </div>
 
-      {/* Baris 2: Kustom Tanggal Input jika mode custom aktif */}
+      {/* Baris 2: Kustom Tanggal */}
       {preset === 'custom' && (
         <div className="flex items-center gap-2.5 p-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[6px] flex-wrap">
           <span className="text-xs text-[var(--color-ink-muted)] font-medium">Rentang Tanggal:</span>
@@ -136,7 +139,7 @@ export function FilterBar({
         </div>
       )}
 
-      {/* Baris 3: Dropdowns (Tipe, Kategori, Metode, Search) */}
+      {/* Baris 3: Dropdowns */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-[var(--color-border)]">
         {onTypeFilterChange && (
           <div>
@@ -168,7 +171,7 @@ export function FilterBar({
               <option value="">Semua Kategori</option>
               {categories.map((c) => (
                 <option key={c.id} value={c.id}>
-                  {c.icon ?? '•'} {c.name} ({c.type === 'expense' ? 'Keluar' : 'Masuk'})
+                  {c.name} ({c.type === 'expense' ? 'Keluar' : 'Masuk'})
                 </option>
               ))}
             </Select>

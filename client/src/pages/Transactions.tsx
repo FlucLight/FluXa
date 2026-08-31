@@ -4,6 +4,7 @@ import type { TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { FilterBar } from '../components/FilterBar'
+import { CategorySymbolIcon } from '../components/Icons'
 import { TransactionForm } from '../components/TransactionForm'
 import {
   formatDate,
@@ -181,8 +182,8 @@ export function Transactions() {
                     </td>
                     <td className="px-4 py-3 text-[var(--color-ink-muted)]">
                       {cat ? (
-                        <span className="inline-flex items-center gap-1 bg-[var(--color-surface-sunken)] text-[var(--color-ink)] px-2 py-0.5 rounded-[4px]">
-                          <span>{cat.icon}</span>
+                        <span className="inline-flex items-center gap-1.5 bg-[var(--color-surface-sunken)] text-[var(--color-ink)] px-2 py-0.5 rounded-[4px]">
+                          <CategorySymbolIcon name={cat.name} size={12} className="text-[var(--color-ink-muted)]" />
                           <span>{cat.name}</span>
                         </span>
                       ) : (

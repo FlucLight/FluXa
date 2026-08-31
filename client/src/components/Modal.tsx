@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Button } from './Button'
+import { CloseIcon } from './Icons'
 
 type Props = { title: string; children: React.ReactNode; onClose: () => void }
 
@@ -27,8 +28,8 @@ export function Modal({ title, children, onClose }: Props) {
       >
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-border)]">
           <h2 className="font-semibold text-sm text-[var(--color-ink)] font-display">{title}</h2>
-          <Button variant="ghost" onClick={onClose} className="!px-2 !py-0.5 text-xs">
-            ✕
+          <Button variant="ghost" onClick={onClose} className="!p-1.5 text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]">
+            <CloseIcon size={14} />
           </Button>
         </div>
         <div className="p-5">{children}</div>

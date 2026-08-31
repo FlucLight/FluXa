@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { Field, Input, Select } from '../components/Form'
+import { CategorySymbolIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { formatRp } from '../utils'
 
@@ -22,7 +23,7 @@ export function Recurring() {
     queryFn: () => api.paymentMethods.list(),
   })
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c]))
-  const pmMap = Object.fromEntries(pms.map((p) => [p.id, p.name]))
+  const pmMap = Object.fromEntries(pms.map((p) => [p.id, p]))
 
   const toggleMut = useMutation({
     mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
@@ -68,7 +69,10 @@ export function Recurring() {
             >
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="font-semibold text-xs text-[var(--color-ink)]">{item.description}</span>
+                  <span className="font-semibold text-xs text-[var(--color-ink)] flex items-center gap-1.5">
+                    <CategorySymbolIcon name={cat?.name} size={14} className="text-[var(--color-ink-muted)]" />
+                    <span>{item.description}</span>
+                  </span>
                   <span
                     className={`text-[10px] px-1.5 py-0.5 rounded-[4px] font-medium ${
                       isExpense
@@ -85,8 +89,8 @@ export function Recurring() {
                   )}
                 </div>
                 <div className="text-[11px] text-[var(--color-ink-muted)] mt-1">
-                  Tanggal {item.day_of_month} tiap bulan · {cat ? `${cat.icon} ${cat.name}` : '-'} ·{' '}
-                  {pmMap[item.payment_method_id] ?? '-'}
+                  Tanggal {item.day_of_month} tiap bulan · {cat ? cat.name : '-'} ·{' '}
+                  {pmMap[item.payment_method_id]?.name ?? '-'}
                 </div>
               </div>
 
@@ -212,7 +216,7 @@ function RecurringForm({
             <option value="">Pilih kategori</option>
             {filtered.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.icon} {c.name}
+                {c.name}
               </option>
             ))}
           </Select>

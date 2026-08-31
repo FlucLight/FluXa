@@ -3,6 +3,7 @@ import { useRef, useState } from 'react'
 import { api } from '../api'
 import { formatRp } from '../utils'
 import { Button } from './Button'
+import { ZapIcon } from './Icons'
 
 export function QuickInput() {
   const qc = useQueryClient()
@@ -50,8 +51,9 @@ export function QuickInput() {
   return (
     <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-6 py-2.5 flex flex-col gap-2">
       <div className="flex gap-2 items-center">
-        <span className="text-[var(--color-ink-faint)] text-[11px] font-mono shrink-0 uppercase tracking-wider">
-          ⚡ Quick
+        <span className="text-[var(--color-ink-faint)] flex items-center gap-1 text-[11px] font-mono shrink-0 uppercase tracking-wider">
+          <ZapIcon size={12} />
+          <span>Quick</span>
         </span>
         <input
           ref={inputRef}

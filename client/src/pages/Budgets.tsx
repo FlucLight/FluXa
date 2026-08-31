@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { Field, Input, Select } from '../components/Form'
+import { CategorySymbolIcon, CloseIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { formatRp, getPresetDateRange } from '../utils'
 
@@ -86,7 +87,7 @@ export function Budgets() {
             >
               <div className="flex items-center justify-between">
                 <span className="font-semibold text-xs text-[var(--color-ink)] flex items-center gap-1.5">
-                  <span>{cat?.icon}</span>
+                  <CategorySymbolIcon name={cat?.name} size={14} className="text-[var(--color-ink-muted)]" />
                   <span>{cat?.name ?? b.category_id}</span>
                 </span>
                 <div className="flex items-center gap-2">
@@ -98,9 +99,9 @@ export function Budgets() {
                     onClick={() => {
                       if (confirm('Hapus budget ini?')) deleteMut.mutate(b.id)
                     }}
-                    className="!px-1.5 !py-0.5 text-xs text-[var(--color-ink-faint)] hover:text-[var(--color-negative)]"
+                    className="!p-1 text-[var(--color-ink-faint)] hover:text-[var(--color-negative)]"
                   >
-                    ✕
+                    <CloseIcon size={12} />
                   </Button>
                 </div>
               </div>
@@ -186,7 +187,7 @@ function BudgetForm({
           >
             {available.map((c) => (
               <option key={c.id} value={c.id}>
-                {c.icon} {c.name}
+                {c.name}
               </option>
             ))}
           </Select>

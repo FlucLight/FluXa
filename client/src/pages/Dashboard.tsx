@@ -14,6 +14,7 @@ import {
 } from 'recharts'
 import { api } from '../api'
 import { FilterBar } from '../components/FilterBar'
+import { ArrowDownLeftIcon, ArrowUpRightIcon, CategorySymbolIcon } from '../components/Icons'
 import { useTheme } from '../components/ThemeContext'
 import {
   formatRp,
@@ -143,7 +144,7 @@ export function Dashboard() {
         .reduce((s, t) => s + parseFloat(t.amount), 0)
       const pct = parseFloat(b.limit_amount) > 0 ? (spent / parseFloat(b.limit_amount)) * 100 : 0
       const cat = categories.find((c) => c.id === b.category_id)
-      return { ...b, spent, pct, catName: cat ? `${cat.icon ?? ''} ${cat.name}` : '-' }
+      return { ...b, spent, pct, catName: cat?.name ?? '-' }
     })
     .filter((b) => b.spent > 0 || parseFloat(b.limit_amount) > 0)
 
@@ -180,8 +181,9 @@ export function Dashboard() {
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
-              <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
-                ↑ Total Pemasukan
+              <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1">
+                <ArrowUpRightIcon size={12} className="text-[var(--color-positive)]" />
+                <span>Total Pemasukan</span>
               </span>
               <p className="text-xl font-bold text-[var(--color-positive)] tabular-nums mt-1 font-display">
                 {formatRp(totalIncome)}
@@ -192,8 +194,9 @@ export function Dashboard() {
             </div>
 
             <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
-              <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
-                ↓ Total Pengeluaran
+              <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1">
+                <ArrowDownLeftIcon size={12} className="text-[var(--color-negative)]" />
+                <span>Total Pengeluaran</span>
               </span>
               <p className="text-xl font-bold text-[var(--color-negative)] tabular-nums mt-1 font-display">
                 {formatRp(totalExpense)}
@@ -349,7 +352,7 @@ export function Dashboard() {
                                   backgroundColor: grayShades[idx % grayShades.length],
                                 }}
                               />
-                              <span>{c.icon}</span>
+                              <CategorySymbolIcon name={c.name} size={13} className="shrink-0 text-[var(--color-ink-muted)]" />
                               <span className="truncate">{c.name}</span>
                             </span>
                             <div className="flex items-center gap-2 shrink-0">
@@ -395,7 +398,7 @@ export function Dashboard() {
                         <span className="font-semibold text-xs text-[var(--color-ink)]">
                           {pm.name}
                         </span>
-                        <span className="text-[10px] bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] px-1.5 py-0.2 rounded-[3px] uppercase">
+                        <span className="text-[10px] bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] px-1.5 py-0.2 rounded-[3px] uppercase font-mono">
                           {pm.type}
                         </span>
                       </div>
@@ -436,8 +439,9 @@ export function Dashboard() {
                     return (
                       <div key={b.id} className="flex flex-col gap-1">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-[var(--color-ink)] font-medium truncate">
-                            {b.catName}
+                          <span className="text-[var(--color-ink)] font-medium truncate flex items-center gap-1.5">
+                            <CategorySymbolIcon name={b.catName} size={13} className="shrink-0 text-[var(--color-ink-muted)]" />
+                            <span className="truncate">{b.catName}</span>
                           </span>
                           <span
                             className={`tabular-nums font-semibold text-[11px] ${
@@ -480,8 +484,8 @@ export function Dashboard() {
                     key={c.id}
                     className="border border-[var(--color-border)] rounded-[6px] p-3 flex flex-col gap-1 bg-[var(--color-surface)]"
                   >
-                    <span className="text-xs text-[var(--color-ink-muted)] flex items-center gap-1">
-                      <span>{c.icon}</span>
+                    <span className="text-xs text-[var(--color-ink-muted)] flex items-center gap-1.5">
+                      <CategorySymbolIcon name={c.name} size={13} className="text-[var(--color-positive)]" />
                       <span>{c.name}</span>
                     </span>
                     <p className="text-sm font-bold text-[var(--color-positive)] tabular-nums font-display">
