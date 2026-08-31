@@ -19,7 +19,7 @@ export async function parsePreview(req: Request, res: Response): Promise<void> {
 }
 
 export async function parseAndSave(req: Request, res: Response): Promise<void> {
-  const { text } = req.body as { text?: string }
+  const { text, occurred_at } = req.body as { text?: string; occurred_at?: string | null }
   if (!text || typeof text !== 'string' || !text.trim()) {
     res.status(400).json({ error: 'Field "text" wajib diisi' })
     return
@@ -43,6 +43,9 @@ export async function parseAndSave(req: Request, res: Response): Promise<void> {
     return
   }
 
+  const resolvedOccurredAt =
+    occurred_at ?? result.occurred_at ?? new Date().toISOString()
+
   const tx = await txRepo.create({
     type: result.category_type ?? 'expense',
     amount: result.amount,
@@ -52,7 +55,8 @@ export async function parseAndSave(req: Request, res: Response): Promise<void> {
     raw_input: result.raw_input,
     source: 'web',
     needs_review: result.confidence === 'low',
+    occurred_at: resolvedOccurredAt,
   })
 
-  res.status(201).json({ transaction: tx, parsed: result })
+  res.status(201).json({ transaction: tx, parsed: { ...result, occurred_at: resolvedOccurredAt } })
 }

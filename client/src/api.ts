@@ -63,8 +63,11 @@ export const api = {
     deleted: () => req<TransactionRecord[]>('/transactions?deleted=true'),
     parse: (text: string) =>
       req<ParseResult>('/transactions/parse', { method: 'POST', body: JSON.stringify({ text }) }),
-    quick: (text: string) =>
-      req<{ transaction: TransactionRecord; parsed: ParseResult }>('/transactions/quick', { method: 'POST', body: JSON.stringify({ text }) }),
+    quick: (text: string, occurredAt?: string | null) =>
+      req<{ transaction: TransactionRecord; parsed: ParseResult }>('/transactions/quick', {
+        method: 'POST',
+        body: JSON.stringify({ text, ...(occurredAt ? { occurred_at: occurredAt } : {}) }),
+      }),
   },
 
   transfers: {
@@ -115,6 +118,7 @@ export interface ParseResult {
   category_type: 'expense' | 'income' | null
   confidence: 'high' | 'low'
   raw_input: string
+  occurred_at: string | null
 }
 
 export type { BudgetRecord, AccountTransferRecord, RecurringTransactionRecord }

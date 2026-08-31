@@ -1,21 +1,34 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { api } from '../api'
-import { formatRp } from '../utils'
+import { formatDateShort, formatRp } from '../utils'
 import { Button } from './Button'
-import { ZapIcon } from './Icons'
+import { DatePicker } from './DatePicker'
+import { CalendarIcon, ZapIcon } from './Icons'
+
+function toDateInput(iso: string | null | undefined): string {
+  if (!iso) return ''
+  const d = new Date(iso)
+  if (isNaN(d.getTime())) return ''
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
 
 export function QuickInput() {
   const qc = useQueryClient()
   const [text, setText] = useState('')
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof api.transactions.parse>> | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [occurredAt, setOccurredAt] = useState<string>(() => toDateInput(new Date().toISOString()))
   const inputRef = useRef<HTMLInputElement>(null)
 
   const parseMutation = useMutation({
     mutationFn: () => api.transactions.parse(text),
     onSuccess: (data) => {
       setPreview(data)
+      if (data.occurred_at) setOccurredAt(toDateInput(data.occurred_at))
       setError(null)
     },
     onError: (e) => {
@@ -25,12 +38,14 @@ export function QuickInput() {
   })
 
   const saveMutation = useMutation({
-    mutationFn: () => api.transactions.quick(text),
+    mutationFn: () => api.transactions.quick(text, occurredAt),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] })
+      qc.invalidateQueries({ queryKey: ['categories'] })
       setText('')
       setPreview(null)
       setError(null)
+      setOccurredAt(toDateInput(new Date().toISOString()))
       inputRef.current?.focus()
     },
     onError: (e) => setError((e as Error).message),
@@ -58,7 +73,7 @@ export function QuickInput() {
         <input
           ref={inputRef}
           className="min-w-0 flex-1 bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[6px] px-2.5 py-2 text-xs text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-focus)] focus:ring-1 focus:ring-[var(--color-focus)] sm:px-3"
-          placeholder="Catat cepat..."
+          placeholder="Catat cepat... contoh: bensin 50rb minggu kemarin"
           value={text}
           onChange={(e) => {
             setText(e.target.value)
@@ -67,11 +82,14 @@ export function QuickInput() {
           }}
           onKeyDown={handleKey}
         />
+        <div className="w-[104px] shrink-0 sm:w-[138px]" title="Ubah tanggal pencatatan (mis. catat transaksi yang terlupa)">
+          <DatePicker value={occurredAt} onChange={setOccurredAt} />
+        </div>
         <Button
           variant="secondary"
           onClick={() => parseMutation.mutate()}
           disabled={!text.trim() || parseMutation.isPending}
-          className="shrink-0 !px-2.5 sm:!px-3"
+          className="shrink-0 !px-2 sm:!px-3"
         >
           {parseMutation.isPending ? '...' : 'Preview'}
         </Button>
@@ -80,7 +98,7 @@ export function QuickInput() {
             variant="primary"
             onClick={() => saveMutation.mutate()}
             disabled={saveMutation.isPending}
-            className="shrink-0 !px-2.5 sm:!px-3"
+            className="shrink-0 !px-2 sm:!px-3"
           >
             {saveMutation.isPending ? '...' : 'Simpan'}
           </Button>
@@ -109,6 +127,10 @@ export function QuickInput() {
               {preview.payment_method_name}
             </span>
           )}
+          <span className="inline-flex items-center gap-1 rounded-[4px] bg-[var(--color-surface-sunken)] px-2 py-0.5 text-[var(--color-ink-muted)]">
+            <CalendarIcon size={11} />
+            {occurredAt ? formatDateShort(occurredAt) : 'Hari ini'}
+          </span>
           {preview.description && (
             <span className="truncate italic text-[var(--color-ink-faint)]">"{preview.description}"</span>
           )}

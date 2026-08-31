@@ -1,3 +1,5 @@
+import { extractDatePhrase } from './date'
+
 export interface ParseResult {
   amount: number | null
   description: string
@@ -5,6 +7,7 @@ export interface ParseResult {
   category_name: string | null
   confidence: 'high' | 'low'
   raw_input: string
+  occurred_at: string | null
 }
 
 interface KnownPaymentMethod {
@@ -93,6 +96,13 @@ export function parse(
   let text = input.trim()
   const raw_input = text
 
+  const datePhrase = extractDatePhrase(text)
+  let occurredAt: string | null = null
+  if (datePhrase) {
+    occurredAt = datePhrase.date.toISOString()
+    text = (text.slice(0, datePhrase.start) + text.slice(datePhrase.end)).trim()
+  }
+
   const { amount, rest: afterAmount } = extractAmount(text)
   text = afterAmount
 
@@ -118,6 +128,7 @@ export function parse(
     category_name: category?.name ?? null,
     confidence,
     raw_input,
+    occurred_at: occurredAt,
   }
 }
 
@@ -131,6 +142,7 @@ export interface ParseResultResolved {
   category_type: 'expense' | 'income' | null
   confidence: 'high' | 'low'
   raw_input: string
+  occurred_at: string | null
 }
 
 export function parseResolved(
@@ -155,5 +167,6 @@ export function parseResolved(
     category_type: (cat ?? fallbackCat)?.type ?? null,
     confidence: result.confidence,
     raw_input: result.raw_input,
+    occurred_at: result.occurred_at,
   }
 }
