@@ -1,23 +1,29 @@
 <div align="center">
 
-<img src="https://img.shields.io/badge/-FluXa-000000?style=for-the-badge&labelColor=000000&color=1a1a1a" alt="FluXa" height="40">
+<img src="https://img.shields.io/badge/FluXa-Personal%20Finance-334155?style=for-the-badge&labelColor=1B1C1F&color=334155" alt="FluXa Personal Finance" height="40">
 
 ### Personal finance, clear and under control.
 
 Web app pencatatan keuangan pribadi untuk memantau pemasukan, pengeluaran, transfer dana, budget, dan transaksi rutin — dalam satu tempat, tanpa spreadsheet yang berantakan.
 
 <p>
-  <img src="https://img.shields.io/github/last-commit/FlucLight/personal-finance-tracker?style=for-the-badge&color=black&labelColor=black" alt="Last commit">
-  <img src="https://img.shields.io/github/commit-activity/y/FlucLight/personal-finance-tracker?style=for-the-badge&color=black&labelColor=black" alt="Commit activity">
-  <img src="https://img.shields.io/badge/status-active--development-lightgrey?style=for-the-badge&labelColor=black" alt="Status">
+  <img src="https://img.shields.io/github/last-commit/FlucLight/personal-finance-tracker?style=for-the-badge&label=updated&labelColor=5A5C61&color=2E7D5B" alt="Last update">
+  <img src="https://img.shields.io/github/commit-activity/y/FlucLight/personal-finance-tracker?style=for-the-badge&label=activity&labelColor=5A5C61&color=A9782E" alt="Commit activity">
+  <img src="https://img.shields.io/badge/status-active%20development-3D7C72?style=for-the-badge&labelColor=ECECE9" alt="Active development">
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19">
-  <img src="https://img.shields.io/badge/TypeScript-6%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 6+">
-  <img src="https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express 5">
-  <img src="https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL 14+">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
+  <img src="https://img.shields.io/badge/React-19-4F7C8A?style=for-the-badge&logo=react&logoColor=white" alt="React 19">
+  <img src="https://img.shields.io/badge/TypeScript-6%2B-356B8C?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 6+">
+  <img src="https://img.shields.io/badge/Express-5-3F454B?style=for-the-badge&logo=express&logoColor=white" alt="Express 5">
+  <img src="https://img.shields.io/badge/PostgreSQL-14%2B-4B6F9E?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL 14+">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-3A7887?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
+</p>
+
+<p>
+  <img src="https://img.shields.io/badge/Responsive-3D7C72?style=flat-square&labelColor=E4EFE9" alt="Responsive">
+  <img src="https://img.shields.io/badge/Dark%20%2F%20Light-A9782E?style=flat-square&labelColor=F1E7D6" alt="Dark and Light mode">
+  <img src="https://img.shields.io/badge/REST%20API-59636E?style=flat-square&labelColor=ECECE9" alt="REST API">
 </p>
 
 <p>
@@ -57,7 +63,7 @@ Semua nominal, metode pembayaran, kategori, dan keterangan dibaca otomatis oleh 
 <tr>
 <td width="50%" valign="top">
 
-### 📝 Pencatatan
+### Pencatatan
 
 - CRUD pemasukan dan pengeluaran
 - Soft delete & pemulihan transaksi
@@ -65,7 +71,7 @@ Semua nominal, metode pembayaran, kategori, dan keterangan dibaca otomatis oleh 
 - Format mata uang Rupiah (angka tabular)
 - Kategori & payment method dari database
 
-### ⚡ Quick Input
+### Quick Input
 
 - Parser rule-based, tanpa biaya LLM
 - Mendukung `15000`, `15.000`, `15rb`, `15 ribu`, `15k`, `1.5jt`
@@ -74,7 +80,7 @@ Semua nominal, metode pembayaran, kategori, dan keterangan dibaca otomatis oleh 
 - Preview parsing dengan confidence `high` / `low`
 - Transaksi confidence rendah otomatis ditandai review
 
-### 📊 Dashboard
+### Dashboard
 
 - Total pemasukan, pengeluaran, saldo bersih
 - Rasio tabungan
@@ -87,20 +93,20 @@ Semua nominal, metode pembayaran, kategori, dan keterangan dibaca otomatis oleh 
 </td>
 <td width="50%" valign="top">
 
-### 💸 Pengelolaan Dana
+### Pengelolaan Dana
 
 - Transfer antar cash, bank, dan e-wallet
 - Budget bulanan per kategori
 - Transaksi berulang, jadwal tanggal 1–28
 - Auto-generate transaksi rutin saat server aktif
 
-### 💾 Backup & Import
+### Backup & Import
 
 - Export transaksi ke CSV
 - Backup penuh ke JSON
 - Import JSON dengan pencegahan duplikasi ID
 
-### 🎨 Tampilan
+### Tampilan
 
 - Mode Light & Dark
 - Custom modal, toast, dropdown, calendar picker
@@ -232,7 +238,7 @@ npm run dev:client
 ## Cara Menggunakan
 
 <details>
-<summary><b>📊 Dashboard</b></summary>
+<summary><b>Dashboard</b></summary>
 <br>
 
 1. Buka menu **Dashboard**.
@@ -243,7 +249,7 @@ npm run dev:client
 </details>
 
 <details>
-<summary><b>⚡ Quick Input</b></summary>
+<summary><b>Quick Input</b></summary>
 <br>
 
 1. Ketik transaksi pada kolom Quick.
@@ -262,7 +268,7 @@ Gaji 5jt mandiri
 </details>
 
 <details>
-<summary><b>✍️ Transaksi Manual</b></summary>
+<summary><b>Transaksi Manual</b></summary>
 <br>
 
 1. Buka menu **Transaksi**.
@@ -274,7 +280,7 @@ Gaji 5jt mandiri
 </details>
 
 <details>
-<summary><b>🔄 Transfer Dana</b></summary>
+<summary><b>Transfer Dana</b></summary>
 <br>
 
 Gunakan menu **Transfer** untuk memindahkan catatan dana dari satu payment method ke payment method lain. Transfer **tidak** menambah pemasukan dan **tidak** mengurangi pengeluaran pada dashboard.
@@ -282,7 +288,7 @@ Gunakan menu **Transfer** untuk memindahkan catatan dana dari satu payment metho
 </details>
 
 <details>
-<summary><b>🎯 Budget</b></summary>
+<summary><b>Budget</b></summary>
 <br>
 
 1. Buka menu **Budget**.
@@ -292,14 +298,14 @@ Gunakan menu **Transfer** untuk memindahkan catatan dana dari satu payment metho
 
 | Progress | Status |
 |:--|:--|
-| < 80% | 🟢 Aman |
-| 80% – 99% | 🟡 Mendekati limit |
-| ≥ 100% | 🔴 Melewati limit |
+| < 80% | Aman |
+| 80% – 99% | Mendekati limit |
+| ≥ 100% | Melebihi limit |
 
 </details>
 
 <details>
-<summary><b>🔁 Transaksi Berulang</b></summary>
+<summary><b>Transaksi Berulang</b></summary>
 <br>
 
 1. Buka menu **Berulang**.
@@ -310,7 +316,7 @@ Gunakan menu **Transfer** untuk memindahkan catatan dana dari satu payment metho
 </details>
 
 <details>
-<summary><b>💾 Export & Backup</b></summary>
+<summary><b>Export & Backup</b></summary>
 <br>
 
 Buka menu **Export / Backup**:
