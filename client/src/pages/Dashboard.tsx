@@ -13,11 +13,10 @@ import {
   YAxis,
 } from 'recharts'
 import { api } from '../api'
-import { Input, Select } from '../components/Form'
+import { FilterBar } from '../components/FilterBar'
 import {
   formatRp,
   getPresetDateRange,
-  PRESET_OPTIONS,
   type PeriodPreset,
 } from '../utils'
 
@@ -60,6 +59,14 @@ export function Dashboard() {
     queryKey: ['budgets', new Date().getMonth() + 1, new Date().getFullYear()],
     queryFn: () => api.budgets.list(new Date().getMonth() + 1, new Date().getFullYear()),
   })
+
+  const handleReset = () => {
+    setPreset('this_month')
+    setCustomFrom('')
+    setCustomTo('')
+    setSelectedCategory('')
+    setSelectedPm('')
+  }
 
   const totalExpense = txs
     .filter((t) => t.type === 'expense')
@@ -136,75 +143,31 @@ export function Dashboard() {
 
   return (
     <div className="p-8 flex flex-col gap-6 max-w-6xl">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">
-            Ringkasan Finansial
-          </h1>
-          <p className="text-xs text-[#5A5C61] mt-0.5">
-            Analisis arus kas, distribusi pengeluaran, dan status budget
-          </p>
-        </div>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <Select
-            value={preset}
-            onChange={(e) => setPreset(e.target.value as PeriodPreset)}
-            className="w-48 !bg-[#FFFFFF]"
-          >
-            {PRESET_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </Select>
-
-          <Select
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-            className="w-40 !bg-[#FFFFFF]"
-          >
-            <option value="">Semua Kategori</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.icon} {c.name}
-              </option>
-            ))}
-          </Select>
-
-          <Select
-            value={selectedPm}
-            onChange={(e) => setSelectedPm(e.target.value)}
-            className="w-36 !bg-[#FFFFFF]"
-          >
-            <option value="">Semua Metode</option>
-            {paymentMethods.map((pm) => (
-              <option key={pm.id} value={pm.id}>
-                {pm.name}
-              </option>
-            ))}
-          </Select>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">
+          Ringkasan Finansial
+        </h1>
+        <p className="text-xs text-[#5A5C61] mt-0.5">
+          Analisis arus kas, distribusi pengeluaran, dan status budget
+        </p>
       </div>
 
-      {preset === 'custom' && (
-        <div className="flex items-center gap-3 bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-3">
-          <span className="text-xs text-[#5A5C61] font-medium">Rentang:</span>
-          <Input
-            type="date"
-            value={customFrom}
-            onChange={(e) => setCustomFrom(e.target.value)}
-            className="w-36 !bg-[#ECECE9]"
-          />
-          <span className="text-xs text-[#8B8D92]">s/d</span>
-          <Input
-            type="date"
-            value={customTo}
-            onChange={(e) => setCustomTo(e.target.value)}
-            className="w-36 !bg-[#ECECE9]"
-          />
-        </div>
-      )}
+      {/* Modern Compact Filter Bar */}
+      <FilterBar
+        preset={preset}
+        onPresetChange={setPreset}
+        customFrom={customFrom}
+        customTo={customTo}
+        onCustomFromChange={setCustomFrom}
+        onCustomToChange={setCustomTo}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
+        paymentMethods={paymentMethods}
+        selectedPm={selectedPm}
+        onPmChange={setSelectedPm}
+        onReset={handleReset}
+      />
 
       {isLoading ? (
         <p className="text-xs text-[#8B8D92]">Memuat ringkasan data...</p>

@@ -3,13 +3,12 @@ import { useState } from 'react'
 import type { TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
-import { Input, Select } from '../components/Form'
+import { FilterBar } from '../components/FilterBar'
 import { TransactionForm } from '../components/TransactionForm'
 import {
   formatDate,
   formatRp,
   getPresetDateRange,
-  PRESET_OPTIONS,
   type PeriodPreset,
 } from '../utils'
 
@@ -53,6 +52,16 @@ export function Transactions() {
     queryFn: () => api.paymentMethods.list(),
   })
 
+  const handleReset = () => {
+    setPreset('this_month')
+    setCustomFrom('')
+    setCustomTo('')
+    setTypeFilter('')
+    setCategoryFilter('')
+    setPmFilter('')
+    setSearch('')
+  }
+
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.transactions.remove(id),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['transactions'] }),
@@ -84,7 +93,7 @@ export function Transactions() {
         <div>
           <h1 className="text-2xl font-bold text-[#1B1C1F] tracking-tight">Daftar Transaksi</h1>
           <p className="text-xs text-[#5A5C61] mt-0.5">
-            Filter lengkap per hari, minggu, bulan, kategori, dan metode pembayaran
+            Kelola, telusuri, dan saring seluruh transaksi Anda
           </p>
         </div>
         <Button
@@ -98,94 +107,35 @@ export function Transactions() {
         </Button>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-[#FFFFFF] border border-[#DADAD6] rounded-[10px] p-4 flex flex-col gap-3">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-2.5">
-          <Select
-            value={preset}
-            onChange={(e) => setPreset(e.target.value as PeriodPreset)}
-            className="!bg-[#ECECE9]"
-          >
-            {PRESET_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </Select>
+      {/* Filter Bar Component */}
+      <FilterBar
+        preset={preset}
+        onPresetChange={setPreset}
+        customFrom={customFrom}
+        customTo={customTo}
+        onCustomFromChange={setCustomFrom}
+        onCustomToChange={setCustomTo}
+        categories={categories}
+        selectedCategory={categoryFilter}
+        onCategoryChange={setCategoryFilter}
+        paymentMethods={paymentMethods}
+        selectedPm={pmFilter}
+        onPmChange={setPmFilter}
+        typeFilter={typeFilter}
+        onTypeFilterChange={setTypeFilter}
+        search={search}
+        onSearchChange={setSearch}
+        onReset={handleReset}
+      />
 
-          <Select
-            value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="!bg-[#ECECE9]"
-          >
-            <option value="">Semua Tipe</option>
-            <option value="expense">Pengeluaran</option>
-            <option value="income">Pemasukan</option>
-          </Select>
-
-          <Select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="!bg-[#ECECE9]"
-          >
-            <option value="">Semua Kategori</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.icon} {c.name} ({c.type === 'expense' ? 'Keluar' : 'Masuk'})
-              </option>
-            ))}
-          </Select>
-
-          <Select
-            value={pmFilter}
-            onChange={(e) => setPmFilter(e.target.value)}
-            className="!bg-[#ECECE9]"
-          >
-            <option value="">Semua Metode</option>
-            {paymentMethods.map((pm) => (
-              <option key={pm.id} value={pm.id}>
-                {pm.name}
-              </option>
-            ))}
-          </Select>
-
-          <Input
-            type="text"
-            placeholder="Cari deskripsi / teks..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="!bg-[#ECECE9]"
-          />
-        </div>
-
-        {preset === 'custom' && (
-          <div className="flex items-center gap-3 pt-2 border-t border-[#DADAD6]">
-            <span className="text-xs text-[#5A5C61]">Dari tanggal:</span>
-            <Input
-              type="date"
-              value={customFrom}
-              onChange={(e) => setCustomFrom(e.target.value)}
-              className="w-36 !bg-[#ECECE9]"
-            />
-            <span className="text-xs text-[#8B8D92]">s/d</span>
-            <Input
-              type="date"
-              value={customTo}
-              onChange={(e) => setCustomTo(e.target.value)}
-              className="w-36 !bg-[#ECECE9]"
-            />
-          </div>
-        )}
-
-        {/* Mini Summary of Filtered View */}
-        <div className="flex items-center justify-between text-xs text-[#5A5C61] pt-1 border-t border-[#DADAD6]">
-          <span>
-            Menampilkan <b>{filteredTxs.length}</b> transaksi
-          </span>
-          <div className="flex items-center gap-4 tabular-nums font-semibold">
-            <span className="text-[#2E7D5B]">Masuk: +{formatRp(totalFilteredIncome)}</span>
-            <span className="text-[#B23A3A]">Keluar: -{formatRp(totalFilteredExpense)}</span>
-          </div>
+      {/* Mini Bar Summary of Filtered View */}
+      <div className="flex items-center justify-between text-xs text-[#5A5C61] px-1">
+        <span>
+          Menampilkan <b>{filteredTxs.length}</b> dari {txs.length} transaksi
+        </span>
+        <div className="flex items-center gap-4 tabular-nums font-semibold">
+          <span className="text-[#2E7D5B]">Total Masuk: +{formatRp(totalFilteredIncome)}</span>
+          <span className="text-[#B23A3A]">Total Keluar: -{formatRp(totalFilteredExpense)}</span>
         </div>
       </div>
 
