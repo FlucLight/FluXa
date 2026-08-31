@@ -1,108 +1,137 @@
 <div align="center">
 
-# FluXa
+<img src="https://img.shields.io/badge/-FluXa-000000?style=for-the-badge&labelColor=000000&color=1a1a1a" alt="FluXa" height="40">
 
 ### Personal finance, clear and under control.
 
-Web app pencatatan keuangan pribadi untuk memantau pemasukan, pengeluaran, transfer dana, budget, dan transaksi rutin dalam satu tempat.
+Web app pencatatan keuangan pribadi untuk memantau pemasukan, pengeluaran, transfer dana, budget, dan transaksi rutin — dalam satu tempat, tanpa spreadsheet yang berantakan.
 
 <p>
-  <img src="https://img.shields.io/github/last-commit/FlucLight/personal-finance-tracker?style=for-the-badge" alt="Last commit">
-  <img src="https://img.shields.io/github/commit-activity/y/FlucLight/personal-finance-tracker?style=for-the-badge" alt="Commit activity">
+  <img src="https://img.shields.io/github/last-commit/FlucLight/personal-finance-tracker?style=for-the-badge&color=black&labelColor=black" alt="Last commit">
+  <img src="https://img.shields.io/github/commit-activity/y/FlucLight/personal-finance-tracker?style=for-the-badge&color=black&labelColor=black" alt="Commit activity">
+  <img src="https://img.shields.io/badge/status-active--development-lightgrey?style=for-the-badge&labelColor=black" alt="Status">
+</p>
+
+<p>
   <img src="https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19">
-  <img src="https://img.shields.io/badge/TypeScript-6%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 6 or newer">
+  <img src="https://img.shields.io/badge/TypeScript-6%2B-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 6+">
   <img src="https://img.shields.io/badge/Express-5-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express 5">
-  <img src="https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL 14 or newer">
+  <img src="https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL 14+">
   <img src="https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
 </p>
 
 <p>
-  <a href="https://github.com/FlucLight/personal-finance-tracker">Repository</a>
-  ·
-  <a href="#quick-start">Quick start</a>
-  ·
-  <a href="#fitur">Fitur</a>
-  ·
-  <a href="#api">API</a>
+  <a href="#quick-start"><b>Quick Start</b></a> ·
+  <a href="#fitur"><b>Fitur</b></a> ·
+  <a href="#cara-menggunakan"><b>Cara Pakai</b></a> ·
+  <a href="#api"><b>API</b></a> ·
+  <a href="#roadmap"><b>Roadmap</b></a> ·
+  <a href="https://github.com/FlucLight/personal-finance-tracker"><b>Repository</b></a>
 </p>
 
 </div>
 
----
+<br>
+
+> [!NOTE]
+> Bahasa yang digunakan pada FluXa dan dokumentasi ini adalah Bahasa Indonesia, disesuaikan dengan target pengguna utama.
 
 ## Tentang FluXa
 
-FluXa membantu mencatat transaksi harian tanpa spreadsheet yang rumit. Data tersimpan di PostgreSQL, backend menyediakan REST API, dan frontend menampilkan ringkasan finansial dalam dashboard yang responsif.
+FluXa membantu mencatat transaksi harian tanpa spreadsheet yang rumit. Data tersimpan di PostgreSQL, backend menyediakan REST API, dan frontend menampilkan ringkasan finansial dalam dashboard yang responsif — dengan desain minimalis hitam-putih yang bersih dan enak dilihat.
 
-Quick Input juga menerima kalimat natural:
+Fitur andalan: **Quick Input**, kolom input tunggal yang menerima kalimat natural dan langsung mem-parsingnya jadi transaksi terstruktur.
 
 ```text
-Nasi goreng 15rb mandiri
+Input:   Nasi goreng 15rb mandiri
+Output:  Rp 15.000 · Kategori: Makanan · Metode: Mandiri · Confidence: high
 ```
 
-FluXa membaca nominal, metode pembayaran, kategori, dan keterangan secara otomatis. Hasil parsing selalu dapat ditinjau sebelum disimpan.
+Semua nominal, metode pembayaran, kategori, dan keterangan dibaca otomatis oleh parser rule-based (tanpa biaya LLM sama sekali), dan hasilnya selalu bisa ditinjau sebelum disimpan.
+
+<br>
 
 ## Fitur
 
-### Pencatatan
+<table>
+<tr>
+<td width="50%" valign="top">
 
-- CRUD pemasukan dan pengeluaran.
-- Soft delete dan pemulihan transaksi.
-- Input tanggal serta waktu transaksi secara manual.
-- Format mata uang Rupiah dengan angka tabular.
-- Kategori dan payment method dari database.
+### 📝 Pencatatan
 
-### Quick Input
+- CRUD pemasukan dan pengeluaran
+- Soft delete & pemulihan transaksi
+- Input tanggal dan waktu manual
+- Format mata uang Rupiah (angka tabular)
+- Kategori & payment method dari database
 
-- Parser rule-based tanpa biaya LLM.
-- Mendukung `15000`, `15.000`, `15rb`, `15 ribu`, `15k`, dan `1.5jt`.
-- Pencocokan kategori melalui keyword.
-- Pencocokan payment method melalui nama dan alias.
-- Preview parsing dengan confidence `high` atau `low`.
-- Transaksi dengan confidence rendah diberi tanda review.
+### ⚡ Quick Input
 
-### Dashboard
+- Parser rule-based, tanpa biaya LLM
+- Mendukung `15000`, `15.000`, `15rb`, `15 ribu`, `15k`, `1.5jt`
+- Pencocokan kategori via keyword
+- Pencocokan payment method via nama & alias
+- Preview parsing dengan confidence `high` / `low`
+- Transaksi confidence rendah otomatis ditandai review
 
-- Total pemasukan.
-- Total pengeluaran.
-- Saldo bersih.
-- Rasio tabungan.
-- Tren pemasukan dan pengeluaran.
-- Breakdown pengeluaran per kategori.
-- Ringkasan berdasarkan sumber dana.
-- Status budget dan progress pemakaian.
-- Filter periode, kategori, dan payment method.
+### 📊 Dashboard
 
-### Pengelolaan Dana
+- Total pemasukan, pengeluaran, saldo bersih
+- Rasio tabungan
+- Tren pemasukan & pengeluaran
+- Breakdown pengeluaran per kategori
+- Ringkasan berdasarkan sumber dana
+- Status & progress budget
+- Filter periode, kategori, payment method
 
-- Transfer antar cash, bank, dan e-wallet.
-- Budget bulanan per kategori.
-- Transaksi berulang dengan jadwal tanggal 1–28.
-- Auto-generate transaksi rutin saat server aktif.
+</td>
+<td width="50%" valign="top">
 
-### Backup dan Tampilan
+### 💸 Pengelolaan Dana
 
-- Export transaksi ke CSV.
-- Backup penuh ke JSON.
-- Import JSON dengan pencegahan duplikasi ID.
-- Mode Light dan Dark.
-- Custom modal, toast, dropdown, dan calendar picker.
-- Layout responsif untuk desktop, tablet, dan mobile.
-- Sidebar desktop berubah menjadi drawer pada layar kecil.
+- Transfer antar cash, bank, dan e-wallet
+- Budget bulanan per kategori
+- Transaksi berulang, jadwal tanggal 1–28
+- Auto-generate transaksi rutin saat server aktif
+
+### 💾 Backup & Import
+
+- Export transaksi ke CSV
+- Backup penuh ke JSON
+- Import JSON dengan pencegahan duplikasi ID
+
+### 🎨 Tampilan
+
+- Mode Light & Dark
+- Custom modal, toast, dropdown, calendar picker
+- Layout responsif — desktop, tablet, mobile
+- Sidebar desktop → drawer di layar kecil
+
+</td>
+</tr>
+</table>
+
+<br>
 
 ## Teknologi
 
+<div align="center">
+
 | Layer | Teknologi |
-| --- | --- |
-| Frontend | React 19, TypeScript, Vite |
-| Styling | Tailwind CSS 4, CSS variables |
-| Data fetching | TanStack Query |
-| Charts | Recharts |
-| Backend | Node.js, Express 5, TypeScript |
-| Database | PostgreSQL |
-| Migration | node-pg-migrate |
-| Validation | Zod |
-| Monorepo | npm workspaces |
+|:--|:--|
+| **Frontend** | React 19 · TypeScript · Vite |
+| **Styling** | Tailwind CSS 4 · CSS Variables |
+| **Data Fetching** | TanStack Query |
+| **Charts** | Recharts |
+| **Backend** | Node.js · Express 5 · TypeScript |
+| **Database** | PostgreSQL |
+| **Migration** | node-pg-migrate |
+| **Validation** | Zod |
+| **Monorepo** | npm workspaces |
+
+</div>
+
+<br>
 
 ## Arsitektur
 
@@ -119,17 +148,22 @@ Browser
           └── PostgreSQL
 ```
 
-Semua tabel inti memiliki `user_id` sejak awal agar auth dan multi-user dapat ditambahkan tanpa mengubah struktur utama.
+> [!TIP]
+> Semua tabel inti sudah memiliki kolom `user_id` sejak awal, jadi auth dan multi-user bisa ditambahkan nanti tanpa mengubah struktur utama database.
+
+<br>
 
 ## Quick Start
 
 ### Prasyarat
 
-- Node.js 22 atau lebih baru.
-- npm 10 atau lebih baru.
-- PostgreSQL 14 atau lebih baru.
+| Tool | Versi minimum |
+|:--|:--|
+| Node.js | 22+ |
+| npm | 10+ |
+| PostgreSQL | 14+ |
 
-### Instalasi
+### 1. Clone & Install
 
 ```bash
 git clone https://github.com/FlucLight/personal-finance-tracker.git
@@ -137,19 +171,25 @@ cd personal-finance-tracker
 npm install
 ```
 
-Buat file environment:
+### 2. Environment
 
-PowerShell:
+<details>
+<summary><b>Windows (PowerShell)</b></summary>
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-macOS/Linux:
+</details>
+
+<details>
+<summary><b>macOS / Linux</b></summary>
 
 ```bash
 cp .env.example .env
 ```
+
+</details>
 
 Isi `.env`:
 
@@ -162,103 +202,126 @@ DB_PORT=5432
 DB_NAME=financial_management
 ```
 
-Jalankan setup database:
+### 3. Setup Database
 
 ```bash
-npm run db:setup
-npm run migrate
+npm run db:setup   # membuat database jika belum ada
+npm run migrate    # membuat tabel & data default
 ```
 
-`db:setup` membuat database jika belum tersedia. `migrate` membuat tabel dan data default.
+### 4. Jalankan Development Server
 
-### Jalankan Development Server
-
-Gunakan dua terminal dari root project.
-
-Terminal backend:
+Butuh dua terminal dari root project:
 
 ```bash
+# Terminal 1 — backend
 npm run dev
-```
 
-Terminal frontend:
-
-```bash
+# Terminal 2 — frontend
 npm run dev:client
 ```
 
-Frontend tersedia di `http://localhost:5173` dan backend di `http://localhost:5000`.
+| Service | URL |
+|:--|:--|
+| Frontend | `http://localhost:5173` |
+| Backend | `http://localhost:5000` |
+| Health check | `GET http://localhost:5000/health` |
 
-Health check:
-
-```text
-GET http://localhost:5000/health
-```
+<br>
 
 ## Cara Menggunakan
 
-### Dashboard
+<details>
+<summary><b>📊 Dashboard</b></summary>
+<br>
 
-1. Buka menu Dashboard.
-2. Pilih preset periode seperti Hari Ini, 3 Hari Terakhir, 7 Hari, Bulan Ini, 3 Bulan, atau Semua Waktu.
+1. Buka menu **Dashboard**.
+2. Pilih preset periode: Hari Ini, 3 Hari Terakhir, 7 Hari, Bulan Ini, 3 Bulan, atau Semua Waktu.
 3. Gunakan filter kategori dan metode pembayaran bila diperlukan.
-4. Pilih Kustom untuk menentukan tanggal mulai dan selesai.
+4. Pilih **Kustom** untuk menentukan tanggal mulai dan selesai sendiri.
 
-### Quick Input
+</details>
+
+<details>
+<summary><b>⚡ Quick Input</b></summary>
+<br>
 
 1. Ketik transaksi pada kolom Quick.
-2. Klik Preview atau tekan `Enter`.
+2. Klik **Preview** atau tekan `Enter`.
 3. Periksa nominal, kategori, metode pembayaran, dan keterangan.
-4. Tekan Enter lagi atau klik Simpan.
-5. Jika hasil kurang yakin, periksa transaksi bertanda `review`.
+4. Tekan `Enter` lagi atau klik **Simpan**.
+5. Jika hasil kurang yakin, cek transaksi bertanda `review`.
 
-Contoh:
-
+**Contoh:**
 ```text
 Kopi 18rb dana
 Bensin 100k cash
 Gaji 5jt mandiri
 ```
 
-### Transaksi Manual
+</details>
 
-1. Buka menu Transaksi.
-2. Klik Catat Transaksi.
+<details>
+<summary><b>✍️ Transaksi Manual</b></summary>
+<br>
+
+1. Buka menu **Transaksi**.
+2. Klik **Catat Transaksi**.
 3. Isi tipe, nominal, kategori, metode pembayaran, keterangan, serta tanggal.
 4. Simpan transaksi.
 5. Gunakan filter untuk mencari data tertentu.
 
-### Transfer Dana
+</details>
 
-Gunakan menu Transfer untuk memindahkan catatan dana dari satu payment method ke payment method lain. Transfer tidak menambah pemasukan dan tidak mengurangi pengeluaran pada dashboard.
+<details>
+<summary><b>🔄 Transfer Dana</b></summary>
+<br>
 
-### Budget
+Gunakan menu **Transfer** untuk memindahkan catatan dana dari satu payment method ke payment method lain. Transfer **tidak** menambah pemasukan dan **tidak** mengurangi pengeluaran pada dashboard.
 
-1. Buka menu Budget.
-2. Klik Set Budget Kategori.
+</details>
+
+<details>
+<summary><b>🎯 Budget</b></summary>
+<br>
+
+1. Buka menu **Budget**.
+2. Klik **Set Budget Kategori**.
 3. Pilih kategori pengeluaran dan nominal batas bulanan.
 4. Pantau progress bar pemakaian.
 
-Status budget:
+| Progress | Status |
+|:--|:--|
+| < 80% | 🟢 Aman |
+| 80% – 99% | 🟡 Mendekati limit |
+| ≥ 100% | 🔴 Melewati limit |
 
-- Di bawah 80%: aman.
-- 80% hingga kurang dari 100%: mendekati limit.
-- 100% atau lebih: melewati limit.
+</details>
 
-### Transaksi Berulang
+<details>
+<summary><b>🔁 Transaksi Berulang</b></summary>
+<br>
 
-1. Buka menu Berulang.
+1. Buka menu **Berulang**.
 2. Buat template tagihan atau pemasukan rutin.
 3. Tentukan tanggal eksekusi antara 1 dan 28.
 4. Aktifkan atau nonaktifkan template sesuai kebutuhan.
 
-### Export dan Backup
+</details>
 
-Buka menu Export / Backup:
+<details>
+<summary><b>💾 Export & Backup</b></summary>
+<br>
 
-- Download CSV untuk daftar transaksi aktif.
-- Download JSON untuk backup kategori, payment method, transaksi, dan budget.
-- Pilih File JSON Backup untuk memulihkan data.
+Buka menu **Export / Backup**:
+
+- Download **CSV** untuk daftar transaksi aktif.
+- Download **JSON** untuk backup kategori, payment method, transaksi, dan budget.
+- Pilih **File JSON Backup** untuk memulihkan data.
+
+</details>
+
+<br>
 
 ## API
 
@@ -268,7 +331,8 @@ Base URL development:
 http://localhost:5000/api
 ```
 
-### Transactions
+<details>
+<summary><b>Transactions</b></summary>
 
 ```text
 GET    /transactions
@@ -281,18 +345,12 @@ POST   /transactions/parse
 POST   /transactions/quick
 ```
 
-Filter yang tersedia:
+Filter yang tersedia: `from` · `to` · `category_id` · `type` · `payment_method_id` · `deleted`
 
-```text
-from
-to
-category_id
-type
-payment_method_id
-deleted
-```
+</details>
 
-### Categories
+<details>
+<summary><b>Categories</b></summary>
 
 ```text
 GET    /categories
@@ -304,7 +362,10 @@ DELETE /categories/:id
 
 Gunakan `GET /categories?type=expense` atau `GET /categories?type=income` untuk memfilter tipe kategori.
 
-### Payment Methods
+</details>
+
+<details>
+<summary><b>Payment Methods</b></summary>
 
 ```text
 GET    /payment-methods
@@ -314,7 +375,10 @@ PATCH  /payment-methods/:id
 DELETE /payment-methods/:id
 ```
 
-### Dana dan Budget
+</details>
+
+<details>
+<summary><b>Dana & Budget</b></summary>
 
 ```text
 GET    /transfers
@@ -327,7 +391,10 @@ PATCH  /budgets/:id
 DELETE /budgets/:id
 ```
 
-### Transaksi Berulang
+</details>
+
+<details>
+<summary><b>Transaksi Berulang</b></summary>
 
 ```text
 GET    /recurring-transactions
@@ -337,13 +404,20 @@ DELETE /recurring-transactions/:id
 POST   /recurring-transactions/trigger
 ```
 
-### Export dan Import
+</details>
+
+<details>
+<summary><b>Export & Import</b></summary>
 
 ```text
 GET    /export/csv
 GET    /export/json
 POST   /export/json
 ```
+
+</details>
+
+<br>
 
 ## Struktur Project
 
@@ -374,42 +448,32 @@ POST   /export/json
 └─ README.md
 ```
 
+<br>
+
 ## Perintah Development
 
-Lint frontend:
+| Perintah | Fungsi |
+|:--|:--|
+| `npm run lint --workspace client` | Lint frontend |
+| `npm run build --workspace client` | Build frontend |
+| `npm run typecheck` | Typecheck server & shared |
+| `npm run migrate:down` | Batalkan migration terakhir (dev only) |
 
-```bash
-npm run lint --workspace client
-```
+> [!WARNING]
+> Jangan menjalankan `migrate:down` pada production tanpa backup.
 
-Build frontend:
-
-```bash
-npm run build --workspace client
-```
-
-Typecheck server dan shared:
-
-```bash
-npm run typecheck
-```
-
-Batalkan migration terakhir pada database development:
-
-```bash
-npm run migrate:down
-```
-
-Jangan menjalankan `migrate:down` pada production tanpa backup.
+<br>
 
 ## Roadmap
 
-- Integrasi bot Telegram.
-- Login dan multi-user.
-- Export PDF.
-- Halaman pengelolaan kategori dan payment method.
-- Endpoint dashboard summary khusus untuk konsumen eksternal.
-- Deployment production.
+- [ ] Integrasi bot Telegram
+- [ ] Login dan multi-user
+- [ ] Export PDF
+- [ ] Halaman pengelolaan kategori dan payment method
+- [ ] Endpoint dashboard summary khusus untuk konsumen eksternal
+- [ ] Deployment production
+
+<br>
 
 ## Keamanan
 
@@ -419,6 +483,16 @@ Jangan menjalankan `migrate:down` pada production tanpa backup.
 - Tambahkan autentikasi sebelum API dibuka ke internet.
 - Integrasi bot Telegram harus memakai API key dan allowlist chat ID.
 
+<br>
+
+<div align="center">
+
 ## License
 
 Belum ditentukan.
+
+<br>
+
+<sub>Dibuat oleh <a href="https://github.com/FlucLight">FlucLight</a></sub>
+
+</div>
