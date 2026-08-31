@@ -149,7 +149,7 @@ export function Dashboard() {
     .filter((b) => b.spent > 0 || parseFloat(b.limit_amount) > 0)
 
   return (
-    <div className="p-8 flex flex-col gap-6 max-w-6xl">
+    <div className="p-8 flex flex-col gap-6 max-w-6xl animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">
           Ringkasan Finansial
@@ -176,11 +176,14 @@ export function Dashboard() {
       />
 
       {isLoading ? (
-        <p className="text-xs text-[var(--color-ink-faint)]">Memuat ringkasan data...</p>
+        <div className="flex items-center gap-2 text-xs text-[var(--color-ink-faint)] py-4 animate-pulse-subtle">
+          <span className="w-2 h-2 rounded-full bg-[var(--color-focus)] animate-ping" />
+          <span>Memuat ringkasan data...</span>
+        </div>
       ) : (
         <>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs card-hover">
               <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1">
                 <ArrowUpRightIcon size={12} className="text-[var(--color-positive)]" />
                 <span>Total Pemasukan</span>
@@ -193,7 +196,7 @@ export function Dashboard() {
               </p>
             </div>
 
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs card-hover">
               <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1">
                 <ArrowDownLeftIcon size={12} className="text-[var(--color-negative)]" />
                 <span>Total Pengeluaran</span>
@@ -206,7 +209,7 @@ export function Dashboard() {
               </p>
             </div>
 
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs card-hover">
               <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
                 Saldo Bersih (Net)
               </span>
@@ -222,7 +225,7 @@ export function Dashboard() {
               </p>
             </div>
 
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs card-hover">
               <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">
                 Rasio Tabungan
               </span>
@@ -234,7 +237,7 @@ export function Dashboard() {
           </div>
 
           {dailyData.length > 0 && (
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs card-hover">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Tren Transaksi per Periode
@@ -292,7 +295,7 @@ export function Dashboard() {
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
               <div className="flex items-center justify-between">
                 <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Pengeluaran per Kategori
@@ -366,7 +369,7 @@ export function Dashboard() {
                           </div>
                           <div className="w-full h-1 bg-[var(--color-surface-sunken)] rounded-[2px] overflow-hidden">
                             <div
-                              className="h-full rounded-[2px]"
+                              className="h-full rounded-[2px] progress-fill"
                               style={{
                                 width: `${Math.min(100, pct)}%`,
                                 backgroundColor: grayShades[idx % grayShades.length],
@@ -381,7 +384,7 @@ export function Dashboard() {
               )}
             </div>
 
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
               <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                 Sumber / Metode Pembayaran
               </h2>
@@ -392,7 +395,7 @@ export function Dashboard() {
                   {byPaymentMethod.map((pm) => (
                     <div
                       key={pm.id}
-                      className="border border-[var(--color-border)] rounded-[6px] p-2.5 flex flex-col gap-1.5 bg-[var(--color-surface)]"
+                      className="border border-[var(--color-border)] rounded-[6px] p-2.5 flex flex-col gap-1.5 bg-[var(--color-surface)] hover:border-[var(--color-border-strong)] transition-colors"
                     >
                       <div className="flex items-center justify-between">
                         <span className="font-semibold text-xs text-[var(--color-ink)]">
@@ -416,7 +419,7 @@ export function Dashboard() {
               )}
             </div>
 
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 flex flex-col gap-3 shadow-xs card-hover">
               <div className="flex items-center justify-between">
                 <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Status Budget Bulan Ini
@@ -457,7 +460,7 @@ export function Dashboard() {
                         </div>
                         <div className="w-full h-1.5 bg-[var(--color-surface-sunken)] rounded-[2px] overflow-hidden">
                           <div
-                            className={`h-full ${barColor} rounded-[2px]`}
+                            className={`h-full ${barColor} rounded-[2px] progress-fill`}
                             style={{ width: `${Math.min(100, b.pct)}%` }}
                           />
                         </div>
@@ -474,7 +477,7 @@ export function Dashboard() {
           </div>
 
           {incomeByCategory.length > 0 && (
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs card-hover">
               <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider mb-3">
                 Sumber Pemasukan
               </h2>
@@ -482,7 +485,7 @@ export function Dashboard() {
                 {incomeByCategory.map((c) => (
                   <div
                     key={c.id}
-                    className="border border-[var(--color-border)] rounded-[6px] p-3 flex flex-col gap-1 bg-[var(--color-surface)]"
+                    className="border border-[var(--color-border)] rounded-[6px] p-3 flex flex-col gap-1 bg-[var(--color-surface)] hover:border-[var(--color-border-strong)] transition-colors"
                   >
                     <span className="text-xs text-[var(--color-ink-muted)] flex items-center gap-1.5">
                       <CategorySymbolIcon name={c.name} size={13} className="text-[var(--color-positive)]" />
@@ -499,7 +502,7 @@ export function Dashboard() {
           )}
 
           {txs.length === 0 && (
-            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center flex flex-col items-center gap-2 shadow-xs">
+            <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center flex flex-col items-center gap-2 shadow-xs animate-fade-in">
               <p className="text-sm text-[var(--color-ink-muted)]">Tidak ada transaksi untuk filter ini.</p>
               <p className="text-xs text-[var(--color-ink-faint)]">
                 Coba ubah rentang tanggal atau filter kategori di atas.

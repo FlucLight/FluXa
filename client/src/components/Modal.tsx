@@ -17,14 +17,14 @@ export function Modal({ title, children, onClose }: Props) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs transition-opacity duration-200"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
     >
       <div
         ref={ref}
-        className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] w-full max-w-md shadow-2xl overflow-visible animate-in fade-in zoom-in-95 duration-100"
+        className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] w-full max-w-md shadow-2xl overflow-visible animate-modal-in"
       >
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-border)]">
           <h2 className="font-semibold text-sm text-[var(--color-ink)] font-display">{title}</h2>

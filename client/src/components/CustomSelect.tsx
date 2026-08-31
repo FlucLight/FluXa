@@ -120,7 +120,7 @@ export function CustomSelect({
       {/* Dropdown Menu */}
       {isOpen && (
         <div
-          className={`absolute z-[999] w-full min-w-[200px] max-h-60 overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[8px] shadow-2xl p-1 animate-in fade-in zoom-in-95 duration-100 ${
+          className={`absolute z-[999] w-full min-w-[200px] max-h-60 overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[8px] shadow-2xl p-1 animate-dropdown-in ${
             openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
           }`}
         >

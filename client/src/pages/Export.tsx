@@ -43,7 +43,7 @@ export function Export() {
   }
 
   return (
-    <div className="p-8 flex flex-col gap-6 max-w-2xl">
+    <div className="p-8 flex flex-col gap-6 max-w-2xl animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Export & Backup</h1>
         <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">

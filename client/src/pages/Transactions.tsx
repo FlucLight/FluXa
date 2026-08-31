@@ -103,7 +103,7 @@ export function Transactions() {
     .reduce((s, t) => s + parseFloat(t.amount), 0)
 
   return (
-    <div className="p-8 flex flex-col gap-5 flex-1 max-w-6xl">
+    <div className="p-8 flex flex-col gap-5 flex-1 max-w-6xl animate-fade-in">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Daftar Transaksi</h1>

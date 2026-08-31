@@ -165,7 +165,7 @@ export function DatePicker({
       {/* Calendar Popup */}
       {isOpen && (
         <div
-          className={`absolute z-[999] w-64 p-3 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-2xl animate-in fade-in zoom-in-95 duration-100 ${
+          className={`absolute z-[999] w-64 p-3 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-2xl animate-dropdown-in ${
             openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
           }`}
         >
