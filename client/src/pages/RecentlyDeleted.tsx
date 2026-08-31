@@ -37,7 +37,7 @@ export function RecentlyDeleted() {
   })
 
   return (
-    <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl animate-fade-in">
+    <div className="w-full min-w-0 max-w-5xl animate-fade-in p-4 sm:p-6 md:p-8 flex flex-col gap-5">
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Transaksi Terhapus</h1>
         <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
@@ -53,7 +53,9 @@ export function RecentlyDeleted() {
       )}
 
       {txs.length > 0 && (
-        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] overflow-hidden shadow-xs">
+        <>
+        <p className="text-[11px] text-[var(--color-ink-faint)] md:hidden">Geser tabel ke samping untuk melihat kolom lainnya.</p>
+        <div className="mobile-table-scroll bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-xs">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-[var(--color-border)] bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] font-medium">
@@ -105,6 +107,7 @@ export function RecentlyDeleted() {
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       <ConfirmModal

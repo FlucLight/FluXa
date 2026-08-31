@@ -169,7 +169,7 @@ export function FilterBar({
       {preset === 'custom' && (
         <div className="flex items-center gap-3 p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] flex-wrap animate-in fade-in duration-100">
           <span className="text-xs text-[var(--color-ink-muted)] font-medium">Rentang:</span>
-          <div className="w-44">
+          <div className="w-full sm:w-44">
             <DatePicker
               value={customFrom}
               onChange={(v) => onCustomFromChange?.(v)}
@@ -177,7 +177,7 @@ export function FilterBar({
             />
           </div>
           <span className="text-xs text-[var(--color-ink-faint)]">sampai</span>
-          <div className="w-44">
+          <div className="w-full sm:w-44">
             <DatePicker
               value={customTo}
               onChange={(v) => onCustomToChange?.(v)}

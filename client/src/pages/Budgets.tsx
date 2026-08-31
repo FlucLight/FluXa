@@ -58,7 +58,7 @@ export function Budgets() {
   })
 
   return (
-    <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl animate-fade-in">
+    <div className="w-full min-w-0 max-w-5xl animate-fade-in p-4 sm:p-6 md:p-8 flex flex-col gap-5">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">
@@ -68,7 +68,7 @@ export function Budgets() {
             Periode {now.toLocaleString('id-ID', { month: 'long', year: 'numeric' })}
           </p>
         </div>
-        <Button variant="primary" onClick={() => setShowForm(true)}>
+        <Button variant="primary" onClick={() => setShowForm(true)} className="w-full sm:w-auto">
           + Set Budget Kategori
         </Button>
       </div>
@@ -96,11 +96,11 @@ export function Budgets() {
             : 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]'
 
           return (
-            <div
-              key={b.id}
-              className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-xs"
-            >
-              <div className="flex items-center justify-between">
+              <div
+                key={b.id}
+                className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex min-w-0 flex-col gap-3 shadow-xs"
+              >
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span className="font-semibold text-xs text-[var(--color-ink)] flex items-center gap-1.5">
                   <CategorySymbolIcon name={cat?.name} size={14} className="text-[var(--color-ink-muted)]" />
                   <span>{cat?.name ?? b.category_id}</span>

@@ -56,15 +56,15 @@ export function Recurring() {
   })
 
   return (
-    <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div className="w-full min-w-0 max-w-5xl animate-fade-in p-4 sm:p-6 md:p-8 flex flex-col gap-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Tagihan Berulang</h1>
           <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
             Auto-generate transaksi tiap tanggal yang ditentukan setiap bulan
           </p>
         </div>
-        <Button variant="primary" onClick={() => setShowForm(true)}>
+        <Button variant="primary" onClick={() => setShowForm(true)} className="w-full sm:w-auto">
           + Tambah Tagihan
         </Button>
       </div>
@@ -83,7 +83,7 @@ export function Recurring() {
           return (
             <div
               key={item.id}
-              className={`bg-[var(--color-surface-raised)] border rounded-[10px] p-4 flex items-center gap-4 transition-opacity shadow-xs ${
+              className={`bg-[var(--color-surface-raised)] border rounded-[10px] p-4 flex flex-col items-stretch gap-3 transition-opacity shadow-xs sm:flex-row sm:items-center ${
                 item.is_active ? 'border-[var(--color-border)]' : 'border-[var(--color-border)]/60 opacity-60'
               }`}
             >
@@ -115,7 +115,7 @@ export function Recurring() {
               </div>
 
               <span
-                className={`font-semibold text-xs tabular-nums ${
+                className={`text-left font-semibold text-xs tabular-nums sm:text-right ${
                   isExpense ? 'text-[var(--color-negative)]' : 'text-[var(--color-positive)]'
                 }`}
               >
@@ -123,7 +123,7 @@ export function Recurring() {
                 {formatRp(item.amount)}
               </span>
 
-              <div className="flex gap-1.5">
+              <div className="flex w-full gap-1.5 sm:w-auto">
                 <Button
                   variant="secondary"
                   onClick={() => toggleMut.mutate({ id: item.id, is_active: !item.is_active })}
