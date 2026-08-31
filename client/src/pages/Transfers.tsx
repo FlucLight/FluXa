@@ -2,16 +2,22 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
+import { ConfirmModal } from '../components/ConfirmModal'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { DateTimePicker } from '../components/DatePicker'
 import { Field, Input } from '../components/Form'
 import { CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
+import { useToast } from '../components/Toast'
 import { formatDate, formatRp } from '../utils'
 
 export function Transfers() {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
+
   const [showForm, setShowForm] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
   const { data: transfers = [], isLoading } = useQuery({
     queryKey: ['transfers'],
     queryFn: () => api.transfers.list(),
@@ -24,7 +30,15 @@ export function Transfers() {
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.transfers.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['transfers'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['transfers'] })
+      success('Riwayat transfer berhasil dihapus')
+      setDeletingId(null)
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Menghapus')
+      setDeletingId(null)
+    },
   })
 
   return (
@@ -80,9 +94,7 @@ export function Transfers() {
                   <td className="px-4 py-3 text-right">
                     <Button
                       variant="danger"
-                      onClick={() => {
-                        if (confirm('Hapus transfer ini?')) deleteMut.mutate(t.id)
-                      }}
+                      onClick={() => setDeletingId(t.id)}
                     >
                       Hapus
                     </Button>
@@ -95,6 +107,18 @@ export function Transfers() {
       )}
 
       {showForm && <TransferForm pms={pms} onClose={() => setShowForm(false)} />}
+
+      <ConfirmModal
+        isOpen={Boolean(deletingId)}
+        title="Hapus Transfer"
+        message="Riwayat transfer ini akan dihapus dari catatan perpindahan dana."
+        confirmLabel="Hapus Transfer"
+        onConfirm={() => {
+          if (deletingId) deleteMut.mutate(deletingId)
+        }}
+        onCancel={() => setDeletingId(null)}
+        isLoading={deleteMut.isPending}
+      />
     </div>
   )
 }
@@ -107,6 +131,8 @@ function TransferForm({
   onClose: () => void
 }) {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
+
   const [form, setForm] = useState({
     from: '',
     to: '',
@@ -127,7 +153,11 @@ function TransferForm({
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transfers'] })
+      success('Transfer dana berhasil dicatat')
       onClose()
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Menyimpan')
     },
   })
 

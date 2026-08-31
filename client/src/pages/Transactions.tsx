@@ -3,8 +3,10 @@ import { useState } from 'react'
 import type { TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
+import { ConfirmModal } from '../components/ConfirmModal'
 import { FilterBar } from '../components/FilterBar'
 import { CategorySymbolIcon } from '../components/Icons'
+import { useToast } from '../components/Toast'
 import { TransactionForm } from '../components/TransactionForm'
 import {
   formatDate,
@@ -15,8 +17,12 @@ import {
 
 export function Transactions() {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
+
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<TransactionRecord | null>(null)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
   const [typeFilter, setTypeFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
   const [pmFilter, setPmFilter] = useState('')
@@ -65,7 +71,15 @@ export function Transactions() {
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.transactions.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['transactions'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['transactions'] })
+      success('Transaksi berhasil dipindahkan ke menu Terhapus')
+      setDeletingId(null)
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Menghapus')
+      setDeletingId(null)
+    },
   })
 
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c]))
@@ -213,9 +227,7 @@ export function Transactions() {
                         </Button>
                         <Button
                           variant="danger"
-                          onClick={() => {
-                            if (confirm('Hapus transaksi ini?')) deleteMutation.mutate(tx.id)
-                          }}
+                          onClick={() => setDeletingId(tx.id)}
                         >
                           Hapus
                         </Button>
@@ -238,6 +250,18 @@ export function Transactions() {
           }}
         />
       )}
+
+      <ConfirmModal
+        isOpen={Boolean(deletingId)}
+        title="Hapus Transaksi"
+        message="Transaksi ini akan dipindahkan ke menu Terhapus. Anda dapat memulihkannya sewaktu-waktu."
+        confirmLabel="Hapus Transaksi"
+        onConfirm={() => {
+          if (deletingId) deleteMutation.mutate(deletingId)
+        }}
+        onCancel={() => setDeletingId(null)}
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   )
 }

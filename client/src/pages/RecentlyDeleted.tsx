@@ -1,10 +1,17 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
+import { ConfirmModal } from '../components/ConfirmModal'
+import { CategorySymbolIcon } from '../components/Icons'
+import { useToast } from '../components/Toast'
 import { formatDate, formatRp } from '../utils'
 
 export function RecentlyDeleted() {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
+  const [restoringId, setRestoringId] = useState<string | null>(null)
+
   const { data: txs = [], isLoading } = useQuery({
     queryKey: ['transactions-deleted'],
     queryFn: () => api.transactions.deleted(),
@@ -15,11 +22,17 @@ export function RecentlyDeleted() {
   })
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c]))
 
-  const restore = useMutation({
+  const restoreMutation = useMutation({
     mutationFn: (id: string) => api.transactions.restore(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] })
       qc.invalidateQueries({ queryKey: ['transactions-deleted'] })
+      success('Transaksi berhasil dipulihkan kembali')
+      setRestoringId(null)
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Memulihkan')
+      setRestoringId(null)
     },
   })
 
@@ -61,7 +74,14 @@ export function RecentlyDeleted() {
                     </td>
                     <td className="px-4 py-3 text-[var(--color-ink)]">{tx.description ?? '-'}</td>
                     <td className="px-4 py-3 text-[var(--color-ink-muted)]">
-                      {cat ? `${cat.icon} ${cat.name}` : '-'}
+                      {cat ? (
+                        <span className="inline-flex items-center gap-1.5 bg-[var(--color-surface-sunken)] text-[var(--color-ink)] px-2 py-0.5 rounded-[4px]">
+                          <CategorySymbolIcon name={cat.name} size={12} className="text-[var(--color-ink-muted)]" />
+                          <span>{cat.name}</span>
+                        </span>
+                      ) : (
+                        '-'
+                      )}
                     </td>
                     <td
                       className={`px-4 py-3 text-right font-semibold tabular-nums ${
@@ -73,8 +93,8 @@ export function RecentlyDeleted() {
                     <td className="px-4 py-3 text-right">
                       <Button
                         variant="secondary"
-                        onClick={() => restore.mutate(tx.id)}
-                        disabled={restore.isPending}
+                        onClick={() => setRestoringId(tx.id)}
+                        disabled={restoreMutation.isPending}
                       >
                         Pulihkan
                       </Button>
@@ -86,6 +106,19 @@ export function RecentlyDeleted() {
           </table>
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={Boolean(restoringId)}
+        title="Pulihkan Transaksi"
+        message="Apakah Anda yakin ingin memulihkan kembali transaksi ini ke daftar aktif?"
+        confirmLabel="Pulihkan"
+        variant="primary"
+        onConfirm={() => {
+          if (restoringId) restoreMutation.mutate(restoringId)
+        }}
+        onCancel={() => setRestoringId(null)}
+        isLoading={restoreMutation.isPending}
+      />
     </div>
   )
 }

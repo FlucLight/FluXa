@@ -2,11 +2,12 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
+import { useToast } from '../components/Toast'
 
 export function Export() {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
   const [importing, setImporting] = useState(false)
-  const [msg, setMsg] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   function download(blob: Blob, filename: string) {
@@ -22,19 +23,19 @@ export function Export() {
     const file = e.target.files?.[0]
     if (!file) return
     setImporting(true)
-    setMsg(null)
     try {
       const text = await file.text()
       const data = JSON.parse(text)
       const result = await api.export.importJson(data)
-      setMsg(
-        `Import berhasil: ${result.imported['transactions'] ?? 0} transaksi, ${
+      success(
+        `Berhasil mengimpor ${result.imported['transactions'] ?? 0} transaksi, ${
           result.imported['categories'] ?? 0
         } kategori dipulihkan.`,
+        'Restore Berhasil'
       )
       qc.invalidateQueries()
     } catch (err) {
-      setMsg(`Gagal: ${(err as Error).message}`)
+      toastError((err as Error).message, 'Gagal Import')
     } finally {
       setImporting(false)
       if (fileRef.current) fileRef.current.value = ''
@@ -64,7 +65,14 @@ export function Export() {
             </div>
             <Button
               variant="secondary"
-              onClick={() => api.export.csv().then((b) => download(b, 'transaksi.csv'))}
+              onClick={() => {
+                api.export.csv()
+                  .then((b) => {
+                    download(b, 'transaksi.csv')
+                    success('File CSV transaksi berhasil diunduh')
+                  })
+                  .catch((err) => toastError((err as Error).message, 'Gagal Download'))
+              }}
             >
               Download CSV
             </Button>
@@ -79,7 +87,14 @@ export function Export() {
             </div>
             <Button
               variant="secondary"
-              onClick={() => api.export.json().then((b) => download(b, 'backup.json'))}
+              onClick={() => {
+                api.export.json()
+                  .then((b) => {
+                    download(b, 'backup.json')
+                    success('File backup database (JSON) berhasil diunduh')
+                  })
+                  .catch((err) => toastError((err as Error).message, 'Gagal Download'))
+              }}
             >
               Download JSON
             </Button>
@@ -112,17 +127,6 @@ export function Export() {
             {importing ? 'Mengimport...' : 'Pilih File JSON Backup'}
           </Button>
         </div>
-        {msg && (
-          <p
-            className={`text-xs p-2.5 rounded-[6px] ${
-              msg.startsWith('Gagal')
-                ? 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]'
-                : 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]'
-            }`}
-          >
-            {msg}
-          </p>
-        )}
       </section>
     </div>
   )

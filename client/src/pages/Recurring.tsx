@@ -2,15 +2,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
+import { ConfirmModal } from '../components/ConfirmModal'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
 import { CategorySymbolIcon, CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
+import { useToast } from '../components/Toast'
 import { formatRp } from '../utils'
 
 export function Recurring() {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
+
   const [showForm, setShowForm] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['recurring'],
     queryFn: () => api.recurring.list(),
@@ -29,11 +35,24 @@ export function Recurring() {
   const toggleMut = useMutation({
     mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
       api.recurring.update(id, { is_active }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['recurring'] }),
+    onSuccess: (data) => {
+      qc.invalidateQueries({ queryKey: ['recurring'] })
+      success(data?.is_active ? 'Tagihan diaktifkan' : 'Tagihan dinonaktifkan')
+    },
+    onError: (err) => toastError((err as Error).message),
   })
+
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.recurring.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['recurring'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['recurring'] })
+      success('Jadwal tagihan rutin berhasil dihapus')
+      setDeletingId(null)
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Menghapus')
+      setDeletingId(null)
+    },
   })
 
   return (
@@ -113,9 +132,7 @@ export function Recurring() {
                 </Button>
                 <Button
                   variant="danger"
-                  onClick={() => {
-                    if (confirm('Hapus tagihan ini?')) deleteMut.mutate(item.id)
-                  }}
+                  onClick={() => setDeletingId(item.id)}
                 >
                   Hapus
                 </Button>
@@ -128,6 +145,18 @@ export function Recurring() {
       {showForm && (
         <RecurringForm categories={categories} pms={pms} onClose={() => setShowForm(false)} />
       )}
+
+      <ConfirmModal
+        isOpen={Boolean(deletingId)}
+        title="Hapus Tagihan Berulang"
+        message="Jadwal tagihan rutin ini akan dihapus permanen. Transaksi yang sudah pernah dibuat tidak akan terhapus."
+        confirmLabel="Hapus Tagihan"
+        onConfirm={() => {
+          if (deletingId) deleteMut.mutate(deletingId)
+        }}
+        onCancel={() => setDeletingId(null)}
+        isLoading={deleteMut.isPending}
+      />
     </div>
   )
 }
@@ -142,6 +171,8 @@ function RecurringForm({
   onClose: () => void
 }) {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
+
   const [form, setForm] = useState({
     type: 'expense',
     category_id: '',
@@ -165,7 +196,11 @@ function RecurringForm({
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['recurring'] })
+      success('Jadwal tagihan rutin berhasil ditambahkan')
       onClose()
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Menyimpan')
     },
   })
 

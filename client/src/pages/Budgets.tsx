@@ -2,15 +2,21 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
+import { ConfirmModal } from '../components/ConfirmModal'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
 import { CategorySymbolIcon, CloseIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
+import { useToast } from '../components/Toast'
 import { formatRp, getPresetDateRange } from '../utils'
 
 export function Budgets() {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
+
   const [showForm, setShowForm] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
+
   const now = new Date()
   const month = now.getMonth() + 1
   const year = now.getFullYear()
@@ -32,7 +38,15 @@ export function Budgets() {
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => api.budgets.remove(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['budgets'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['budgets'] })
+      success('Batas budget berhasil dihapus')
+      setDeletingId(null)
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Menghapus')
+      setDeletingId(null)
+    },
   })
 
   const budgetsWithSpend = budgets.map((b) => {
@@ -97,9 +111,7 @@ export function Budgets() {
                   </span>
                   <Button
                     variant="ghost"
-                    onClick={() => {
-                      if (confirm('Hapus budget ini?')) deleteMut.mutate(b.id)
-                    }}
+                    onClick={() => setDeletingId(b.id)}
                     className="!p-1 text-[var(--color-ink-faint)] hover:text-[var(--color-negative)]"
                   >
                     <CloseIcon size={12} />
@@ -132,6 +144,18 @@ export function Budgets() {
           onClose={() => setShowForm(false)}
         />
       )}
+
+      <ConfirmModal
+        isOpen={Boolean(deletingId)}
+        title="Hapus Limit Budget"
+        message="Batas anggaran untuk kategori ini akan dihapus untuk periode bulan berjalan."
+        confirmLabel="Hapus Budget"
+        onConfirm={() => {
+          if (deletingId) deleteMut.mutate(deletingId)
+        }}
+        onCancel={() => setDeletingId(null)}
+        isLoading={deleteMut.isPending}
+      />
     </div>
   )
 }
@@ -150,6 +174,8 @@ function BudgetForm({
   onClose: () => void
 }) {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
+
   const available = categories.filter((c) => !existingIds.includes(c.id))
   const [form, setForm] = useState({
     category_id: available[0]?.id ?? '',
@@ -167,7 +193,11 @@ function BudgetForm({
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['budgets'] })
+      success('Batas budget berhasil disimpan')
       onClose()
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Menyimpan')
     },
   })
 
