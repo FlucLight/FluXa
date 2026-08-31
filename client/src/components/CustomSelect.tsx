@@ -28,6 +28,7 @@ export function CustomSelect({
   searchable = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [openUpwards, setOpenUpwards] = useState(false)
   const [search, setSearch] = useState('')
   const containerRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
@@ -45,6 +46,16 @@ export function CustomSelect({
       document.addEventListener('mousedown', handleClickOutside)
       if (searchable && searchInputRef.current) {
         setTimeout(() => searchInputRef.current?.focus(), 50)
+      }
+      // Check available space below
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        if (spaceBelow < 240 && rect.top > 240) {
+          setOpenUpwards(true)
+        } else {
+          setOpenUpwards(false)
+        }
       }
     }
     return () => document.removeEventListener('mousedown', handleClickOutside)
@@ -108,7 +119,11 @@ export function CustomSelect({
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-full min-w-[200px] max-h-64 overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[8px] shadow-xl p-1 animate-in fade-in zoom-in-95 duration-100">
+        <div
+          className={`absolute z-[999] w-full min-w-[200px] max-h-60 overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[8px] shadow-2xl p-1 animate-in fade-in zoom-in-95 duration-100 ${
+            openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+          }`}
+        >
           {searchable && (
             <div className="p-1.5 mb-1 border-b border-[var(--color-border)]">
               <input

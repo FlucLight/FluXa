@@ -16,6 +16,7 @@ export function DatePicker({
   className = '',
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [openUpwards, setOpenUpwards] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Parsing date or default to current
@@ -41,6 +42,17 @@ export function DatePicker({
     }
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside)
+      // Check viewport position to decide whether to open upwards
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect()
+        const spaceBelow = window.innerHeight - rect.bottom
+        // Calendar popup height is ~270px
+        if (spaceBelow < 280 && rect.top > 280) {
+          setOpenUpwards(true)
+        } else {
+          setOpenUpwards(false)
+        }
+      }
     }
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [isOpen])
@@ -152,7 +164,11 @@ export function DatePicker({
 
       {/* Calendar Popup */}
       {isOpen && (
-        <div className="absolute z-50 mt-1 w-64 p-3 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-2xl animate-in fade-in zoom-in-95 duration-100">
+        <div
+          className={`absolute z-[999] w-64 p-3 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-2xl animate-in fade-in zoom-in-95 duration-100 ${
+            openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
+          }`}
+        >
           {/* Header Month / Year Navigation */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-[var(--color-border)]">
             <button
@@ -255,7 +271,6 @@ export function DateTimePicker({
   onChange,
   className = '',
 }: DateTimePickerProps) {
-  // Normalize value to date (YYYY-MM-DD) and time (HH:mm)
   const initialDate = value ? value.slice(0, 10) : new Date().toISOString().slice(0, 10)
   const initialTime = value && value.length >= 16 ? value.slice(11, 16) : '12:00'
 

@@ -24,7 +24,7 @@ export function Modal({ title, children, onClose }: Props) {
     >
       <div
         ref={ref}
-        className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] w-full max-w-md shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+        className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] w-full max-w-md shadow-2xl overflow-visible animate-in fade-in zoom-in-95 duration-100"
       >
         <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-border)]">
           <h2 className="font-semibold text-sm text-[var(--color-ink)] font-display">{title}</h2>
