@@ -2,8 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
-import { Field, Input, Select } from '../components/Form'
-import { CategorySymbolIcon } from '../components/Icons'
+import { CustomSelect, type SelectOption } from '../components/CustomSelect'
+import { Field, Input } from '../components/Form'
+import { CategorySymbolIcon, CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { formatRp } from '../utils'
 
@@ -168,35 +169,54 @@ function RecurringForm({
     },
   })
 
+  const typeOptions: SelectOption[] = [
+    { value: 'expense', label: 'Pengeluaran', badge: 'Keluar', badgeColor: 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]' },
+    { value: 'income', label: 'Pemasukan', badge: 'Masuk', badgeColor: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]' },
+  ]
+
+  const categoryOptions: SelectOption[] = filtered.map((c) => ({
+    value: c.id,
+    label: c.name,
+    icon: <CategorySymbolIcon name={c.name} size={14} />,
+  }))
+
+  const pmOptions: SelectOption[] = pms.map((p) => ({
+    value: p.id,
+    label: p.name,
+    icon: <CreditCardIcon size={14} />,
+  }))
+
   return (
     <Modal title="Tambah Tagihan Berulang" onClose={onClose}>
       <form
         className="flex flex-col gap-3.5"
         onSubmit={(e) => {
           e.preventDefault()
+          if (!form.category_id || !form.payment_method_id || !form.description || !form.amount) return
           mut.mutate()
         }}
       >
         <Field label="Tipe">
-          <Select
+          <CustomSelect
             value={form.type}
-            onChange={(e) => {
-              set('type', e.target.value)
+            onChange={(v) => {
+              set('type', v)
               set('category_id', '')
             }}
-          >
-            <option value="expense">Pengeluaran</option>
-            <option value="income">Pemasukan</option>
-          </Select>
+            options={typeOptions}
+          />
         </Field>
+
         <Field label="Nama Tagihan">
           <Input
             required
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
             placeholder="WiFi Indihome, Kost, Netflix..."
+            className="!py-2"
           />
         </Field>
+
         <Field label="Jumlah (Rp)">
           <Input
             type="number"
@@ -205,37 +225,30 @@ function RecurringForm({
             value={form.amount}
             onChange={(e) => set('amount', e.target.value)}
             placeholder="350000"
+            className="!py-2"
           />
         </Field>
+
         <Field label="Kategori">
-          <Select
-            required
+          <CustomSelect
             value={form.category_id}
-            onChange={(e) => set('category_id', e.target.value)}
-          >
-            <option value="">Pilih kategori</option>
-            {filtered.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
+            onChange={(v) => set('category_id', v)}
+            options={categoryOptions}
+            placeholder="Pilih kategori..."
+            searchable
+          />
         </Field>
+
         <Field label="Metode Pembayaran">
-          <Select
-            required
+          <CustomSelect
             value={form.payment_method_id}
-            onChange={(e) => set('payment_method_id', e.target.value)}
-          >
-            <option value="">Pilih metode</option>
-            {pms.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </Select>
+            onChange={(v) => set('payment_method_id', v)}
+            options={pmOptions}
+            placeholder="Pilih metode bayar..."
+          />
         </Field>
-        <Field label="Tanggal Eksekusi (1–28)">
+
+        <Field label="Tanggal Eksekusi Tiap Bulan (1–28)">
           <Input
             type="number"
             min="1"
@@ -243,14 +256,20 @@ function RecurringForm({
             required
             value={form.day_of_month}
             onChange={(e) => set('day_of_month', e.target.value)}
+            className="!py-2"
           />
         </Field>
+
         {mut.isError && <p className="text-[var(--color-negative)] text-xs">{(mut.error as Error).message}</p>}
+
         <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>
-          <Button type="submit" disabled={mut.isPending}>
+          <Button
+            type="submit"
+            disabled={mut.isPending || !form.category_id || !form.payment_method_id || !form.description || !form.amount}
+          >
             {mut.isPending ? 'Menyimpan...' : 'Simpan'}
           </Button>
         </div>

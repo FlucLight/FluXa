@@ -2,7 +2,10 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
-import { Field, Input, Select } from '../components/Form'
+import { CustomSelect, type SelectOption } from '../components/CustomSelect'
+import { DateTimePicker } from '../components/DatePicker'
+import { Field, Input } from '../components/Form'
+import { CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { formatDate, formatRp } from '../utils'
 
@@ -100,7 +103,7 @@ function TransferForm({
   pms,
   onClose,
 }: {
-  pms: Array<{ id: string; name: string }>
+  pms: Array<{ id: string; name: string; type?: string }>
   onClose: () => void
 }) {
   const qc = useQueryClient()
@@ -128,37 +131,54 @@ function TransferForm({
     },
   })
 
+  const fromOptions: SelectOption[] = pms.map((p) => ({
+    value: p.id,
+    label: p.name,
+    icon: <CreditCardIcon size={14} />,
+    badge: p.type,
+  }))
+
+  const toOptions: SelectOption[] = pms
+    .filter((p) => p.id !== form.from)
+    .map((p) => ({
+      value: p.id,
+      label: p.name,
+      icon: <CreditCardIcon size={14} />,
+      badge: p.type,
+    }))
+
   return (
     <Modal title="Catat Transfer Antar Akun" onClose={onClose}>
       <form
         className="flex flex-col gap-3.5"
         onSubmit={(e) => {
           e.preventDefault()
+          if (!form.from || !form.to || !form.amount) return
           mut.mutate()
         }}
       >
         <Field label="Dari Akun (Sumber)">
-          <Select required value={form.from} onChange={(e) => set('from', e.target.value)}>
-            <option value="">Pilih akun asal</option>
-            {pms.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </Select>
+          <CustomSelect
+            value={form.from}
+            onChange={(v) => {
+              set('from', v)
+              if (form.to === v) set('to', '')
+            }}
+            options={fromOptions}
+            placeholder="Pilih akun asal..."
+          />
         </Field>
+
         <Field label="Ke Akun (Tujuan)">
-          <Select required value={form.to} onChange={(e) => set('to', e.target.value)}>
-            <option value="">Pilih akun tujuan</option>
-            {pms
-              .filter((p) => p.id !== form.from)
-              .map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-          </Select>
+          <CustomSelect
+            value={form.to}
+            onChange={(v) => set('to', v)}
+            options={toOptions}
+            placeholder="Pilih akun tujuan..."
+            disabled={!form.from}
+          />
         </Field>
+
         <Field label="Jumlah (Rp)">
           <Input
             type="number"
@@ -167,29 +187,33 @@ function TransferForm({
             value={form.amount}
             onChange={(e) => set('amount', e.target.value)}
             placeholder="50000"
+            className="!py-2"
           />
         </Field>
+
         <Field label="Keterangan">
           <Input
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
             placeholder="mis. Tarik tunai ATM, Top up ShopeePay"
+            className="!py-2"
           />
         </Field>
-        <Field label="Tanggal & Jam">
-          <Input
-            type="datetime-local"
-            required
+
+        <Field label="Tanggal & Waktu">
+          <DateTimePicker
             value={form.occurred_at}
-            onChange={(e) => set('occurred_at', e.target.value)}
+            onChange={(v) => set('occurred_at', v)}
           />
         </Field>
+
         {mut.isError && <p className="text-[var(--color-negative)] text-xs">{(mut.error as Error).message}</p>}
+
         <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>
-          <Button type="submit" disabled={mut.isPending}>
+          <Button type="submit" disabled={mut.isPending || !form.from || !form.to || !form.amount}>
             {mut.isPending ? 'Menyimpan...' : 'Simpan'}
           </Button>
         </div>

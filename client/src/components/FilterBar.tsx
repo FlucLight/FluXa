@@ -1,5 +1,7 @@
-import { CalendarIcon, CloseIcon } from './Icons'
-import { Input, Select } from './Form'
+import { CustomSelect, type SelectOption } from './CustomSelect'
+import { DatePicker } from './DatePicker'
+import { CalendarIcon, CategorySymbolIcon, CloseIcon, CreditCardIcon } from './Icons'
+import { Input } from './Form'
 import { PRESET_OPTIONS, type PeriodPreset } from '../utils'
 
 interface CategoryItem {
@@ -12,6 +14,7 @@ interface CategoryItem {
 interface PaymentMethodItem {
   id: string
   name: string
+  type?: string
 }
 
 interface FilterBarProps {
@@ -66,6 +69,49 @@ export function FilterBar({
     Boolean(customFrom) ||
     Boolean(customTo)
 
+  // Opsi Tipe Transaksi
+  const typeOptions: SelectOption[] = [
+    { value: '', label: 'Semua Tipe' },
+    {
+      value: 'expense',
+      label: 'Pengeluaran',
+      badge: 'Keluar',
+      badgeColor: 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]',
+    },
+    {
+      value: 'income',
+      label: 'Pemasukan',
+      badge: 'Masuk',
+      badgeColor: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]',
+    },
+  ]
+
+  // Opsi Kategori dengan icon vector & badge
+  const categoryOptions: SelectOption[] = [
+    { value: '', label: 'Semua Kategori' },
+    ...categories.map((c) => ({
+      value: c.id,
+      label: c.name,
+      icon: <CategorySymbolIcon name={c.name} size={13} />,
+      badge: c.type === 'expense' ? 'Keluar' : 'Masuk',
+      badgeColor:
+        c.type === 'expense'
+          ? 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]'
+          : 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]',
+    })),
+  ]
+
+  // Opsi Metode Pembayaran dengan icon kartu
+  const pmOptions: SelectOption[] = [
+    { value: '', label: 'Semua Metode' },
+    ...paymentMethods.map((pm) => ({
+      value: pm.id,
+      label: pm.name,
+      icon: <CreditCardIcon size={13} />,
+      badge: pm.type,
+    })),
+  ]
+
   return (
     <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-xs">
       {/* Baris 1: Quick Preset Chips */}
@@ -83,9 +129,9 @@ export function FilterBar({
                 key={p}
                 type="button"
                 onClick={() => onPresetChange(p)}
-                className={`text-xs px-2.5 py-1 rounded-[6px] font-medium transition-colors cursor-pointer ${
+                className={`text-xs px-2.5 py-1.5 rounded-[6px] font-medium transition-colors cursor-pointer ${
                   isActive
-                    ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs'
+                    ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs font-semibold'
                     : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-ink)]'
                 }`}
               >
@@ -96,9 +142,9 @@ export function FilterBar({
           <button
             type="button"
             onClick={() => onPresetChange('custom')}
-            className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-[6px] font-medium transition-colors cursor-pointer ${
+            className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-[6px] font-medium transition-colors cursor-pointer ${
               preset === 'custom'
-                ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs'
+                ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs font-semibold'
                 : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-ink)]'
             }`}
           >
@@ -111,7 +157,7 @@ export function FilterBar({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-1 text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-negative)] transition-colors cursor-pointer font-medium"
+            className="inline-flex items-center gap-1 text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-negative)] transition-colors cursor-pointer font-medium px-2 py-1 rounded-[4px] hover:bg-[var(--color-surface-sunken)]"
           >
             <CloseIcon size={10} />
             <span>Reset Filter</span>
@@ -119,42 +165,41 @@ export function FilterBar({
         )}
       </div>
 
-      {/* Baris 2: Kustom Tanggal */}
+      {/* Baris 2: Custom Date Picker Popups */}
       {preset === 'custom' && (
-        <div className="flex items-center gap-2.5 p-2.5 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[6px] flex-wrap">
-          <span className="text-xs text-[var(--color-ink-muted)] font-medium">Rentang Tanggal:</span>
-          <Input
-            type="date"
-            value={customFrom}
-            onChange={(e) => onCustomFromChange?.(e.target.value)}
-            className="w-36 !bg-[var(--color-surface-raised)]"
-          />
+        <div className="flex items-center gap-3 p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] flex-wrap animate-in fade-in duration-100">
+          <span className="text-xs text-[var(--color-ink-muted)] font-medium">Rentang:</span>
+          <div className="w-44">
+            <DatePicker
+              value={customFrom}
+              onChange={(v) => onCustomFromChange?.(v)}
+              placeholder="Dari tanggal"
+            />
+          </div>
           <span className="text-xs text-[var(--color-ink-faint)]">sampai</span>
-          <Input
-            type="date"
-            value={customTo}
-            onChange={(e) => onCustomToChange?.(e.target.value)}
-            className="w-36 !bg-[var(--color-surface-raised)]"
-          />
+          <div className="w-44">
+            <DatePicker
+              value={customTo}
+              onChange={(v) => onCustomToChange?.(v)}
+              placeholder="Sampai tanggal"
+            />
+          </div>
         </div>
       )}
 
-      {/* Baris 3: Dropdowns */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-[var(--color-border)]">
+      {/* Baris 3: Dropdowns Elegan & Search Input */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-[var(--color-border)]">
         {onTypeFilterChange && (
           <div>
             <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
               Tipe Transaksi
             </label>
-            <Select
+            <CustomSelect
               value={typeFilter}
-              onChange={(e) => onTypeFilterChange(e.target.value)}
-              className="!bg-[var(--color-surface-sunken)]"
-            >
-              <option value="">Semua Tipe</option>
-              <option value="expense">Pengeluaran</option>
-              <option value="income">Pemasukan</option>
-            </Select>
+              onChange={onTypeFilterChange}
+              options={typeOptions}
+              placeholder="Semua Tipe"
+            />
           </div>
         )}
 
@@ -163,18 +208,13 @@ export function FilterBar({
             <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
               Kategori
             </label>
-            <Select
+            <CustomSelect
               value={selectedCategory}
-              onChange={(e) => onCategoryChange(e.target.value)}
-              className="!bg-[var(--color-surface-sunken)]"
-            >
-              <option value="">Semua Kategori</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.type === 'expense' ? 'Keluar' : 'Masuk'})
-                </option>
-              ))}
-            </Select>
+              onChange={onCategoryChange}
+              options={categoryOptions}
+              placeholder="Semua Kategori"
+              searchable
+            />
           </div>
         )}
 
@@ -183,18 +223,13 @@ export function FilterBar({
             <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
               Metode / Akun
             </label>
-            <Select
+            <CustomSelect
               value={selectedPm}
-              onChange={(e) => onPmChange(e.target.value)}
-              className="!bg-[var(--color-surface-sunken)]"
-            >
-              <option value="">Semua Metode</option>
-              {paymentMethods.map((pm) => (
-                <option key={pm.id} value={pm.id}>
-                  {pm.name}
-                </option>
-              ))}
-            </Select>
+              onChange={onPmChange}
+              options={pmOptions}
+              placeholder="Semua Metode"
+              searchable
+            />
           </div>
         )}
 
@@ -208,7 +243,7 @@ export function FilterBar({
               placeholder="Cari deskripsi..."
               value={search ?? ''}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="!bg-[var(--color-surface-sunken)]"
+              className="!py-2"
             />
           </div>
         )}

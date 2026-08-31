@@ -3,7 +3,10 @@ import { useState } from 'react'
 import type { TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from './Button'
-import { Field, Input, Select, Textarea } from './Form'
+import { CustomSelect, type SelectOption } from './CustomSelect'
+import { DateTimePicker } from './DatePicker'
+import { Field, Input, Textarea } from './Form'
+import { CategorySymbolIcon, CreditCardIcon } from './Icons'
 import { Modal } from './Modal'
 
 type Props = { existing?: TransactionRecord; onClose: () => void }
@@ -54,7 +57,34 @@ export function TransactionForm({ existing, onClose }: Props) {
     },
   })
 
+  const typeOptions: SelectOption[] = [
+    {
+      value: 'expense',
+      label: 'Pengeluaran (Expense)',
+      badge: 'Keluar',
+      badgeColor: 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]',
+    },
+    {
+      value: 'income',
+      label: 'Pemasukan (Income)',
+      badge: 'Masuk',
+      badgeColor: 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]',
+    },
+  ]
+
   const filteredCategories = categories.filter((c) => c.type === form.type)
+  const categoryOptions: SelectOption[] = filteredCategories.map((c) => ({
+    value: c.id,
+    label: c.name,
+    icon: <CategorySymbolIcon name={c.name} size={14} />,
+  }))
+
+  const pmOptions: SelectOption[] = paymentMethods.map((p) => ({
+    value: p.id,
+    label: p.name,
+    icon: <CreditCardIcon size={14} />,
+    badge: p.type,
+  }))
 
   return (
     <Modal title={existing ? 'Edit Transaksi' : 'Tambah Transaksi'} onClose={onClose}>
@@ -62,21 +92,21 @@ export function TransactionForm({ existing, onClose }: Props) {
         className="flex flex-col gap-3.5"
         onSubmit={(e) => {
           e.preventDefault()
+          if (!form.category_id || !form.payment_method_id || !form.amount) return
           mutation.mutate()
         }}
       >
-        <Field label="Tipe">
-          <Select
+        <Field label="Tipe Transaksi">
+          <CustomSelect
             value={form.type}
-            onChange={(e) => {
-              set('type', e.target.value)
+            onChange={(v) => {
+              set('type', v)
               set('category_id', '')
             }}
-          >
-            <option value="expense">Pengeluaran (Expense)</option>
-            <option value="income">Pemasukan (Income)</option>
-          </Select>
+            options={typeOptions}
+          />
         </Field>
+
         <Field label="Jumlah (Rp)">
           <Input
             type="number"
@@ -86,60 +116,57 @@ export function TransactionForm({ existing, onClose }: Props) {
             value={form.amount}
             onChange={(e) => set('amount', e.target.value)}
             placeholder="15000"
+            className="!py-2"
           />
         </Field>
+
         <Field label="Kategori">
-          <Select
-            required
+          <CustomSelect
             value={form.category_id}
-            onChange={(e) => set('category_id', e.target.value)}
-          >
-            <option value="">Pilih kategori</option>
-            {filteredCategories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
+            onChange={(v) => set('category_id', v)}
+            options={categoryOptions}
+            placeholder="Pilih kategori..."
+            searchable
+          />
         </Field>
-        <Field label="Sumber / Metode Bayar">
-          <Select
-            required
+
+        <Field label="Sumber / Metode Pembayaran">
+          <CustomSelect
             value={form.payment_method_id}
-            onChange={(e) => set('payment_method_id', e.target.value)}
-          >
-            <option value="">Pilih metode</option>
-            {paymentMethods.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </Select>
+            onChange={(v) => set('payment_method_id', v)}
+            options={pmOptions}
+            placeholder="Pilih metode bayar..."
+          />
         </Field>
+
         <Field label="Keterangan">
           <Textarea
             rows={2}
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
-            placeholder="Opsional (mis. Nasi padang siang)"
+            placeholder="Opsional (mis. Nasi padang siang, Belanja mingguan)"
           />
         </Field>
-        <Field label="Tanggal & Jam">
-          <Input
-            type="datetime-local"
-            required
+
+        <Field label="Tanggal & Waktu">
+          <DateTimePicker
             value={form.occurred_at}
-            onChange={(e) => set('occurred_at', e.target.value)}
+            onChange={(v) => set('occurred_at', v)}
           />
         </Field>
+
         {mutation.isError && (
           <p className="text-[var(--color-negative)] text-xs">{(mutation.error as Error).message}</p>
         )}
+
         <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>
-          <Button type="submit" disabled={mutation.isPending}>
+          <Button
+            type="submit"
+            disabled={mutation.isPending || !form.category_id || !form.payment_method_id || !form.amount}
+          >
             {mutation.isPending ? 'Menyimpan...' : 'Simpan'}
           </Button>
         </div>

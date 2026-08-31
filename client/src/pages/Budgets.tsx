@@ -2,7 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
-import { Field, Input, Select } from '../components/Form'
+import { CustomSelect, type SelectOption } from '../components/CustomSelect'
+import { Field, Input } from '../components/Form'
 import { CategorySymbolIcon, CloseIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { formatRp, getPresetDateRange } from '../utils'
@@ -64,7 +65,7 @@ export function Budgets() {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {budgetsWithSpend.map((b) => {
           const cat = catMap[b.category_id]
           const isOver = b.pct >= 100
@@ -170,28 +171,31 @@ function BudgetForm({
     },
   })
 
+  const categoryOptions: SelectOption[] = available.map((c) => ({
+    value: c.id,
+    label: c.name,
+    icon: <CategorySymbolIcon name={c.name} size={14} />,
+  }))
+
   return (
     <Modal title="Set Limit Budget Kategori" onClose={onClose}>
       <form
         className="flex flex-col gap-3.5"
         onSubmit={(e) => {
           e.preventDefault()
+          if (!form.category_id || !form.limit_amount) return
           mut.mutate()
         }}
       >
         <Field label="Kategori Pengeluaran">
-          <Select
-            required
+          <CustomSelect
             value={form.category_id}
-            onChange={(e) => set('category_id', e.target.value)}
-          >
-            {available.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </Select>
+            onChange={(v) => set('category_id', v)}
+            options={categoryOptions}
+            placeholder="Pilih kategori..."
+          />
         </Field>
+
         <Field label="Batas Maksimal Bulanan (Rp)">
           <Input
             type="number"
@@ -200,14 +204,17 @@ function BudgetForm({
             value={form.limit_amount}
             onChange={(e) => set('limit_amount', e.target.value)}
             placeholder="500000"
+            className="!py-2"
           />
         </Field>
+
         {mut.isError && <p className="text-[var(--color-negative)] text-xs">{(mut.error as Error).message}</p>}
+
         <div className="flex justify-end gap-2 pt-2 border-t border-[var(--color-border)]">
           <Button variant="secondary" onClick={onClose}>
             Batal
           </Button>
-          <Button type="submit" disabled={mut.isPending || available.length === 0}>
+          <Button type="submit" disabled={mut.isPending || !form.category_id || !form.limit_amount}>
             {mut.isPending ? 'Menyimpan...' : 'Simpan'}
           </Button>
         </div>
