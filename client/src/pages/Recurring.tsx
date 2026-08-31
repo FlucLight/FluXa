@@ -7,7 +7,7 @@ import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
 import { CategorySymbolIcon, CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
-import { useToast } from '../components/Toast'
+import { useToast } from '../components/useToast'
 import { formatRp } from '../utils'
 
 export function Recurring() {
@@ -56,7 +56,7 @@ export function Recurring() {
   })
 
   return (
-    <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl">
+    <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Tagihan Berulang</h1>

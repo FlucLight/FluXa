@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
-import { useToast } from '../components/Toast'
+import { useToast } from '../components/useToast'
 
 export function Export() {
   const qc = useQueryClient()
@@ -43,7 +43,7 @@ export function Export() {
   }
 
   return (
-    <div className="p-8 flex flex-col gap-6 max-w-2xl">
+    <div className="p-8 flex flex-col gap-6 max-w-2xl animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Export & Backup</h1>
         <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">

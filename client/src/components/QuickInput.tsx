@@ -49,7 +49,7 @@ export function QuickInput() {
   }
 
   return (
-    <div className="border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-6 py-2.5 flex flex-col gap-2">
+    <div className="relative z-20 shrink-0 border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-6 py-2.5 flex flex-col gap-2">
       <div className="flex gap-2 items-center">
         <span className="text-[var(--color-ink-faint)] flex items-center gap-1 text-[11px] font-mono shrink-0 uppercase tracking-wider">
           <ZapIcon size={12} />

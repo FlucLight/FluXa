@@ -4,7 +4,7 @@ import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { CategorySymbolIcon } from '../components/Icons'
-import { useToast } from '../components/Toast'
+import { useToast } from '../components/useToast'
 import { formatDate, formatRp } from '../utils'
 
 export function RecentlyDeleted() {
@@ -37,7 +37,7 @@ export function RecentlyDeleted() {
   })
 
   return (
-    <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl">
+    <div className="p-8 flex flex-col gap-5 flex-1 max-w-5xl animate-fade-in">
       <div>
         <h1 className="text-2xl font-bold text-[var(--color-ink)] tracking-tight">Transaksi Terhapus</h1>
         <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">

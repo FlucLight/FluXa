@@ -25,16 +25,6 @@ export function DatePicker({
   const [viewMonth, setViewMonth] = useState(parsedDate.getMonth()) // 0-indexed
 
   useEffect(() => {
-    if (value) {
-      const d = new Date(value + 'T00:00:00')
-      if (!isNaN(d.getTime())) {
-        setViewYear(d.getFullYear())
-        setViewMonth(d.getMonth())
-      }
-    }
-  }, [value])
-
-  useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         setIsOpen(false)
@@ -165,7 +155,7 @@ export function DatePicker({
       {/* Calendar Popup */}
       {isOpen && (
         <div
-          className={`absolute z-[999] w-64 p-3 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-2xl animate-in fade-in zoom-in-95 duration-100 ${
+          className={`absolute z-[999] w-64 p-3 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-2xl animate-dropdown-in ${
             openUpwards ? 'bottom-full mb-1.5' : 'top-full mt-1.5'
           }`}
         >
@@ -271,33 +261,18 @@ export function DateTimePicker({
   onChange,
   className = '',
 }: DateTimePickerProps) {
-  const initialDate = value ? value.slice(0, 10) : new Date().toISOString().slice(0, 10)
-  const initialTime = value && value.length >= 16 ? value.slice(11, 16) : '12:00'
-
-  const [datePart, setDatePart] = useState(initialDate)
-  const [timePart, setTimePart] = useState(initialTime)
-
-  useEffect(() => {
-    if (value) {
-      setDatePart(value.slice(0, 10))
-      if (value.length >= 16) {
-        setTimePart(value.slice(11, 16))
-      }
-    }
-  }, [value])
+  const datePart = value ? value.slice(0, 10) : new Date().toISOString().slice(0, 10)
+  const timePart = value && value.length >= 16 ? value.slice(11, 16) : '12:00'
 
   const handleDateChange = (newDate: string) => {
-    setDatePart(newDate)
     if (newDate) {
       onChange(`${newDate}T${timePart}`)
     }
   }
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = e.target.value
-    setTimePart(newTime)
     if (datePart) {
-      onChange(`${datePart}T${newTime}`)
+      onChange(`${datePart}T${e.target.value}`)
     }
   }
 
