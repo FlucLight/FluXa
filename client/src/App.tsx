@@ -26,7 +26,7 @@ function MobileLogo() {
   const { photoSrc } = useProfile()
   return (
     <div className="flex items-center gap-2.5">
-      <div className="flex h-6 w-6 overflow-hidden rounded-[5px]">
+      <div className="h-9 w-9 overflow-hidden rounded-full">
         <img src={photoSrc} alt="FluXa" className="h-full w-full object-cover" />
       </div>
       <span className="font-display text-base font-bold tracking-tight text-[var(--color-ink)]">
