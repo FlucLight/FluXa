@@ -185,6 +185,11 @@ export const api = {
       if (!res.ok) throw new Error('Gagal mengunduh CSV')
       return res.blob()
     },
+    xlsx: async () => {
+      const res = await fetch('/api/export/xlsx')
+      if (!res.ok) throw new Error('Gagal mengunduh Excel')
+      return res.blob()
+    },
     json: async () => {
       const res = await fetch('/api/export/json')
       if (!res.ok) throw new Error('Gagal mengunduh JSON')

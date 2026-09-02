@@ -1,4 +1,5 @@
 import type { Request, Response } from 'express'
+import { Workbook } from 'exceljs'
 import { pool } from '../config/db'
 import * as categoryRepo from '../repositories/categories'
 import * as pmRepo from '../repositories/paymentMethods'
@@ -56,6 +57,53 @@ export async function exportCsv(req: Request, res: Response): Promise<void> {
   res.setHeader('Content-Type', 'text/csv; charset=utf-8')
   res.setHeader('Content-Disposition', 'attachment; filename="transaksi.csv"')
   res.send('\uFEFF' + [header.join(','), ...rows].join('\r\n'))
+}
+
+export async function exportXlsx(req: Request, res: Response): Promise<void> {
+  const { from, to } = req.query as Record<string, string | undefined>
+  const txs = await txRepo.findAll({ from, to, category_id: undefined, payment_method_id: undefined, type: undefined, deleted: false, search: undefined, sort: undefined, limit: undefined, offset: undefined })
+  const categories = await categoryRepo.findAll()
+  const pms = await pmRepo.findAll()
+  const catMap = Object.fromEntries(categories.map(c => [c.id, c.name]))
+  const pmMap = Object.fromEntries(pms.map(p => [p.id, p.name]))
+
+  const workbook = new Workbook()
+  workbook.creator = 'FluXa'
+  workbook.created = new Date()
+  const sheet = workbook.addWorksheet('Transaksi')
+
+  sheet.columns = [
+    { header: 'Tanggal', key: 'tanggal', width: 20 },
+    { header: 'Tipe', key: 'tipe', width: 14 },
+    { header: 'Jumlah', key: 'jumlah', width: 16 },
+    { header: 'Kategori', key: 'kategori', width: 16 },
+    { header: 'Metode', key: 'metode', width: 14 },
+    { header: 'Keterangan', key: 'keterangan', width: 32 },
+    { header: 'Sumber', key: 'sumber', width: 14 },
+  ]
+
+  sheet.getRow(1).font = { bold: true }
+  sheet.getRow(1).alignment = { vertical: 'middle' }
+
+  for (const t of txs.slice().sort((a, b) => new Date(a.occurred_at).getTime() - new Date(b.occurred_at).getTime())) {
+    sheet.addRow({
+      tanggal: new Date(t.occurred_at),
+      tipe: t.type === 'expense' ? 'Pengeluaran' : 'Pemasukan',
+      jumlah: Number(t.amount),
+      kategori: catMap[t.category_id] ?? '',
+      metode: pmMap[t.payment_method_id] ?? '',
+      keterangan: t.description ?? '',
+      sumber: t.source,
+    })
+  }
+
+  sheet.getColumn('tanggal').numFmt = 'dd/mm/yyyy hh:mm'
+  sheet.getColumn('jumlah').numFmt = '#,##0'
+
+  const buffer = await workbook.xlsx.writeBuffer()
+  res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+  res.setHeader('Content-Disposition', 'attachment; filename="transaksi.xlsx"')
+  res.send(Buffer.from(buffer))
 }
 
 export async function exportJson(req: Request, res: Response): Promise<void> {

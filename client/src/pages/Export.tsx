@@ -9,9 +9,9 @@ function pad(n: number): string {
   return String(n).padStart(2, '0')
 }
 
-function transactionFileName(): string {
+function transactionFileName(ext: 'csv' | 'xlsx'): string {
   const { year, month, day } = getWitaDateParts()
-  return `transaksi (${pad(day)}-${pad(month)}-${year}).csv`
+  return `transaksi (${pad(day)}-${pad(month)}-${year}).${ext}`
 }
 
 export function Export() {
@@ -79,13 +79,36 @@ export function Export() {
               onClick={() => {
                 api.export.csv()
                   .then((b) => {
-                    download(b, transactionFileName())
+                    download(b, transactionFileName('csv'))
                     success('File CSV transaksi berhasil diunduh')
                   })
                   .catch((err) => toastError((err as Error).message, 'Gagal Download'))
               }}
             >
               Download CSV
+            </Button>
+          </div>
+
+          <div className="flex flex-col items-start gap-3 py-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold text-[var(--color-ink)]">Spreadsheet Excel (XLSX)</p>
+              <p className="text-[11px] text-[var(--color-ink-faint)]">
+                Daftar semua transaksi aktif dengan kolom rapi, mudah dibaca di Excel/Sheets
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              className="w-full sm:w-auto"
+              onClick={() => {
+                api.export.xlsx()
+                  .then((b) => {
+                    download(b, transactionFileName('xlsx'))
+                    success('File Excel transaksi berhasil diunduh')
+                  })
+                  .catch((err) => toastError((err as Error).message, 'Gagal Download'))
+              }}
+            >
+              Download Excel
             </Button>
           </div>
 
