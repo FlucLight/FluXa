@@ -661,10 +661,13 @@ POST   /export/json
 
 <br>
 
-### Dibuat dengan semangat oleh [Rahmat Alfarizi](https://github.com/FlucLight)
+### Dibuat oleh [Rahmat Alfarizi](https://github.com/FlucLight) Untuk keperluan pribadi
 
 <br>
 
+<a href="https://github.com/FlucLight" target="_blank">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white&labelColor=1B1C1F" alt="GitHub">
+</a>
 <a href="https://wa.me/6287721685155" target="_blank">
   <img src="https://img.shields.io/badge/WhatsApp-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&labelColor=1B1C1F" alt="WhatsApp">
 </a>

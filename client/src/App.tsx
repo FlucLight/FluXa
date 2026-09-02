@@ -70,8 +70,8 @@ export default function App() {
                     <Route path="/deleted" element={<RecentlyDeleted />} />
                   </Routes>
                   </Suspense>
+                  <Footer />
                 </main>
-                <Footer />
               </div>
             </div>
           </BrowserRouter>
