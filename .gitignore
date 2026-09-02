@@ -27,7 +27,3 @@ coverage/
 !.vscode/extensions.json
 .idea
 .DS_Store
-
-
-finance-tracker.prd.md
-finance-tracker-design.prd.md

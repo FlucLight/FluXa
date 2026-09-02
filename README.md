@@ -56,16 +56,14 @@ Semua nominal, metode pembayaran, kategori, tanggal, dan keterangan dibaca otoma
 
 <br>
 
-<!--
 ## Tampilan
 
 <div align="center">
 <img src="docs/screenshot-dashboard.png" width="800" alt="Dashboard FluXa">
-<p><i>Dashboard — ringkasan bulanan, tren, dan saldo per akun</i></p>
+<p><i>Dashboard — pengeluaran per kategori, saldo per akun, dan status budget bulanan</i></p>
 </div>
 
-> Tambahkan screenshot dashboard, halaman transaksi, dan bot Telegram di sini untuk menunjukkan tampilan aslinya.
--->
+<!-- Tambahkan screenshot halaman Transaksi dan bot Telegram juga kalau ada, biar makin lengkap. -->
 
 ## Fitur Unggulan
 
