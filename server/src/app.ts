@@ -13,6 +13,8 @@ import budgetsRouter from './routes/budgets'
 import recurringRouter from './routes/recurring'
 import exportRouter from './routes/export'
 import summaryRouter from './routes/summary'
+import profileRouter from './routes/profile'
+import path from 'node:path'
 import { runDue } from './repositories/recurring'
 import { backupIntervalMs, createBackup } from './services/backup'
 
@@ -43,6 +45,8 @@ app.use('/api', rateLimit({
 
 app.use(express.json({ limit: '10mb' }))
 
+app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
+
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() })
 })
@@ -55,6 +59,7 @@ app.use('/api/budgets', budgetsRouter)
 app.use('/api/recurring-transactions', recurringRouter)
 app.use('/api/export', exportRouter)
 app.use('/api/summary', summaryRouter)
+app.use('/api/profile', profileRouter)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

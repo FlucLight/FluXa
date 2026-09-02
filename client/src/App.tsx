@@ -8,6 +8,8 @@ import { Sidebar } from './components/Sidebar'
 import { MenuIcon } from './components/Icons'
 import { ThemeProvider } from './components/ThemeContext'
 import { ToastProvider } from './components/Toast'
+import { ProfileProvider } from './components/ProfileContext'
+import { useProfile } from './components/profile-context'
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })))
 const Accounts = lazy(() => import('./pages/Accounts').then((m) => ({ default: m.Accounts })))
@@ -20,27 +22,35 @@ const RecentlyDeleted = lazy(() => import('./pages/RecentlyDeleted').then((m) =>
 
 const qc = new QueryClient({ defaultOptions: { queries: { staleTime: 30_000 } } })
 
+function MobileLogo() {
+  const { photoSrc } = useProfile()
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="flex h-6 w-6 overflow-hidden rounded-[5px]">
+        <img src={photoSrc} alt="FluXa" className="h-full w-full object-cover" />
+      </div>
+      <span className="font-display text-base font-bold tracking-tight text-[var(--color-ink)]">
+        FluXa
+      </span>
+    </div>
+  )
+}
+
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
     <ThemeProvider>
       <ToastProvider>
-        <QueryClientProvider client={qc}>
-          <ErrorBoundary>
-            <BrowserRouter>
+        <ProfileProvider>
+          <QueryClientProvider client={qc}>
+            <ErrorBoundary>
+              <BrowserRouter>
             <div className="flex h-screen h-[100dvh] min-w-0 overflow-hidden bg-[var(--color-surface)] text-[var(--color-ink)]">
               <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
               <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                 <header className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 md:hidden">
-                  <div className="flex items-center gap-2.5">
-                    <div className="flex h-6 w-6 overflow-hidden rounded-[5px]">
-                      <img src="/elaina_profil.jpg" alt="FluXa" className="h-full w-full object-cover" />
-                    </div>
-                    <span className="font-display text-base font-bold tracking-tight text-[var(--color-ink)]">
-                      FluXa
-                    </span>
-                  </div>
+                  <MobileLogo />
                   <button
                     type="button"
                     onClick={() => setSidebarOpen(true)}
@@ -78,8 +88,9 @@ export default function App() {
             </div>
           </BrowserRouter>
           </ErrorBoundary>
-        </QueryClientProvider>
-      </ToastProvider>
+          </QueryClientProvider>
+          </ProfileProvider>
+        </ToastProvider>
     </ThemeProvider>
   )
 }

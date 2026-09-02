@@ -13,6 +13,9 @@ dist-ssr/
 # Local backups
 backups/
 
+# Uploaded files
+server/uploads/
+
 # Logs
 *.log
 npm-debug.log*

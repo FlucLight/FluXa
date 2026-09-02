@@ -198,6 +198,19 @@ export const api = {
     importJson: (data: unknown) =>
       req<{ ok: boolean; imported: Record<string, number> }>('/export/json', { method: 'POST', body: JSON.stringify(data) }),
   },
+
+  profile: {
+    upload: async (file: File) => {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/profile/photo', { method: 'POST', body: fd })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error((body as { error?: string }).error ?? 'Gagal mengunggah foto profil')
+      }
+      return res.json() as Promise<{ url: string; message: string }>
+    },
+  },
 }
 
 export interface ParseResult {

@@ -11,6 +11,7 @@ import {
   TrashIcon,
 } from './Icons'
 import { ThemeToggle } from './ThemeToggle'
+import { AvatarEditor } from './AvatarEditor'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: DashboardIcon },
@@ -47,9 +48,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         <div className="flex flex-col gap-1">
           <div className="relative px-3 py-5 mb-2 flex flex-col items-center gap-2">
-            <div className="h-16 w-16 overflow-hidden rounded-full">
-              <img src="/elaina_profil.jpg" alt="FluXa" className="h-full w-full object-cover" />
-            </div>
+            <AvatarEditor />
             <span className="text-[var(--color-ink)] font-bold text-base font-display tracking-tight">
               FluXa
             </span>
