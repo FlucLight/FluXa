@@ -46,20 +46,18 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         }`}
       >
         <div className="flex flex-col gap-1">
-          <div className="px-3 py-3 mb-2 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="h-6 w-6 overflow-hidden rounded-[5px]">
-                <img src="/elaina_profil.jpg" alt="FluXa" className="h-full w-full object-cover" />
-              </div>
-              <span className="text-[var(--color-ink)] font-bold text-base font-display tracking-tight">
-                FluXa
-              </span>
+          <div className="relative px-3 py-5 mb-2 flex flex-col items-center gap-2">
+            <div className="h-16 w-16 overflow-hidden rounded-full">
+              <img src="/elaina_profil.jpg" alt="FluXa" className="h-full w-full object-cover" />
             </div>
+            <span className="text-[var(--color-ink)] font-bold text-base font-display tracking-tight">
+              FluXa
+            </span>
             <button
               type="button"
               onClick={onClose}
               aria-label="Tutup menu navigasi"
-              className="p-1.5 rounded-[5px] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-sunken)] md:hidden cursor-pointer"
+              className="absolute right-2 top-3 p-1.5 rounded-[5px] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-sunken)] md:hidden cursor-pointer"
             >
               <CloseIcon size={16} />
             </button>
