@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
-import { CategorySymbolIcon } from '../components/Icons'
+import { CategoryIcon } from '../components/CategoryIcon'
 import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { useToast } from '../components/useToast'
@@ -102,7 +102,7 @@ export function RecentlyDeleted() {
                     <td className="px-4 py-3 text-[var(--color-ink-muted)]">
                       {cat ? (
                         <span className="inline-flex items-center gap-1.5 bg-[var(--color-surface-sunken)] text-[var(--color-ink)] px-2 py-0.5 rounded-[4px]">
-                          <CategorySymbolIcon name={cat.name} size={12} className="text-[var(--color-ink-muted)]" />
+                          <CategoryIcon name={cat.name} size={12} />
                           <span>{cat.name}</span>
                         </span>
                       ) : (

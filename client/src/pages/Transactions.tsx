@@ -6,7 +6,7 @@ import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
-import { CategorySymbolIcon } from '../components/Icons'
+import { CategoryIcon } from '../components/CategoryIcon'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { useToast } from '../components/useToast'
 import { TransactionForm } from '../components/TransactionForm'
@@ -451,7 +451,7 @@ export function Transactions() {
                     <td className="px-4 py-3 text-[var(--color-ink-muted)]">
                       {cat ? (
                         <span className="inline-flex items-center gap-1.5 bg-[var(--color-surface-sunken)] text-[var(--color-ink)] px-2 py-0.5 rounded-[4px]">
-                          <CategorySymbolIcon name={cat.name} size={12} className="text-[var(--color-ink-muted)]" />
+                          <CategoryIcon name={cat.name} size={12} />
                           <span>{cat.name}</span>
                         </span>
                       ) : (

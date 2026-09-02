@@ -6,7 +6,8 @@ import { Button } from './Button'
 import { CustomSelect, type SelectOption } from './CustomSelect'
 import { DateTimePicker } from './DatePicker'
 import { Field, Input, Textarea } from './Form'
-import { CategorySymbolIcon, CreditCardIcon } from './Icons'
+import { CategoryIcon } from './CategoryIcon'
+import { CreditCardIcon } from './Icons'
 import { Modal } from './Modal'
 import { fromLocalDateTimeInput, toLocalDateTimeInput } from '../utils'
 
@@ -78,7 +79,7 @@ export function TransactionForm({ existing, onClose }: Props) {
   const categoryOptions: SelectOption[] = filteredCategories.map((c) => ({
     value: c.id,
     label: c.name,
-    icon: <CategorySymbolIcon name={c.name} size={14} />,
+    icon: <CategoryIcon name={c.name} size={14} />,
   }))
 
   const pmOptions: SelectOption[] = paymentMethods.map((p) => ({

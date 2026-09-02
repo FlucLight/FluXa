@@ -172,3 +172,57 @@ export const SORT_OPTIONS: Array<{ value: SortOrder | ''; label: string }> = [
   { value: 'most', label: 'Terbanyak → Tersedikit' },
   { value: 'least', label: 'Tersedikit → Terbanyak' },
 ]
+
+const CATEGORY_PALETTE_LIGHT: Array<[string, string[]]> = [
+  ['#B23A3A', ['makan', 'food', 'kuliner', 'snack']],
+  ['#2E7D5B', ['transport', 'bensin', 'ojek', 'bbm']],
+  ['#8A6D1F', ['belanja', 'toko', 'supermarket', 'minimarket']],
+  ['#9A4D2E', ['tagihan', 'listrik', 'wifi', 'pulsa', 'pdam', 'internet']],
+  ['#5B4FA3', ['gaji', 'bonus', 'pendapatan', 'bisnis']],
+  ['#1F6F8B', ['hiburan', 'game', 'nonton', 'film']],
+  ['#6B7A14', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
+  ['#A34F6B', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
+]
+
+const CATEGORY_PALETTE_DARK: Array<[string, string[]]> = [
+  ['#F87171', ['makan', 'food', 'kuliner', 'snack']],
+  ['#4ADE80', ['transport', 'bensin', 'ojek', 'bbm']],
+  ['#FACC15', ['belanja', 'toko', 'supermarket', 'minimarket']],
+  ['#FB923C', ['tagihan', 'listrik', 'wifi', 'pulsa', 'pdam', 'internet']],
+  ['#A78BFA', ['gaji', 'bonus', 'pendapatan', 'bisnis']],
+  ['#38BDF8', ['hiburan', 'game', 'nonton', 'film']],
+  ['#A3E635', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
+  ['#F472B6', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
+]
+
+const GENERIC_PALETTE_LIGHT = ['#3A3C42', '#5A5C61', '#7A7D84', '#9A9DA4', '#B7B7B2']
+const GENERIC_PALETTE_DARK = ['#CBD5E1', '#94A3B8', '#64748B', '#475569', '#334155']
+
+function hashStr(value: string): number {
+  let hash = 0
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) | 0
+  }
+  return Math.abs(hash)
+}
+
+function categoryPaletteIndex(name: string): number | null {
+  const n = name.toLowerCase()
+  const palette = CATEGORY_PALETTE_LIGHT
+  for (let i = 0; i < palette.length; i += 1) {
+    const [, keywords] = palette[i]!
+    if (keywords.some((keyword) => n.includes(keyword))) return i
+  }
+  return null
+}
+
+export function categoryColor(name: string, dark = false): string {
+  const idx = categoryPaletteIndex(name)
+  if (idx !== null) {
+    return dark
+      ? CATEGORY_PALETTE_DARK[idx]![0]
+      : CATEGORY_PALETTE_LIGHT[idx]![0]
+  }
+  const generic = dark ? GENERIC_PALETTE_DARK : GENERIC_PALETTE_LIGHT
+  return generic[hashStr(name) % generic.length]!
+}

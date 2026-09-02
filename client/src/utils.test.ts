@@ -2,6 +2,7 @@
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import {
+  categoryColor,
   fromLocalDateInput,
   fromLocalDateTimeInput,
   getPresetDateRange,
@@ -61,4 +62,22 @@ test('getPresetDateRange this_month starts on the 1st at 00:00 WITA', () => {
   const m = String(prevDay.getUTCMonth() + 1).padStart(2, '0')
   const d = String(prevDay.getUTCDate()).padStart(2, '0')
   assert.equal(from, `${y}-${m}-${d}T16:00:00.000Z`)
+})
+
+test('categoryColor returns a stable distinct light color per named category', () => {
+  assert.equal(categoryColor('Makan Siang'), categoryColor('makan siang'))
+  assert.equal(categoryColor('Makan Siang'), '#B23A3A')
+})
+
+test('categoryColor returns a different light color for distinct categories', () => {
+  assert.notEqual(categoryColor('Makan'), categoryColor('Belanja'))
+  assert.notEqual(categoryColor('Transport'), categoryColor('Tagihan'))
+})
+
+test('categoryColor dark palette differs from light and stays valid', () => {
+  const light = categoryColor('Gaji', false)
+  const dark = categoryColor('Gaji', true)
+  assert.notEqual(light, dark)
+  assert.match(light, /^#[0-9A-F]{6}$/i)
+  assert.match(dark, /^#[0-9A-F]{6}$/i)
 })

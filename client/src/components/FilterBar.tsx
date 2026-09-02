@@ -1,6 +1,7 @@
 import { CustomSelect, type SelectOption } from './CustomSelect'
 import { DatePicker } from './DatePicker'
-import { CalendarIcon, CategorySymbolIcon, CloseIcon, CreditCardIcon } from './Icons'
+import { CalendarIcon, CloseIcon, CreditCardIcon } from './Icons'
+import { CategoryIcon } from './CategoryIcon'
 import { Input } from './Form'
 import { PRESET_OPTIONS, SORT_OPTIONS, type PeriodPreset, type SortOrder } from '../utils'
 
@@ -106,7 +107,7 @@ export function FilterBar({
     ...categories.map((c) => ({
       value: c.id,
       label: c.name,
-      icon: <CategorySymbolIcon name={c.name} size={13} />,
+      icon: <CategoryIcon name={c.name} size={13} />,
       badge: c.type === 'expense' ? 'Keluar' : 'Masuk',
       badgeColor:
         c.type === 'expense'

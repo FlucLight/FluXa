@@ -9,7 +9,8 @@ import { FilterBar } from '../components/FilterBar'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
-import { CategorySymbolIcon, CreditCardIcon } from '../components/Icons'
+import { CategoryIcon } from '../components/CategoryIcon'
+import { CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
 import { formatDateShort, formatRp, type SortOrder } from '../utils'
@@ -216,7 +217,7 @@ export function Recurring() {
               <div className="flex-1">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-xs text-[var(--color-ink)] flex items-center gap-1.5">
-                    <CategorySymbolIcon name={cat?.name} size={14} className="text-[var(--color-ink-muted)]" />
+                    <CategoryIcon name={cat?.name} size={14} />
                     <span>{item.description}</span>
                   </span>
                   <span
@@ -378,7 +379,7 @@ function RecurringForm({
   const categoryOptions: SelectOption[] = filtered.map((c) => ({
     value: c.id,
     label: c.name,
-    icon: <CategorySymbolIcon name={c.name} size={14} />,
+    icon: <CategoryIcon name={c.name} size={14} />,
   }))
 
   const pmOptions: SelectOption[] = pms.map((p) => ({

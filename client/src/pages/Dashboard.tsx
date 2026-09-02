@@ -16,9 +16,11 @@ import { api } from '../api'
 import { DashboardSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
 import { Pagination, type PageSize } from '../components/Pagination'
-import { ArrowDownLeftIcon, ArrowUpRightIcon, CategorySymbolIcon } from '../components/Icons'
+import { ArrowDownLeftIcon, ArrowUpRightIcon } from '../components/Icons'
+import { CategoryIcon } from '../components/CategoryIcon'
 import { useTheme } from '../components/useTheme'
 import {
+  categoryColor,
   formatDateShort,
   formatRp,
   fromLocalDateInput,
@@ -27,13 +29,9 @@ import {
   type PeriodPreset,
 } from '../utils'
 
-const GRAY_SHADES_LIGHT = ['#1B1C1F', '#3A3C42', '#5A5C61', '#7A7D84', '#9A9DA4', '#B7B7B2', '#DADAD6']
-const GRAY_SHADES_DARK = ['#F1F5F9', '#CBD5E1', '#94A3B8', '#64748B', '#475569', '#334155', '#1E293B']
-
 export function Dashboard() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
-  const grayShades = isDark ? GRAY_SHADES_DARK : GRAY_SHADES_LIGHT
 
   const [preset, setPreset] = useState<PeriodPreset>('this_month')
   const [customFrom, setCustomFrom] = useState('')
@@ -379,12 +377,16 @@ export function Dashboard() {
                   />
                   <Tooltip
                     contentStyle={{
-                      background: isDark ? '#1E293B' : '#FFFFFF',
+                      background: isDark ? '#111827' : '#FFFFFF',
                       border: `1px solid ${isDark ? '#334155' : '#DADAD6'}`,
-                      borderRadius: 6,
+                      borderRadius: 8,
                       fontSize: 12,
-                      color: isDark ? '#F1F5F9' : '#1B1C1F',
+                      boxShadow: isDark
+                        ? '0 8px 24px rgba(0,0,0,0.45)'
+                        : '0 8px 24px rgba(0,0,0,0.08)',
+                      padding: '8px 10px',
                     }}
+                    itemStyle={{ color: isDark ? '#E2E8F0' : '#1B1C1F' }}
                     labelStyle={{ color: isDark ? '#94A3B8' : '#5A5C61', fontWeight: 600, marginBottom: 4 }}
                     formatter={(v, name) => [
                       formatRp(Number(v)),
@@ -425,41 +427,49 @@ export function Dashboard() {
                           stroke={isDark ? '#1E293B' : '#FFFFFF'}
                           strokeWidth={2}
                         >
-                          {expenseByCategory.map((_, idx) => (
+                          {expenseByCategory.map((c, idx) => (
                             <Cell
                               key={`cell-${idx}`}
-                              fill={grayShades[idx % grayShades.length]}
+                              fill={categoryColor(c.name, isDark)}
                             />
                           ))}
                         </Pie>
                         <Tooltip
                           contentStyle={{
-                            background: isDark ? '#1E293B' : '#FFFFFF',
+                            background: isDark ? '#111827' : '#FFFFFF',
                             border: `1px solid ${isDark ? '#334155' : '#DADAD6'}`,
-                            borderRadius: 6,
+                            borderRadius: 8,
                             fontSize: 11,
-                            color: isDark ? '#F1F5F9' : '#1B1C1F',
+                            boxShadow: isDark
+                              ? '0 8px 24px rgba(0,0,0,0.45)'
+                              : '0 8px 24px rgba(0,0,0,0.08)',
+                            padding: '8px 10px',
                           }}
-                          formatter={(v) => [formatRp(Number(v)), 'Total']}
+                          itemStyle={{ color: isDark ? '#E2E8F0' : '#1B1C1F' }}
+                          labelStyle={{ color: isDark ? '#94A3B8' : '#5A5C61', fontWeight: 600, marginBottom: 4 }}
+                          formatter={(v, name) => [formatRp(Number(v)), name as string]}
                         />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
 
                   <div className="flex flex-col gap-2 max-h-52 overflow-y-auto pr-1">
-                    {expenseByCategory.map((c, idx) => {
+                    {expenseByCategory.map((c) => {
                       const pct = totalExpense > 0 ? (c.total / totalExpense) * 100 : 0
                       return (
                         <div key={c.id} className="flex flex-col gap-1">
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-[var(--color-ink)] flex items-center gap-1.5 truncate">
                               <span
-                                className="w-2 h-2 rounded-[2px] shrink-0"
+                                className="w-2.5 h-2.5 rounded-full shrink-0"
                                 style={{
-                                  backgroundColor: grayShades[idx % grayShades.length],
+                                  backgroundColor: categoryColor(c.name, isDark),
+                                  boxShadow: isDark
+                                    ? `0 0 0 1px rgba(255,255,255,0.12)`
+                                    : 'none',
                                 }}
                               />
-                              <CategorySymbolIcon name={c.name} size={13} className="shrink-0 text-[var(--color-ink-muted)]" />
+                              <CategoryIcon name={c.name} size={13} className="shrink-0" />
                               <span className="truncate">{c.name}</span>
                             </span>
                             <div className="flex items-center gap-2 shrink-0">
@@ -476,7 +486,7 @@ export function Dashboard() {
                               className="h-full rounded-[2px] progress-fill"
                               style={{
                                 width: `${Math.min(100, pct)}%`,
-                                backgroundColor: grayShades[idx % grayShades.length],
+                                backgroundColor: categoryColor(c.name, isDark),
                               }}
                             />
                           </div>
@@ -547,7 +557,7 @@ export function Dashboard() {
                       <div key={b.id} className="flex flex-col gap-1">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-[var(--color-ink)] font-medium truncate flex items-center gap-1.5">
-                            <CategorySymbolIcon name={b.catName} size={13} className="shrink-0 text-[var(--color-ink-muted)]" />
+                            <CategoryIcon name={b.catName} size={13} className="shrink-0" />
                             <span className="truncate">{b.catName}</span>
                           </span>
                           <span
@@ -592,7 +602,7 @@ export function Dashboard() {
                     className="border border-[var(--color-border)] rounded-[6px] p-3 flex flex-col gap-1 bg-[var(--color-surface)] hover:border-[var(--color-border-strong)] transition-colors"
                   >
                     <span className="text-xs text-[var(--color-ink-muted)] flex items-center gap-1.5">
-                      <CategorySymbolIcon name={c.name} size={13} className="text-[var(--color-positive)]" />
+                      <CategoryIcon name={c.name} size={13} />
                       <span>{c.name}</span>
                     </span>
                     <p className="text-sm font-bold text-[var(--color-positive)] tabular-nums font-display">

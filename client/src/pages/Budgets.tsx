@@ -7,7 +7,8 @@ import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
-import { CategorySymbolIcon, CloseIcon } from '../components/Icons'
+import { CloseIcon } from '../components/Icons'
+import { CategoryIcon } from '../components/CategoryIcon'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
 import { formatRp, getPresetDateRange, getWitaDateParts } from '../utils'
@@ -127,7 +128,7 @@ export function Budgets() {
               >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <span className="font-semibold text-xs text-[var(--color-ink)] flex items-center gap-1.5">
-                  <CategorySymbolIcon name={cat?.name} size={14} className="text-[var(--color-ink-muted)]" />
+                  <CategoryIcon name={cat?.name} size={14} />
                   <span>{cat?.name ?? b.category_id}</span>
                 </span>
                 <div className="flex items-center gap-2">
@@ -240,7 +241,7 @@ function BudgetForm({
   const categoryOptions: SelectOption[] = available.map((c) => ({
     value: c.id,
     label: c.name,
-    icon: <CategorySymbolIcon name={c.name} size={14} />,
+    icon: <CategoryIcon name={c.name} size={14} />,
   }))
 
   return (
