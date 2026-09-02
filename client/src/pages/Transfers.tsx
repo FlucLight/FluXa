@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
-import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
@@ -54,12 +54,12 @@ export function Transfers() {
     transferParams['offset'] = String(page * pageSize)
   }
 
-  const { data: transferPage = { rows: [], count: 0 }, isLoading } = useQuery({
+  const { data: transferPage = { rows: [], count: 0 }, isLoading, isError, refetch } = useQuery({
     queryKey: ['transfers', transferParams],
     queryFn: () => api.transfers.listWithCount(transferParams),
   })
   const transfers = transferPage.rows
-  const { data: pms = [] } = useQuery({
+  const { data: pms = [], isError: isPmError, refetch: refetchPm } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: () => api.paymentMethods.list(),
   })
@@ -125,7 +125,17 @@ export function Transfers() {
       />
 
       {isLoading && <ListSkeleton rows={pageSize === 'all' ? 6 : Number(pageSize)} />}
-      {!isLoading && transfers.length === 0 && (
+      {!isLoading && (isError || isPmError) && (
+        <ErrorState
+          title="Gagal memuat data"
+          description="Terjadi kesalahan saat mengambil data transfer. Periksa koneksi lalu coba lagi."
+          onRetry={() => {
+            refetch()
+            refetchPm()
+          }}
+        />
+      )}
+      {!isLoading && !isError && !isPmError && transfers.length === 0 && (
         <EmptyState
           title="Belum ada riwayat transfer"
           description="Pindahkan saldo antar akun untuk melihat riwayatnya di sini."
@@ -134,7 +144,7 @@ export function Transfers() {
         />
       )}
 
-      {transfers.length > 0 && (
+      {!isError && !isPmError && transfers.length > 0 && (
         <>
         <p className="text-[11px] text-[var(--color-ink-faint)] md:hidden">Geser tabel ke samping untuk melihat kolom lainnya.</p>
         <div className="mobile-table-scroll bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] shadow-xs">

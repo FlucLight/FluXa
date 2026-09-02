@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
-import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { Field, Input } from '../components/Form'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
@@ -14,11 +14,11 @@ export function Accounts() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [initialBalance, setInitialBalance] = useState('')
 
-  const { data: accounts = [], isLoading } = useQuery({
+  const { data: accounts = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: () => api.paymentMethods.list(),
   })
-  const { data: balances = [] } = useQuery({
+  const { data: balances = [], isError: isBalancesError, refetch: refetchBalances } = useQuery({
     queryKey: ['summary-balances'],
     queryFn: () => api.summary.balances(),
   })
@@ -50,10 +50,20 @@ export function Accounts() {
       </div>
 
       {isLoading && <ListSkeleton rows={4} />}
-      {!isLoading && accounts.length === 0 && (
+      {!isLoading && (isError || isBalancesError) && (
+        <ErrorState
+          title="Gagal memuat data"
+          description="Terjadi kesalahan saat mengambil data akun dan saldo. Periksa koneksi lalu coba lagi."
+          onRetry={() => {
+            refetch()
+            refetchBalances()
+          }}
+        />
+      )}
+      {!isLoading && !isError && !isBalancesError && accounts.length === 0 && (
         <EmptyState title="Belum ada akun pembayaran" description="Tambahkan akun pembayaran untuk mulai menghitung saldo." />
       )}
-      {!isLoading && accounts.length > 0 && (
+      {!isLoading && !isError && !isBalancesError && accounts.length > 0 && (
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {accounts.map((account) => (
             <section key={account.id} className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-4 shadow-xs card-hover">

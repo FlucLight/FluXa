@@ -4,7 +4,7 @@ import type { RecurringInterval } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
-import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
@@ -45,15 +45,15 @@ export function Recurring() {
   const [pageSize, setPageSize] = useState<PageSize>(10)
   const [page, setPage] = useState(0)
 
-  const { data: items = [], isLoading } = useQuery({
+  const { data: items = [], isLoading, isError, refetch } = useQuery({
     queryKey: ['recurring'],
     queryFn: () => api.recurring.list(),
   })
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isError: isCategoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
   })
-  const { data: pms = [] } = useQuery({
+  const { data: pms = [], isError: isPmError, refetch: refetchPm } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: () => api.paymentMethods.list(),
   })
@@ -172,7 +172,18 @@ export function Recurring() {
       />
 
       {isLoading && <ListSkeleton rows={pageSize === 'all' ? 6 : Number(pageSize)} />}
-      {!isLoading && items.length === 0 && (
+      {!isLoading && (isError || isCategoriesError || isPmError) && (
+        <ErrorState
+          title="Gagal memuat data"
+          description="Terjadi kesalahan saat mengambil data tagihan rutin. Periksa koneksi lalu coba lagi."
+          onRetry={() => {
+            refetch()
+            refetchCategories()
+            refetchPm()
+          }}
+        />
+      )}
+      {!isLoading && !isError && !isCategoriesError && !isPmError && items.length === 0 && (
         <EmptyState
           title="Belum ada jadwal tagihan"
           description="Tambahkan tagihan rutin untuk mengatur pembayaran otomatis."
@@ -181,7 +192,7 @@ export function Recurring() {
         />
       )}
 
-      {!isLoading && items.length > 0 && filteredItems.length === 0 && (
+      {!isLoading && !isError && !isCategoriesError && !isPmError && items.length > 0 && filteredItems.length === 0 && (
         <EmptyState
           title="Tidak ada tagihan sesuai filter"
           description="Coba ubah status atau urutan daftar."

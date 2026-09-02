@@ -4,7 +4,7 @@ import type { TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
-import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
 import { CategorySymbolIcon } from '../components/Icons'
 import { Pagination, type PageSize } from '../components/Pagination'
@@ -67,16 +67,16 @@ export function Transactions() {
     params['offset'] = String(page * pageSize)
   }
 
-  const { data: transactionPage = { rows: [], count: 0 }, isLoading } = useQuery({
+  const { data: transactionPage = { rows: [], count: 0 }, isLoading, isError, refetch } = useQuery({
     queryKey: ['transactions', params],
     queryFn: () => api.transactions.listWithCount(params),
   })
   const txs = transactionPage.rows
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isError: isCategoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
   })
-  const { data: paymentMethods = [] } = useQuery({
+  const { data: paymentMethods = [], isError: isPmError, refetch: refetchPm } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: () => api.paymentMethods.list(),
   })
@@ -278,7 +278,19 @@ export function Transactions() {
 
       {isLoading && <ListSkeleton rows={pageSize === 'all' ? 6 : Number(pageSize)} />}
 
-      {!isLoading && filteredTxs.length === 0 && (
+      {!isLoading && (isError || isCategoriesError || isPmError) && (
+        <ErrorState
+          title="Gagal memuat data"
+          description="Terjadi kesalahan saat mengambil data transaksi. Periksa koneksi lalu coba lagi."
+          onRetry={() => {
+            refetch()
+            refetchCategories()
+            refetchPm()
+          }}
+        />
+      )}
+
+      {!isLoading && !isError && !isCategoriesError && !isPmError && filteredTxs.length === 0 && (
         <EmptyState
           title="Tidak ada transaksi yang cocok"
           description="Ubah filter atau catat transaksi baru untuk mulai mengisi daftar."

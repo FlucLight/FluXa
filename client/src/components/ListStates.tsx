@@ -26,6 +26,31 @@ export function EmptyState({ title, description, actionLabel, onAction }: EmptyS
   )
 }
 
+interface ErrorStateProps {
+  title?: string
+  description?: string
+  onRetry?: () => void
+}
+
+export function ErrorState({ title = 'Gagal memuat data', description, onRetry }: ErrorStateProps) {
+  return (
+    <div role="alert" className="flex flex-col items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-8 text-center shadow-xs">
+      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface-sunken)] text-lg font-bold text-[var(--color-negative)]">
+        !
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-[var(--color-ink)]">{title}</p>
+        {description && <p className="mt-1 text-xs text-[var(--color-ink-muted)]">{description}</p>}
+      </div>
+      {onRetry && (
+        <Button variant="secondary" onClick={onRetry}>
+          Coba Lagi
+        </Button>
+      )}
+    </div>
+  )
+}
+
 export function ListSkeleton({ rows = 5 }: { rows?: number }) {
   return (
     <div className="flex flex-col gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-4 shadow-xs" aria-label="Memuat data" role="status">

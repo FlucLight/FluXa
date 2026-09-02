@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
-import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
@@ -27,15 +27,15 @@ export function Budgets() {
   const year = witaToday.year
   const { from, to } = getPresetDateRange('this_month')
 
-  const { data: budgets = [], isLoading: budgetsLoading } = useQuery({
+  const { data: budgets = [], isLoading: budgetsLoading, isError, refetch } = useQuery({
     queryKey: ['budgets', month, year],
     queryFn: () => api.budgets.list(month, year),
   })
-  const { data: txs = [] } = useQuery({
+  const { data: txs = [], isError: isTxsError, refetch: refetchTxs } = useQuery({
     queryKey: ['transactions', { from, to }],
     queryFn: () => api.transactions.list({ from: from ?? '', to: to ?? '' }),
   })
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isError: isCategoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
   })
@@ -84,7 +84,18 @@ export function Budgets() {
       </div>
 
       {budgetsLoading && <ListSkeleton rows={4} />}
-      {!budgetsLoading && budgetsWithSpend.length === 0 && (
+      {!budgetsLoading && (isError || isTxsError || isCategoriesError) && (
+        <ErrorState
+          title="Gagal memuat data"
+          description="Terjadi kesalahan saat mengambil data budget. Periksa koneksi lalu coba lagi."
+          onRetry={() => {
+            refetch()
+            refetchTxs()
+            refetchCategories()
+          }}
+        />
+      )}
+      {!budgetsLoading && !isError && !isTxsError && !isCategoriesError && budgetsWithSpend.length === 0 && (
         <EmptyState
           title="Belum ada budget bulan ini"
           description="Atur limit pengeluaran berdasarkan kategori."

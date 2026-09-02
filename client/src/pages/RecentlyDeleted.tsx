@@ -4,7 +4,7 @@ import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { CategorySymbolIcon } from '../components/Icons'
-import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { useToast } from '../components/useToast'
 import { formatDate, formatRp } from '../utils'
@@ -20,13 +20,13 @@ export function RecentlyDeleted() {
     ? { limit: 'all' as const }
     : { limit: pageSize, offset: page * pageSize }
 
-  const { data: deletedPage = { rows: [], count: 0 }, isLoading } = useQuery({
+  const { data: deletedPage = { rows: [], count: 0 }, isLoading, isError, refetch } = useQuery({
     queryKey: ['transactions-deleted', pageSize, page],
     queryFn: () => api.transactions.deletedWithCount(deletedParams),
   })
   const txs = deletedPage.rows
 
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isError: isCategoriesError, refetch: refetchCategories } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
   })
@@ -59,7 +59,17 @@ export function RecentlyDeleted() {
       </div>
 
       {isLoading && <ListSkeleton rows={pageSize === 'all' ? 6 : Number(pageSize)} />}
-      {!isLoading && txs.length === 0 && (
+      {!isLoading && (isError || isCategoriesError) && (
+        <ErrorState
+          title="Gagal memuat data"
+          description="Terjadi kesalahan saat mengambil data transaksi terhapus. Periksa koneksi lalu coba lagi."
+          onRetry={() => {
+            refetch()
+            refetchCategories()
+          }}
+        />
+      )}
+      {!isLoading && !isError && !isCategoriesError && txs.length === 0 && (
         <EmptyState
           title="Tidak ada transaksi terhapus"
           description="Transaksi yang dihapus akan muncul di sini dan dapat dipulihkan."
