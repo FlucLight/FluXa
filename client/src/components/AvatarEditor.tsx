@@ -78,21 +78,34 @@ export function AvatarEditor() {
   }
 
   return (
-    <div className="group relative">
-      <div className={`h-16 w-16 overflow-hidden rounded-full ${busy ? 'opacity-60' : ''}`}>
-        <img src={photoSrc} alt="Foto profil" className="h-full w-full object-cover" />
-      </div>
+    <div className="flex flex-col items-center gap-1">
+      <div className="relative">
+        <div className={`h-24 w-24 overflow-hidden rounded-full ${busy ? 'opacity-60' : ''}`}>
+          <img src={photoSrc} alt="Foto profil" className="h-full w-full object-cover" />
+        </div>
 
-      <button
-        type="button"
-        disabled={busy}
-        onClick={() => fileRef.current?.click()}
-        aria-label="Ganti foto profil"
-        title="Ganti foto profil"
-        className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-2 border-[var(--color-surface-raised)] bg-[var(--color-ink)] text-[var(--color-surface-raised)] transition-colors hover:bg-[var(--color-ink-muted)] disabled:opacity-60"
-      >
-        <CameraIcon />
-      </button>
+        <button
+          type="button"
+          disabled={busy}
+          onClick={() => fileRef.current?.click()}
+          aria-label="Ganti foto profil"
+          title="Ganti foto profil"
+          className="absolute bottom-0 right-0 flex h-7 w-7 items-center justify-center rounded-full border-2 border-[var(--color-surface-raised)] bg-[var(--color-ink)] text-[var(--color-surface-raised)] transition-colors hover:bg-[var(--color-ink-muted)] disabled:opacity-60"
+        >
+          <CameraIcon />
+        </button>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={(e) => {
+            handleFile(e.target.files?.[0])
+            e.target.value = ''
+          }}
+        />
+      </div>
 
       {!isDefault && (
         <button
@@ -100,23 +113,12 @@ export function AvatarEditor() {
           disabled={busy}
           onClick={() => reset()}
           aria-label="Hapus foto profil"
-          title="Hapus foto profil"
-          className="absolute -bottom-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[var(--color-surface-raised)] bg-[var(--color-negative)] text-white transition-colors hover:opacity-90 disabled:opacity-60"
+          className="flex items-center gap-1 text-[11px] text-[var(--color-negative)] transition-colors hover:opacity-80 disabled:opacity-60"
         >
           <TrashIcon />
+          Hapus foto
         </button>
       )}
-
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        onChange={(e) => {
-          handleFile(e.target.files?.[0])
-          e.target.value = ''
-        }}
-      />
     </div>
   )
 }
