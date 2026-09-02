@@ -66,9 +66,13 @@ export async function findAll(filter: ListFilter = DEFAULT_FILTER): Promise<Tran
   const order = resolveOrderClause(filter.sort)
   let sql = `SELECT * FROM transactions WHERE ${conditions.join(' AND ')} ORDER BY ${order}`
 
-  if (filter.limit !== undefined) {
+  const maxLimit = 1000
+  if (filter.limit !== undefined && filter.limit > 0) {
     sql += ` LIMIT $${idx++}`
-    values.push(filter.limit)
+    values.push(Math.min(filter.limit, maxLimit))
+  } else {
+    sql += ` LIMIT $${idx++}`
+    values.push(maxLimit)
   }
   if (filter.offset !== undefined) {
     sql += ` OFFSET $${idx++}`

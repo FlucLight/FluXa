@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import * as repo from '../repositories/transfers'
+import type { CreateTransferInput } from 'shared'
 
 function parsePageNumber(value: string | undefined, fallback: number): number {
   if (value === undefined) return fallback
@@ -32,19 +33,16 @@ export async function list(req: Request, res: Response): Promise<void> {
 }
 
 export async function create(req: Request, res: Response): Promise<void> {
-  const { from_payment_method_id, to_payment_method_id, amount, description, occurred_at } = req.body as Record<string, string>
-  if (!from_payment_method_id || !to_payment_method_id || !amount) {
-    res.status(400).json({ error: 'from_payment_method_id, to_payment_method_id, amount wajib' }); return
-  }
-  if (from_payment_method_id === to_payment_method_id) {
+  const body = req.body as CreateTransferInput
+  if (body.from_payment_method_id === body.to_payment_method_id) {
     res.status(400).json({ error: 'Akun asal dan tujuan tidak boleh sama' }); return
   }
   const row = await repo.create({
-    from_payment_method_id,
-    to_payment_method_id,
-    amount: parseFloat(amount),
-    description: description ?? null,
-    occurred_at: occurred_at ?? null,
+    from_payment_method_id: body.from_payment_method_id,
+    to_payment_method_id: body.to_payment_method_id,
+    amount: body.amount,
+    description: body.description ?? null,
+    occurred_at: body.occurred_at ?? null,
   })
   res.status(201).json(row)
 }

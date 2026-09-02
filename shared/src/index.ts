@@ -185,3 +185,30 @@ export const updateRecurringSchema = createRecurringSchema
     is_active: z.boolean().optional(),
   })
 export type UpdateRecurringInput = z.infer<typeof updateRecurringSchema>
+
+export const createTransferSchema = z.object({
+  from_payment_method_id: idSchema,
+  to_payment_method_id: idSchema,
+  amount: z.coerce.number().positive().max(1e12),
+  description: z.string().max(500).nullish(),
+  occurred_at: z.iso.datetime({ offset: true }).nullish(),
+})
+export type CreateTransferInput = z.infer<typeof createTransferSchema>
+
+export const updateTransferSchema = createTransferSchema
+  .pick({ amount: true, description: true, occurred_at: true })
+  .partial()
+export type UpdateTransferInput = z.infer<typeof updateTransferSchema>
+
+export const createBudgetSchema = z.object({
+  category_id: idSchema,
+  month: z.coerce.number().int().min(1).max(12),
+  year: z.coerce.number().int().min(2000).max(2100),
+  limit_amount: z.coerce.number().positive().max(1e12),
+})
+export type CreateBudgetInput = z.infer<typeof createBudgetSchema>
+
+export const updateBudgetSchema = createBudgetSchema
+  .pick({ limit_amount: true })
+  .partial()
+export type UpdateBudgetInput = z.infer<typeof updateBudgetSchema>

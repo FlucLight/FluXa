@@ -215,38 +215,51 @@ export async function remove(id: string): Promise<boolean> {
 export async function runDue(): Promise<number> {
   const today = new Date()
   const todayStr = formatDate(today)
+  const client = await pool.connect()
 
-  const { rows: due } = await pool.query<RecurringTransactionRecord>(
-    `SELECT * FROM recurring_transactions
-     WHERE user_id = $1 AND is_active = true
-       AND next_due_at IS NOT NULL AND next_due_at <= $2::date
-       AND (target_count IS NULL OR times_generated < target_count)`,
-    [OWNER_ID, todayStr],
-  )
+  try {
+    await client.query('BEGIN')
 
-  let generated = 0
-  for (const r of due) {
-    const dueDate = parseDateStr(r.next_due_at) ?? today
-    const occurredAt = formatDate(dueDate)
-
-    await pool.query(
-      `INSERT INTO transactions (user_id, category_id, payment_method_id, type, amount, description, source, occurred_at)
-       VALUES ($1, $2, $3, $4, $5, $6, 'recurring', $7::timestamp)`,
-      [OWNER_ID, r.category_id, r.payment_method_id, r.type, r.amount, r.description, occurredAt + ' 12:00:00'],
+    const { rows: due } = await client.query<RecurringTransactionRecord>(
+      `SELECT * FROM recurring_transactions
+       WHERE user_id = $1 AND is_active = true
+         AND next_due_at IS NOT NULL AND next_due_at <= $2::date
+         AND (target_count IS NULL OR times_generated < target_count)
+       FOR UPDATE`,
+      [OWNER_ID, todayStr],
     )
 
-    const nextDue = advanceFrom(
-      { interval: r.interval, interval_steps: r.interval_steps, day_of_month: r.day_of_month },
-      dueDate,
-    )
+    let generated = 0
+    for (const r of due) {
+      const dueDate = parseDateStr(r.next_due_at) ?? today
+      const occurredAt = formatDate(dueDate)
 
-    await pool.query(
-      `UPDATE recurring_transactions
-       SET times_generated = times_generated + 1, last_generated_at = CURRENT_DATE, next_due_at = $2::date
-       WHERE id = $1`,
-      [r.id, formatDate(nextDue)],
-    )
-    generated++
+      await client.query(
+        `INSERT INTO transactions (user_id, category_id, payment_method_id, type, amount, description, source, occurred_at)
+         VALUES ($1, $2, $3, $4, $5, $6, 'recurring', $7::timestamp)`,
+        [OWNER_ID, r.category_id, r.payment_method_id, r.type, r.amount, r.description, occurredAt + ' 12:00:00'],
+      )
+
+      const nextDue = advanceFrom(
+        { interval: r.interval, interval_steps: r.interval_steps, day_of_month: r.day_of_month },
+        dueDate,
+      )
+
+      await client.query(
+        `UPDATE recurring_transactions
+         SET times_generated = times_generated + 1, last_generated_at = CURRENT_DATE, next_due_at = $2::date
+         WHERE id = $1`,
+        [r.id, formatDate(nextDue)],
+      )
+      generated++
+    }
+
+    await client.query('COMMIT')
+    return generated
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  } finally {
+    client.release()
   }
-  return generated
 }

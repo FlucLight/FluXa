@@ -31,10 +31,12 @@ export function CustomSelect({
   const [isOpen, setIsOpen] = useState(false)
   const [openUpwards, setOpenUpwards] = useState(false)
   const [search, setSearch] = useState('')
+  const [activeIndex, setActiveIndex] = useState(0)
   const [menuStyle, setMenuStyle] = useState<React.CSSProperties>({})
   const containerRef = useRef<HTMLDivElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const triggerRef = useRef<HTMLButtonElement>(null)
 
   const selectedOption = options.find((o) => o.value === value)
 
@@ -92,14 +94,102 @@ export function CustomSelect({
       )
     : options
 
+  useEffect(() => {
+    if (!isOpen) return
+    const el = document.getElementById(`opt-${filteredOptions[activeIndex]?.value}`)
+    el?.scrollIntoView({ block: 'nearest' })
+  }, [activeIndex, isOpen, filteredOptions])
+
+  const close = () => {
+    setIsOpen(false)
+    setSearch('')
+    triggerRef.current?.focus()
+  }
+
+  const selectOption = (opt: SelectOption) => {
+    onChange(opt.value)
+    close()
+  }
+
+  const handleTriggerKey = (e: React.KeyboardEvent) => {
+    if (disabled) return
+    if (!isOpen) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        setIsOpen(true)
+      }
+      return
+    }
+    if (filteredOptions.length === 0) {
+      if (e.key === 'Escape') close()
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActiveIndex((i) => (i + 1) % filteredOptions.length)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActiveIndex((i) => (i - 1 + filteredOptions.length) % filteredOptions.length)
+    } else if (e.key === 'Home') {
+      e.preventDefault()
+      setActiveIndex(0)
+    } else if (e.key === 'End') {
+      e.preventDefault()
+      setActiveIndex(filteredOptions.length - 1)
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      const opt = filteredOptions[activeIndex]
+      if (opt) selectOption(opt)
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      close()
+    } else if (!searchable && e.key.length === 1) {
+      e.preventDefault()
+      const idx = filteredOptions.findIndex((o) =>
+        o.label.toLowerCase().startsWith(e.key.toLowerCase()),
+      )
+      if (idx >= 0) setActiveIndex(idx)
+    }
+  }
+
+  const handleMenuKey = (e: React.KeyboardEvent) => {
+    if (filteredOptions.length === 0) {
+      if (e.key === 'Escape') close()
+      return
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setActiveIndex((i) => (i + 1) % filteredOptions.length)
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setActiveIndex((i) => (i - 1 + filteredOptions.length) % filteredOptions.length)
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault()
+      const opt = filteredOptions[activeIndex]
+      if (opt) selectOption(opt)
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      close()
+    }
+  }
+
   return (
     <div ref={containerRef} className={`relative select-none ${className}`}>
       <button
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         aria-expanded={isOpen}
         aria-haspopup="listbox"
-        onClick={() => setIsOpen((prev) => !prev)}
+        aria-activedescendant={isOpen && filteredOptions[activeIndex] ? `opt-${filteredOptions[activeIndex]!.value}` : undefined}
+        aria-label="Pilih opsi"
+        onClick={() => {
+          setIsOpen((prev) => {
+            if (!prev) setActiveIndex(0)
+            return !prev
+          })
+        }}
+        onKeyDown={handleTriggerKey}
         className={`flex items-center justify-between gap-2 w-full px-3 py-2 text-xs rounded-[6px] transition-all bg-[var(--color-surface-raised)] border border-[var(--color-border-strong)] text-[var(--color-ink)] shadow-xs hover:bg-[var(--color-surface-sunken)] hover:border-[var(--color-ink-faint)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus)] focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
           isOpen ? 'ring-1 ring-[var(--color-focus)] border-[var(--color-border-strong)]' : ''
         }`}
@@ -145,6 +235,9 @@ export function CustomSelect({
         <div
           ref={menuRef}
           role="listbox"
+          tabIndex={-1}
+          aria-activedescendant={filteredOptions[activeIndex] ? `opt-${filteredOptions[activeIndex]!.value}` : undefined}
+          onKeyDown={handleMenuKey}
           style={menuStyle}
           className={`fixed z-[9999] min-w-[200px] overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border-strong)] rounded-[8px] shadow-2xl p-1 animate-dropdown-in ${
             openUpwards ? 'origin-bottom' : 'origin-top'
@@ -156,7 +249,10 @@ export function CustomSelect({
                 ref={searchInputRef}
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value)
+                  setActiveIndex(0)
+                }}
                 placeholder="Cari opsi..."
                 className="w-full bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[5px] px-2 py-1.5 text-xs text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:ring-1 focus:ring-[var(--color-focus)]"
               />
@@ -169,22 +265,23 @@ export function CustomSelect({
                 Tidak ada opsi cocok
               </div>
             ) : (
-              filteredOptions.map((opt) => {
+              filteredOptions.map((opt, index) => {
                 const isSelected = opt.value === value
+                const isActive = index === activeIndex
                 return (
                   <button
                     key={opt.value}
+                    id={`opt-${opt.value}`}
                     type="button"
                     role="option"
                     aria-selected={isSelected}
-                    onClick={() => {
-                      onChange(opt.value)
-                      setIsOpen(false)
-                      setSearch('')
-                    }}
+                    onMouseEnter={() => setActiveIndex(index)}
+                    onClick={() => selectOption(opt)}
                     className={`flex items-center justify-between gap-2 w-full px-2.5 py-2 rounded-[5px] text-xs transition-colors cursor-pointer text-left ${
-                      isSelected
+                      isActive
                         ? 'bg-[var(--color-surface-sunken)] text-[var(--color-ink)] font-semibold'
+                        : isSelected
+                        ? 'bg-[var(--color-surface-sunken)] text-[var(--color-ink)]'
                         : 'text-[var(--color-ink-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-ink)]'
                     }`}
                   >

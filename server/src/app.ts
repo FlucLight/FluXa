@@ -1,4 +1,8 @@
 import cors from 'cors'
+import compression from 'compression'
+import helmet from 'helmet'
+import morgan from 'morgan'
+import rateLimit from 'express-rate-limit'
 import express from 'express'
 import { errorHandler, notFoundHandler } from './middleware/errorHandler'
 import categoriesRouter from './routes/categories'
@@ -14,7 +18,29 @@ import { backupIntervalMs, createBackup } from './services/backup'
 
 const app = express()
 
-app.use(cors())
+app.set('trust proxy', 1)
+app.use(helmet())
+app.use(compression())
+app.use(morgan('dev'))
+
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174', 'http://127.0.0.1:5173']
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true)
+      return
+    }
+    callback(null, false)
+  },
+}))
+
+app.use('/api', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 500,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+}))
+
 app.use(express.json({ limit: '10mb' }))
 
 app.get('/health', (_req, res) => {
@@ -47,10 +73,13 @@ function nextWitaMidnight(): Date {
   return next
 }
 
+const recurringTimer: ReturnType<typeof setTimeout>[] = []
+const backupTimer: ReturnType<typeof setTimeout>[] = []
+
 function scheduleDailyRecurring(): void {
   const msUntil = nextWitaMidnight().getTime() - Date.now()
 
-  setTimeout(async () => {
+  const timer = setTimeout(async () => {
     try {
       const n = await runDue()
       if (n > 0) console.log(`[recurring] Generated ${n} transaction(s)`)
@@ -59,15 +88,14 @@ function scheduleDailyRecurring(): void {
     }
     scheduleDailyRecurring()
   }, msUntil)
+  recurringTimer.push(timer)
 
   runDue().then(n => { if (n > 0) console.log(`[recurring] Startup: generated ${n}`) }).catch(() => {})
 }
 
-scheduleDailyRecurring()
-
 function scheduleBackup(): void {
   const interval = backupIntervalMs()
-  setTimeout(async () => {
+  const timer = setTimeout(async () => {
     try {
       const filepath = await createBackup()
       console.log(`[backup] Created ${filepath}`)
@@ -76,11 +104,20 @@ function scheduleBackup(): void {
     }
     scheduleBackup()
   }, interval)
+  backupTimer.push(timer)
+}
+
+export function stopScheduledTasks(): void {
+  for (const t of recurringTimer) clearTimeout(t)
+  for (const t of backupTimer) clearTimeout(t)
+  recurringTimer.length = 0
+  backupTimer.length = 0
 }
 
 createBackup()
   .then((filepath) => console.log(`[backup] Created ${filepath}`))
   .catch((error) => console.error('[backup] Startup error:', error))
 scheduleBackup()
+scheduleDailyRecurring()
 
 export default app

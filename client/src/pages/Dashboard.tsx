@@ -72,24 +72,24 @@ export function Dashboard() {
   if (selectedCategory) params['category_id'] = selectedCategory
   if (selectedPm) params['payment_method_id'] = selectedPm
 
-  const { data: txs = [], isLoading } = useQuery({
+  const { data: txs = [], isLoading, isError: txsError } = useQuery({
     queryKey: ['transactions', params],
     queryFn: () => api.transactions.list(params),
   })
-  const { data: categories = [] } = useQuery({
+  const { data: categories = [], isError: categoriesError } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
   })
-  const { data: paymentMethods = [] } = useQuery({
+  const { data: paymentMethods = [], isError: pmError } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: () => api.paymentMethods.list(),
   })
   const witaToday = getWitaDateParts()
-  const { data: budgets = [] } = useQuery({
+  const { data: budgets = [], isError: budgetsError } = useQuery({
     queryKey: ['budgets', witaToday.month, witaToday.year],
     queryFn: () => api.budgets.list(witaToday.month, witaToday.year),
   })
-  const { data: accountBalances = [] } = useQuery({
+  const { data: accountBalances = [], isError: balancesError } = useQuery({
     queryKey: ['summary-balances'],
     queryFn: () => api.summary.balances(),
   })
@@ -256,6 +256,14 @@ export function Dashboard() {
         <DashboardSkeleton />
       ) : (
         <>
+          {(txsError || categoriesError || pmError || budgetsError || balancesError) && (
+            <div
+              role="alert"
+              className="mb-3 rounded-[8px] border border-[var(--color-negative)]/40 bg-[var(--color-negative-soft)] px-3 py-2.5 text-xs text-[var(--color-ink)]"
+            >
+              Sebagian data tidak dapat dimuat. Periksa koneksi atau coba muat ulang halaman.
+            </div>
+          )}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 shadow-xs card-hover">
               <span className="text-[11px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1">

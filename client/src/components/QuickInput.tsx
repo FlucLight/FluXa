@@ -209,6 +209,12 @@ export function QuickInput() {
           </span>
           <input
             ref={inputRef}
+            aria-label="Catat transaksi cepat"
+            aria-autocomplete="list"
+            role="combobox"
+            aria-expanded={suggestionsOpen}
+            aria-controls="quick-input-suggestions"
+            aria-activedescendant={suggestionsOpen && !text.trim() ? `qi-suggestion-${activeSuggestion}` : undefined}
             className="min-w-0 flex-1 bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[6px] px-2.5 py-2 text-xs text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-focus)] focus:ring-1 focus:ring-[var(--color-focus)] sm:px-3"
             placeholder="Catat cepat... contoh: bensin 50rb minggu kemarin"
             value={text}
@@ -291,12 +297,15 @@ export function QuickInput() {
         </div>
       )}
 
-      {error && <p className="px-1 pt-2 text-xs text-[var(--color-negative)]">{error}</p>}
+      {error && <p role="alert" className="px-1 pt-2 text-xs text-[var(--color-negative)]">{error}</p>}
 
       {suggestionsOpen &&
         createPortal(
           <div
             ref={panelRef}
+            id="quick-input-suggestions"
+            role="listbox"
+            aria-label="Contoh input cepat"
             style={{ ...panelStyle, position: 'fixed', zIndex: 100 }}
             className="origin-top overflow-hidden rounded-lg border border-[var(--color-border)] bg-[var(--color-surface-raised)] shadow-lg"
           >
@@ -315,10 +324,12 @@ export function QuickInput() {
                     return (
                       <button
                         key={item.example}
+                        id={`qi-suggestion-${suggestionIndex}`}
                         ref={(element) => {
                           suggestionRefs.current[suggestionIndex] = element
                         }}
                         type="button"
+                        role="option"
                         aria-selected={isActive}
                         onClick={() => chooseSuggestion(item.example)}
                         className={`flex w-full items-center gap-2 rounded-md px-2 py-2 text-left text-xs transition-colors ${

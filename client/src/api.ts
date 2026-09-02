@@ -14,6 +14,8 @@ import type {
 } from 'shared'
 
 const BASE = '/api'
+const TIMEOUT_MS = 15000
+const RETRY_COUNT = 2
 type QueryValue = string | number | undefined
 
 type QueryParams = Record<string, QueryValue>
@@ -27,17 +29,43 @@ function queryString(params?: QueryParams): string {
   return qs ? `?${qs}` : ''
 }
 
-async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(BASE + path, {
-    headers: { 'Content-Type': 'application/json' },
-    ...init,
-  })
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}))
-    throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
+async function rawFetch(path: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
+  const headers = new Headers(init?.headers)
+  if (init?.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
   }
-  if (res.status === 204) return undefined as T
-  return res.json()
+  try {
+    return await fetch(BASE + path, { ...init, headers, signal: controller.signal })
+  } finally {
+    clearTimeout(timeout)
+  }
+}
+
+async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  let attempt = 0
+  for (;;) {
+    try {
+      const res = await rawFetch(path, init)
+      if (!res.ok && res.status !== 204) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
+      }
+      if (res.status === 204) return undefined as T
+      return res.json()
+    } catch (err) {
+      const retriable = attempt < RETRY_COUNT && !((err as Error).name === 'AbortError')
+      if (retriable) {
+        attempt++
+        await delay(300 * attempt)
+        continue
+      }
+      throw err
+    }
+  }
 }
 
 export const api = {
@@ -152,8 +180,16 @@ export const api = {
   },
 
   export: {
-    csv: () => fetch('/api/export/csv').then(r => r.blob()),
-    json: () => fetch('/api/export/json').then(r => r.blob()),
+    csv: async () => {
+      const res = await fetch('/api/export/csv')
+      if (!res.ok) throw new Error('Gagal mengunduh CSV')
+      return res.blob()
+    },
+    json: async () => {
+      const res = await fetch('/api/export/json')
+      if (!res.ok) throw new Error('Gagal mengunduh JSON')
+      return res.blob()
+    },
     importJson: (data: unknown) =>
       req<{ ok: boolean; imported: Record<string, number> }>('/export/json', { method: 'POST', body: JSON.stringify(data) }),
   },

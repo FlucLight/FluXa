@@ -56,13 +56,19 @@ export function DatePicker({
       setIsOpen(false)
     }
 
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false)
+    }
+
     updatePosition()
     document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleKey)
     window.addEventListener('resize', updatePosition)
     window.addEventListener('scroll', updatePosition, true)
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleKey)
       window.removeEventListener('resize', updatePosition)
       window.removeEventListener('scroll', updatePosition, true)
     }
@@ -155,13 +161,14 @@ export function DatePicker({
         </div>
 
         {value ? (
-          <span
+          <button
+            type="button"
             onClick={handleClear}
+            aria-label="Hapus tanggal"
             className="text-[var(--color-ink-faint)] hover:text-[var(--color-negative)] p-0.5 rounded cursor-pointer transition-colors"
-            title="Hapus tanggal"
           >
             <CloseIcon size={10} />
-          </span>
+          </button>
         ) : (
           <svg
             width="12"
@@ -230,12 +237,22 @@ export function DatePicker({
               const day = idx + 1
               const isSelected = isSelectedMonth && selectedDayNum === day
               const isToday = isTodayMonth && todayDay === day
+              const dayDate = `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+              const fullLabel = new Intl.DateTimeFormat('id-ID', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric',
+              }).format(new Date(dayDate + 'T00:00:00'))
 
               return (
                 <button
                   key={`day-${day}`}
                   type="button"
                   onClick={() => handleSelectDay(day)}
+                  aria-label={fullLabel}
+                  aria-selected={isSelected}
+                  aria-current={isToday ? 'date' : undefined}
                   className={`h-7 w-7 text-xs font-medium rounded-[6px] flex items-center justify-center transition-all cursor-pointer mx-auto ${
                     isSelected
                       ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] font-bold shadow-xs'

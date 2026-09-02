@@ -12,13 +12,14 @@ export interface ToastMessage {
   message: string
   type: ToastType
   action?: ToastAction
+  duration?: number
 }
 
 export interface ToastContextType {
-  toast: (message: string, type?: ToastType, title?: string, action?: ToastAction) => void
-  success: (message: string, title?: string, action?: ToastAction) => void
+  toast: (message: string, type?: ToastType, title?: string, action?: ToastAction, duration?: number) => void
+  success: (message: string, title?: string, action?: ToastAction, duration?: number) => void
   error: (message: string, title?: string) => void
-  info: (message: string, title?: string, action?: ToastAction) => void
+  info: (message: string, title?: string, action?: ToastAction, duration?: number) => void
 }
 
 export const ToastContext = createContext<ToastContextType | undefined>(undefined)
