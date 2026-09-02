@@ -14,6 +14,11 @@ function transactionFileName(ext: 'csv' | 'xlsx'): string {
   return `transaksi (${pad(day)}-${pad(month)}-${year}).${ext}`
 }
 
+function backupFileName(): string {
+  const { year, month, day } = getWitaDateParts()
+  return `backup (${pad(day)}-${pad(month)}-${year}).json`
+}
+
 export function Export() {
   const qc = useQueryClient()
   const { success, error: toastError } = useToast()
@@ -125,7 +130,7 @@ export function Export() {
               onClick={() => {
                 api.export.json()
                   .then((b) => {
-                    download(b, 'backup.json')
+                    download(b, backupFileName())
                     success('File backup database (JSON) berhasil diunduh')
                   })
                   .catch((err) => toastError((err as Error).message, 'Gagal Download'))
