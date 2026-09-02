@@ -181,11 +181,48 @@ html.dark .card-hover:hover {
   min-height: 100%;
 }
 
-html,
-body {
-  min-width: 320px;
-  overflow-x: hidden;
-}
+  html,
+  body {
+    min-width: 320px;
+    overflow-x: hidden;
+  }
+
+  /* Custom scrollbars — light mode */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #B7B7B2 transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: #B7B7B2;
+    border-radius: 9999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: #9A9DA4;
+  }
+
+  /* Custom scrollbars — dark mode */
+  html.dark * {
+    scrollbar-color: #475569 transparent;
+  }
+
+  html.dark *::-webkit-scrollbar-thumb {
+    background-color: #475569;
+  }
+
+  html.dark *::-webkit-scrollbar-thumb:hover {
+    background-color: #64748B;
+  }
 
 .scrollbar-hidden {
   -ms-overflow-style: none;
