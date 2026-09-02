@@ -13,12 +13,17 @@ import {
   YAxis,
 } from 'recharts'
 import { api } from '../api'
+import { DashboardSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
+import { Pagination, type PageSize } from '../components/Pagination'
 import { ArrowDownLeftIcon, ArrowUpRightIcon, CategorySymbolIcon } from '../components/Icons'
 import { useTheme } from '../components/useTheme'
 import {
+  formatDateShort,
   formatRp,
+  fromLocalDateInput,
   getPresetDateRange,
+  getWitaDateParts,
   type PeriodPreset,
 } from '../utils'
 
@@ -35,12 +40,14 @@ export function Dashboard() {
   const [customTo, setCustomTo] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [selectedPm, setSelectedPm] = useState('')
+  const [recentPageSize, setRecentPageSize] = useState<PageSize>(5)
+  const [recentPage, setRecentPage] = useState(0)
 
   const dateRange =
     preset === 'custom'
       ? {
-          from: customFrom ? new Date(customFrom + 'T00:00:00').toISOString() : undefined,
-          to: customTo ? new Date(customTo + 'T23:59:59').toISOString() : undefined,
+          from: customFrom ? fromLocalDateInput(customFrom) : undefined,
+          to: customTo ? fromLocalDateInput(customTo, true) : undefined,
         }
       : getPresetDateRange(preset)
 
@@ -62,9 +69,23 @@ export function Dashboard() {
     queryKey: ['payment-methods'],
     queryFn: () => api.paymentMethods.list(),
   })
+  const witaToday = getWitaDateParts()
   const { data: budgets = [] } = useQuery({
-    queryKey: ['budgets', new Date().getMonth() + 1, new Date().getFullYear()],
-    queryFn: () => api.budgets.list(new Date().getMonth() + 1, new Date().getFullYear()),
+    queryKey: ['budgets', witaToday.month, witaToday.year],
+    queryFn: () => api.budgets.list(witaToday.month, witaToday.year),
+  })
+  const { data: accountBalances = [] } = useQuery({
+    queryKey: ['summary-balances'],
+    queryFn: () => api.summary.balances(),
+  })
+
+  const recentParams = recentPageSize === 'all'
+    ? { sort: 'newest', limit: 'all' as const }
+    : { sort: 'newest', limit: recentPageSize, offset: recentPage * recentPageSize }
+
+  const { data: recent = { rows: [], count: 0 }, isFetching: recentLoading } = useQuery({
+    queryKey: ['recent-transactions', recentPageSize, recentPage],
+    queryFn: () => api.transactions.listWithCount(recentParams),
   })
 
   const handleReset = () => {
@@ -73,6 +94,7 @@ export function Dashboard() {
     setCustomTo('')
     setSelectedCategory('')
     setSelectedPm('')
+    setRecentPage(0)
   }
 
   const totalExpense = txs
@@ -124,8 +146,10 @@ export function Dashboard() {
   const dailyMap: Record<string, { date: Date; expense: number; income: number; label: string }> = {}
   for (const t of txs) {
     const d = new Date(t.occurred_at)
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    const dateParts = getWitaDateParts(t.occurred_at)
+    const key = `${dateParts.year}-${String(dateParts.month).padStart(2, '0')}-${String(dateParts.day).padStart(2, '0')}`
     const label = d.toLocaleDateString('id-ID', {
+      weekday: 'short',
       day: '2-digit',
       month: 'short',
       timeZone: 'Asia/Makassar',
@@ -176,10 +200,7 @@ export function Dashboard() {
       />
 
       {isLoading ? (
-        <div className="flex items-center gap-2 text-xs text-[var(--color-ink-faint)] py-4 animate-pulse-subtle">
-          <span className="w-2 h-2 rounded-full bg-[var(--color-focus)] animate-ping" />
-          <span>Memuat ringkasan data...</span>
-        </div>
+        <DashboardSkeleton />
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
@@ -234,9 +255,31 @@ export function Dashboard() {
               </p>
               <p className="text-[11px] text-[var(--color-ink-faint)] mt-1">dari total pemasukan</p>
             </div>
-          </div>
+           </div>
 
-          {dailyData.length > 0 && (
+           {accountBalances.length > 0 && (
+             <section className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5 shadow-xs card-hover">
+               <div className="mb-3 flex items-center justify-between gap-3">
+                 <div>
+                   <h2 className="text-xs font-semibold uppercase tracking-wider text-[var(--color-ink)]">Saldo Akun</h2>
+                   <p className="mt-0.5 text-[11px] text-[var(--color-ink-faint)]">Saldo berdasarkan transaksi dan transfer aktif</p>
+                 </div>
+                 <span className="text-[11px] text-[var(--color-ink-faint)]">{accountBalances.length} akun</span>
+               </div>
+               <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+                 {accountBalances.map((account) => (
+                   <div key={account.id} className="rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface)] p-3">
+                     <p className="truncate text-xs font-semibold text-[var(--color-ink)]">{account.name}</p>
+                     <p className={`mt-1 text-sm font-bold tabular-nums ${account.balance < 0 ? 'text-[var(--color-negative)]' : 'text-[var(--color-ink)]'}`}>
+                       {formatRp(account.balance)}
+                     </p>
+                   </div>
+                 ))}
+               </div>
+             </section>
+           )}
+
+           {dailyData.length > 0 && (
             <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs card-hover">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
@@ -500,6 +543,86 @@ export function Dashboard() {
               </div>
             </div>
           )}
+
+          <section className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs card-hover">
+              <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+                <div>
+                  <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
+                    Transaksi Terakhir
+                  </h2>
+                  <p className="text-[11px] text-[var(--color-ink-faint)] mt-0.5">
+                    {recent.count} total transaksi tercatat
+                  </p>
+                </div>
+              </div>
+
+              {recentLoading && (
+                <div className="flex items-center gap-2 text-xs text-[var(--color-ink-faint)] py-2 animate-pulse-subtle">
+                  <span className="w-2 h-2 rounded-full bg-[var(--color-focus)] animate-ping" />
+                  <span>Memuat...</span>
+                </div>
+              )}
+
+              <ul className="flex flex-col">
+                {recent.rows.map((t, i) => {
+                  const cat = categories.find((c) => c.id === t.category_id)
+                  const pm = paymentMethods.find((p) => p.id === t.payment_method_id)
+                  return (
+                    <li
+                      key={t.id}
+                      className={`flex items-center gap-3 py-2.5 ${
+                        i !== 0 ? 'border-t border-[var(--color-border)]' : ''
+                      }`}
+                    >
+                      <span
+                        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-[6px] ${
+                          t.type === 'expense'
+                            ? 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]'
+                            : 'bg-[var(--color-positive-soft)] text-[var(--color-positive)]'
+                        }`}
+                      >
+                        {t.type === 'expense' ? (
+                          <ArrowDownLeftIcon size={14} />
+                        ) : (
+                          <ArrowUpRightIcon size={14} />
+                        )}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-xs font-medium text-[var(--color-ink)]">
+                          {cat?.name ?? 'Kategori'}
+                          {t.description ? <span className="font-normal text-[var(--color-ink-faint)]"> · {t.description}</span> : null}
+                        </p>
+                        <p className="text-[11px] text-[var(--color-ink-faint)]">
+                          {formatDateShort(t.occurred_at)}
+                          {pm ? <span className="mx-1">·</span> : null}
+                          {pm?.name}
+                        </p>
+                      </div>
+                      <span
+                        className={`shrink-0 text-xs font-semibold tabular-nums ${
+                          t.type === 'expense'
+                            ? 'text-[var(--color-negative)]'
+                            : 'text-[var(--color-positive)]'
+                        }`}
+                      >
+                        {t.type === 'expense' ? '-' : '+'}
+                        {formatRp(t.amount)}
+                      </span>
+                    </li>
+                  )
+                })}
+              </ul>
+              <div className="mt-3">
+                <Pagination
+                  totalItems={recent.count}
+                  pageSize={recentPageSize}
+                  page={recentPage}
+                  onPageSizeChange={setRecentPageSize}
+                  onPageChange={setRecentPage}
+                  label="transaksi"
+                />
+              </div>
+            </section>
 
           {txs.length === 0 && (
             <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center flex flex-col items-center gap-2 shadow-xs animate-fade-in">

@@ -14,6 +14,18 @@ import type {
 } from 'shared'
 
 const BASE = '/api'
+type QueryValue = string | number | undefined
+
+type QueryParams = Record<string, QueryValue>
+
+function queryString(params?: QueryParams): string {
+  if (!params) return ''
+  const entries = Object.entries(params)
+    .filter((entry): entry is [string, string | number] => entry[1] !== undefined)
+    .map(([key, value]) => [key, String(value)] as [string, string])
+  const qs = new URLSearchParams(entries).toString()
+  return qs ? `?${qs}` : ''
+}
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(BASE + path, {
@@ -49,10 +61,12 @@ export const api = {
   },
 
   transactions: {
-    list: (params?: Record<string, string>) => {
-      const qs = params ? '?' + new URLSearchParams(params).toString() : ''
-      return req<TransactionRecord[]>(`/transactions${qs}`)
-    },
+    list: (params?: QueryParams) =>
+      req<TransactionRecord[]>(`/transactions${queryString(params)}`),
+    listWithCount: (params?: QueryParams) =>
+      req<{ rows: TransactionRecord[]; count: number }>(
+        `/transactions${queryString({ ...params, include_count: 'true' })}`,
+      ),
     create: (data: CreateTransactionInput) =>
       req<TransactionRecord>('/transactions', { method: 'POST', body: JSON.stringify(data) }),
     update: (id: string, data: UpdateTransactionInput) =>
@@ -60,7 +74,12 @@ export const api = {
     remove: (id: string) => req<void>(`/transactions/${id}`, { method: 'DELETE' }),
     restore: (id: string) =>
       req<TransactionRecord>(`/transactions/${id}/restore`, { method: 'POST' }),
-    deleted: () => req<TransactionRecord[]>('/transactions?deleted=true'),
+    deleted: (params?: QueryParams) =>
+      req<TransactionRecord[]>(`/transactions${queryString({ ...params, deleted: 'true' })}`),
+    deletedWithCount: (params?: QueryParams) =>
+      req<{ rows: TransactionRecord[]; count: number }>(
+        `/transactions${queryString({ ...params, deleted: 'true', include_count: 'true' })}`,
+      ),
     parse: (text: string) =>
       req<ParseResult>('/transactions/parse', { method: 'POST', body: JSON.stringify({ text }) }),
     quick: (text: string, occurredAt?: string | null) =>
@@ -71,7 +90,12 @@ export const api = {
   },
 
   transfers: {
-    list: () => req<AccountTransferRecord[]>('/transfers'),
+    list: (params?: QueryParams) =>
+      req<AccountTransferRecord[]>(`/transfers${queryString(params)}`),
+    listWithCount: (params?: QueryParams) =>
+      req<{ rows: AccountTransferRecord[]; count: number }>(
+        `/transfers${queryString({ ...params, include_count: 'true' })}`,
+      ),
     create: (data: { from_payment_method_id: string; to_payment_method_id: string; amount: number; description?: string; occurred_at?: string }) =>
       req<AccountTransferRecord>('/transfers', { method: 'POST', body: JSON.stringify(data) }),
     remove: (id: string) => req<void>(`/transfers/${id}`, { method: 'DELETE' }),
@@ -93,11 +117,38 @@ export const api = {
 
   recurring: {
     list: () => req<RecurringTransactionRecord[]>('/recurring-transactions'),
-    create: (data: { category_id: string; payment_method_id: string; type: 'expense' | 'income'; amount: number; description: string; day_of_month: number }) =>
+    create: (data: {
+      category_id: string
+      payment_method_id: string
+      type: 'expense' | 'income'
+      amount: number
+      description: string
+      day_of_month: number
+      interval?: 'day' | 'week' | 'month'
+      interval_steps?: number
+      target_count?: number | null
+    }) =>
       req<RecurringTransactionRecord>('/recurring-transactions', { method: 'POST', body: JSON.stringify(data) }),
-    update: (id: string, data: Partial<{ is_active: boolean; amount: number; description: string; day_of_month: number }>) =>
+    update: (id: string, data: Partial<{
+      is_active: boolean
+      amount: number
+      description: string
+      day_of_month: number
+      interval?: 'day' | 'week' | 'month'
+      interval_steps?: number
+      target_count?: number | null
+      category_id: string
+      payment_method_id: string
+      type: 'expense' | 'income'
+    }>) =>
       req<RecurringTransactionRecord>(`/recurring-transactions/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     remove: (id: string) => req<void>(`/recurring-transactions/${id}`, { method: 'DELETE' }),
+  },
+
+  summary: {
+    totals: (params?: QueryParams) =>
+      req<{ income: number; expense: number; net: number; transactionCount: number }>(`/summary/totals${queryString(params)}`),
+    balances: () => req<Array<{ id: string; name: string; type: string; balance: number }>>('/summary/balances'),
   },
 
   export: {

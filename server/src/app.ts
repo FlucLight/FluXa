@@ -8,7 +8,9 @@ import transfersRouter from './routes/transfers'
 import budgetsRouter from './routes/budgets'
 import recurringRouter from './routes/recurring'
 import exportRouter from './routes/export'
+import summaryRouter from './routes/summary'
 import { runDue } from './repositories/recurring'
+import { backupIntervalMs, createBackup } from './services/backup'
 
 const app = express()
 
@@ -26,14 +28,27 @@ app.use('/api/transfers', transfersRouter)
 app.use('/api/budgets', budgetsRouter)
 app.use('/api/recurring-transactions', recurringRouter)
 app.use('/api/export', exportRouter)
+app.use('/api/summary', summaryRouter)
 
 app.use(notFoundHandler)
 app.use(errorHandler)
 
-function scheduleDailyRecurring(): void {
+function nextWitaMidnight(): Date {
   const now = new Date()
-  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 1, 0)
-  const msUntil = nextMidnight.getTime() - now.getTime()
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Makassar',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now)
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  const next = new Date(`${values['year']}-${values['month']}-${values['day']}T00:01:00+08:00`)
+  next.setUTCDate(next.getUTCDate() + 1)
+  return next
+}
+
+function scheduleDailyRecurring(): void {
+  const msUntil = nextWitaMidnight().getTime() - Date.now()
 
   setTimeout(async () => {
     try {
@@ -49,5 +64,23 @@ function scheduleDailyRecurring(): void {
 }
 
 scheduleDailyRecurring()
+
+function scheduleBackup(): void {
+  const interval = backupIntervalMs()
+  setTimeout(async () => {
+    try {
+      const filepath = await createBackup()
+      console.log(`[backup] Created ${filepath}`)
+    } catch (error) {
+      console.error('[backup] Error:', error)
+    }
+    scheduleBackup()
+  }, interval)
+}
+
+createBackup()
+  .then((filepath) => console.log(`[backup] Created ${filepath}`))
+  .catch((error) => console.error('[backup] Startup error:', error))
+scheduleBackup()
 
 export default app

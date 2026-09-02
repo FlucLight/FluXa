@@ -4,6 +4,8 @@ import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
 import { CategorySymbolIcon } from '../components/Icons'
+import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { Pagination, type PageSize } from '../components/Pagination'
 import { useToast } from '../components/useToast'
 import { formatDate, formatRp } from '../utils'
 
@@ -11,11 +13,19 @@ export function RecentlyDeleted() {
   const qc = useQueryClient()
   const { success, error: toastError } = useToast()
   const [restoringId, setRestoringId] = useState<string | null>(null)
+  const [pageSize, setPageSize] = useState<PageSize>(10)
+  const [page, setPage] = useState(0)
 
-  const { data: txs = [], isLoading } = useQuery({
-    queryKey: ['transactions-deleted'],
-    queryFn: () => api.transactions.deleted(),
+  const deletedParams = pageSize === 'all'
+    ? { limit: 'all' as const }
+    : { limit: pageSize, offset: page * pageSize }
+
+  const { data: deletedPage = { rows: [], count: 0 }, isLoading } = useQuery({
+    queryKey: ['transactions-deleted', pageSize, page],
+    queryFn: () => api.transactions.deletedWithCount(deletedParams),
   })
+  const txs = deletedPage.rows
+
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
@@ -26,6 +36,7 @@ export function RecentlyDeleted() {
     mutationFn: (id: string) => api.transactions.restore(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] })
+      qc.invalidateQueries({ queryKey: ['summary-balances'] })
       qc.invalidateQueries({ queryKey: ['transactions-deleted'] })
       success('Transaksi berhasil dipulihkan kembali')
       setRestoringId(null)
@@ -45,11 +56,12 @@ export function RecentlyDeleted() {
         </p>
       </div>
 
-      {isLoading && <p className="text-xs text-[var(--color-ink-faint)]">Memuat...</p>}
+      {isLoading && <ListSkeleton rows={pageSize === 'all' ? 6 : Number(pageSize)} />}
       {!isLoading && txs.length === 0 && (
-        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
-          <p className="text-xs text-[var(--color-ink-muted)]">Tidak ada transaksi yang sedang dihapus.</p>
-        </div>
+        <EmptyState
+          title="Tidak ada transaksi terhapus"
+          description="Transaksi yang dihapus akan muncul di sini dan dapat dipulihkan."
+        />
       )}
 
       {txs.length > 0 && (
@@ -107,6 +119,14 @@ export function RecentlyDeleted() {
             </tbody>
           </table>
         </div>
+        <Pagination
+          totalItems={deletedPage.count}
+          pageSize={pageSize}
+          page={page}
+          onPageSizeChange={setPageSize}
+          onPageChange={setPage}
+          label="transaksi terhapus"
+        />
         </>
       )}
 

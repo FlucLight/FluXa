@@ -1,18 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
+import { EmptyState, ListSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
 import { CategorySymbolIcon } from '../components/Icons'
+import { Pagination, type PageSize } from '../components/Pagination'
 import { useToast } from '../components/useToast'
 import { TransactionForm } from '../components/TransactionForm'
 import {
   formatDate,
   formatRp,
+  fromLocalDateInput,
   getPresetDateRange,
   type PeriodPreset,
+  type SortOrder,
 } from '../utils'
 
 export function Transactions() {
@@ -30,12 +34,21 @@ export function Transactions() {
   const [customFrom, setCustomFrom] = useState('')
   const [customTo, setCustomTo] = useState('')
   const [search, setSearch] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [sort, setSort] = useState<SortOrder | ''>('')
+  const [pageSize, setPageSize] = useState<PageSize>(10)
+  const [page, setPage] = useState(0)
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSearch(searchInput.trim()), 300)
+    return () => window.clearTimeout(timer)
+  }, [searchInput])
 
   const dateRange =
     preset === 'custom'
       ? {
-          from: customFrom ? new Date(customFrom + 'T00:00:00').toISOString() : undefined,
-          to: customTo ? new Date(customTo + 'T23:59:59').toISOString() : undefined,
+          from: customFrom ? fromLocalDateInput(customFrom) : undefined,
+          to: customTo ? fromLocalDateInput(customTo, true) : undefined,
         }
       : getPresetDateRange(preset)
 
@@ -45,11 +58,19 @@ export function Transactions() {
   if (pmFilter) params['payment_method_id'] = pmFilter
   if (dateRange.from) params['from'] = dateRange.from
   if (dateRange.to) params['to'] = dateRange.to
+  if (sort) params['sort'] = sort
+  if (search.trim()) params['search'] = search.trim()
+  if (pageSize === 'all') params['limit'] = 'all'
+  else {
+    params['limit'] = String(pageSize)
+    params['offset'] = String(page * pageSize)
+  }
 
-  const { data: txs = [], isLoading } = useQuery({
+  const { data: transactionPage = { rows: [], count: 0 }, isLoading } = useQuery({
     queryKey: ['transactions', params],
-    queryFn: () => api.transactions.list(params),
+    queryFn: () => api.transactions.listWithCount(params),
   })
+  const txs = transactionPage.rows
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
@@ -66,13 +87,17 @@ export function Transactions() {
     setTypeFilter('')
     setCategoryFilter('')
     setPmFilter('')
+    setSearchInput('')
     setSearch('')
+    setSort('')
+    setPage(0)
   }
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.transactions.remove(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] })
+      qc.invalidateQueries({ queryKey: ['summary-balances'] })
       success('Transaksi berhasil dipindahkan ke menu Terhapus')
       setDeletingId(null)
     },
@@ -85,15 +110,7 @@ export function Transactions() {
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c]))
   const pmMap = Object.fromEntries(paymentMethods.map((p) => [p.id, p]))
 
-  const filteredTxs = txs.filter((t) => {
-    if (!search.trim()) return true
-    const q = search.toLowerCase()
-    const desc = (t.description ?? '').toLowerCase()
-    const catName = (catMap[t.category_id]?.name ?? '').toLowerCase()
-    const pmName = (pmMap[t.payment_method_id]?.name ?? '').toLowerCase()
-    const raw = (t.raw_input ?? '').toLowerCase()
-    return desc.includes(q) || catName.includes(q) || pmName.includes(q) || raw.includes(q)
-  })
+  const filteredTxs = txs
 
   const totalFilteredExpense = filteredTxs
     .filter((t) => t.type === 'expense')
@@ -125,27 +142,53 @@ export function Transactions() {
 
       <FilterBar
         preset={preset}
-        onPresetChange={setPreset}
+        onPresetChange={(value) => {
+          setPreset(value)
+          setPage(0)
+        }}
         customFrom={customFrom}
         customTo={customTo}
-        onCustomFromChange={setCustomFrom}
-        onCustomToChange={setCustomTo}
+        onCustomFromChange={(value) => {
+          setCustomFrom(value)
+          setPage(0)
+        }}
+        onCustomToChange={(value) => {
+          setCustomTo(value)
+          setPage(0)
+        }}
         categories={categories}
         selectedCategory={categoryFilter}
-        onCategoryChange={setCategoryFilter}
+        onCategoryChange={(value) => {
+          setCategoryFilter(value)
+          setPage(0)
+        }}
         paymentMethods={paymentMethods}
         selectedPm={pmFilter}
-        onPmChange={setPmFilter}
+        onPmChange={(value) => {
+          setPmFilter(value)
+          setPage(0)
+        }}
         typeFilter={typeFilter}
-        onTypeFilterChange={setTypeFilter}
-        search={search}
-        onSearchChange={setSearch}
+        onTypeFilterChange={(value) => {
+          setTypeFilter(value)
+          setPage(0)
+        }}
+        search={searchInput}
+        onSearchChange={(value) => {
+          setSearchInput(value)
+          setPage(0)
+        }}
+        sort={sort}
+        onSortChange={(value) => {
+          setSort(value)
+          setPage(0)
+        }}
         onReset={handleReset}
       />
 
       <div className="flex flex-col items-start gap-2 px-1 text-xs text-[var(--color-ink-muted)] sm:flex-row sm:items-center sm:justify-between">
         <span>
-          Menampilkan <b>{filteredTxs.length}</b> dari {txs.length} transaksi
+           Menampilkan <b>{filteredTxs.length}</b> pada halaman ini dari <b>{transactionPage.count}</b> transaksi
         </span>
         <div className="flex flex-wrap gap-x-4 gap-y-1 tabular-nums font-semibold">
           <span className="text-[var(--color-positive)]">Total Masuk: +{formatRp(totalFilteredIncome)}</span>
@@ -153,12 +196,18 @@ export function Transactions() {
         </div>
       </div>
 
-      {isLoading && <p className="text-xs text-[var(--color-ink-faint)]">Memuat transaksi...</p>}
+      {isLoading && <ListSkeleton rows={pageSize === 'all' ? 6 : Number(pageSize)} />}
 
       {!isLoading && filteredTxs.length === 0 && (
-        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
-          <p className="text-xs text-[var(--color-ink-muted)]">Tidak ada transaksi yang cocok dengan filter.</p>
-        </div>
+        <EmptyState
+          title="Tidak ada transaksi yang cocok"
+          description="Ubah filter atau catat transaksi baru untuk mulai mengisi daftar."
+          actionLabel="Catat Transaksi"
+          onAction={() => {
+            setEditing(null)
+            setShowForm(true)
+          }}
+        />
       )}
 
       {filteredTxs.length > 0 && (
@@ -243,6 +292,17 @@ export function Transactions() {
           </table>
         </div>
         </>
+      )}
+
+      {transactionPage.count > 0 && (
+        <Pagination
+          totalItems={transactionPage.count}
+          pageSize={pageSize}
+          page={page}
+          onPageSizeChange={setPageSize}
+          onPageChange={setPage}
+          label="transaksi"
+        />
       )}
 
       {showForm && (

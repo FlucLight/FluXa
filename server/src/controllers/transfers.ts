@@ -1,9 +1,34 @@
 import type { Request, Response } from 'express'
 import * as repo from '../repositories/transfers'
 
+function parsePageNumber(value: string | undefined, fallback: number): number {
+  if (value === undefined) return fallback
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback
+}
+
 export async function list(req: Request, res: Response): Promise<void> {
-  const { from, to } = req.query as Record<string, string | undefined>
-  res.json(await repo.findAll({ from, to }))
+  const q = req.query as Record<string, string | undefined>
+  const { from, to, sort } = q
+  const rawLimit = q['limit']
+  const limit = rawLimit === undefined || rawLimit === 'all'
+    ? undefined
+    : Math.min(1000, parsePageNumber(rawLimit, 50) || 1)
+  const offset = parsePageNumber(q['offset'], 0)
+  const filter = {
+    from,
+    to,
+    sort: sort as 'newest' | 'oldest' | 'most' | 'least' | undefined,
+  }
+  if (q['include_count'] === 'true') {
+    const [rows, count] = await Promise.all([
+      repo.findAll({ ...filter, limit, offset }),
+      repo.countAll(filter),
+    ])
+    res.json({ rows, count })
+    return
+  }
+  res.json(await repo.findAll({ ...filter, limit, offset }))
 }
 
 export async function create(req: Request, res: Response): Promise<void> {

@@ -3,13 +3,25 @@ import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
+import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { FilterBar } from '../components/FilterBar'
+import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { DateTimePicker } from '../components/DatePicker'
 import { Field, Input } from '../components/Form'
 import { CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
-import { formatDate, formatRp } from '../utils'
+import {
+  formatDate,
+  formatRp,
+  fromLocalDateInput,
+  getPresetDateRange,
+  type PeriodPreset,
+  type SortOrder,
+  fromLocalDateTimeInput,
+  toLocalDateTimeInput,
+} from '../utils'
 
 export function Transfers() {
   const qc = useQueryClient()
@@ -17,11 +29,36 @@ export function Transfers() {
 
   const [showForm, setShowForm] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [preset, setPreset] = useState<PeriodPreset>('this_month')
+  const [customFrom, setCustomFrom] = useState('')
+  const [customTo, setCustomTo] = useState('')
+  const [sort, setSort] = useState<SortOrder | ''>('')
+  const [pageSize, setPageSize] = useState<PageSize>(10)
+  const [page, setPage] = useState(0)
 
-  const { data: transfers = [], isLoading } = useQuery({
-    queryKey: ['transfers'],
-    queryFn: () => api.transfers.list(),
+  const dateRange =
+    preset === 'custom'
+      ? {
+          from: customFrom ? fromLocalDateInput(customFrom) : undefined,
+          to: customTo ? fromLocalDateInput(customTo, true) : undefined,
+        }
+      : getPresetDateRange(preset)
+
+  const transferParams: Record<string, string> = {}
+  if (dateRange.from) transferParams['from'] = dateRange.from
+  if (dateRange.to) transferParams['to'] = dateRange.to
+  if (sort) transferParams['sort'] = sort
+  if (pageSize === 'all') transferParams['limit'] = 'all'
+  else {
+    transferParams['limit'] = String(pageSize)
+    transferParams['offset'] = String(page * pageSize)
+  }
+
+  const { data: transferPage = { rows: [], count: 0 }, isLoading } = useQuery({
+    queryKey: ['transfers', transferParams],
+    queryFn: () => api.transfers.listWithCount(transferParams),
   })
+  const transfers = transferPage.rows
   const { data: pms = [] } = useQuery({
     queryKey: ['payment-methods'],
     queryFn: () => api.paymentMethods.list(),
@@ -32,6 +69,7 @@ export function Transfers() {
     mutationFn: (id: string) => api.transfers.remove(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transfers'] })
+      qc.invalidateQueries({ queryKey: ['summary-balances'] })
       success('Riwayat transfer berhasil dihapus')
       setDeletingId(null)
     },
@@ -55,11 +93,45 @@ export function Transfers() {
         </Button>
       </div>
 
-      {isLoading && <p className="text-xs text-[var(--color-ink-faint)]">Memuat data...</p>}
+      <FilterBar
+        preset={preset}
+        onPresetChange={(value) => {
+          setPreset(value)
+          setPage(0)
+        }}
+        customFrom={customFrom}
+        customTo={customTo}
+        onCustomFromChange={(value) => {
+          setCustomFrom(value)
+          setPage(0)
+        }}
+        onCustomToChange={(value) => {
+          setCustomTo(value)
+          setPage(0)
+        }}
+        sort={sort}
+        onSortChange={(value) => {
+          setSort(value)
+          setPage(0)
+        }}
+        showPeriod
+        onReset={() => {
+          setPreset('this_month')
+          setCustomFrom('')
+           setCustomTo('')
+           setSort('')
+           setPage(0)
+        }}
+      />
+
+      {isLoading && <ListSkeleton rows={pageSize === 'all' ? 6 : Number(pageSize)} />}
       {!isLoading && transfers.length === 0 && (
-        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
-          <p className="text-xs text-[var(--color-ink-muted)]">Belum ada riwayat transfer.</p>
-        </div>
+        <EmptyState
+          title="Belum ada riwayat transfer"
+          description="Pindahkan saldo antar akun untuk melihat riwayatnya di sini."
+          actionLabel="Transfer Baru"
+          onAction={() => setShowForm(true)}
+        />
       )}
 
       {transfers.length > 0 && (
@@ -109,6 +181,17 @@ export function Transfers() {
         </>
       )}
 
+      {transferPage.count > 0 && (
+        <Pagination
+          totalItems={transferPage.count}
+          pageSize={pageSize}
+          page={page}
+          onPageSizeChange={setPageSize}
+          onPageChange={setPage}
+          label="transfer"
+        />
+      )}
+
       {showForm && <TransferForm pms={pms} onClose={() => setShowForm(false)} />}
 
       <ConfirmModal
@@ -141,7 +224,7 @@ function TransferForm({
     to: '',
     amount: '',
     description: '',
-    occurred_at: new Date().toISOString().slice(0, 16),
+    occurred_at: toLocalDateTimeInput(),
   })
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -152,10 +235,11 @@ function TransferForm({
         to_payment_method_id: form.to,
         amount: parseFloat(form.amount),
         description: form.description || undefined,
-        occurred_at: new Date(form.occurred_at).toISOString(),
+        occurred_at: fromLocalDateTimeInput(form.occurred_at),
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transfers'] })
+      qc.invalidateQueries({ queryKey: ['summary-balances'] })
       success('Transfer dana berhasil dicatat')
       onClose()
     },

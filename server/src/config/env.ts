@@ -27,6 +27,10 @@ export interface Env {
   DB_PASSWORD: string
   DB_NAME: string
   DATABASE_URL: string
+  TELEGRAM_BOT_TOKEN: string
+  TELEGRAM_ALLOWED_CHAT_IDS: string
+  BACKUP_INTERVAL_HOURS: number
+  BACKUP_RETENTION_COUNT: number
 }
 
 function toNumber(value: string | undefined, fallback: number): number {
@@ -44,4 +48,8 @@ export const env: Env = {
   DATABASE_URL:
     process.env.DATABASE_URL ??
     `postgres://${process.env.DB_USER ?? 'postgres'}:${encodeURIComponent(process.env.DB_PASSWORD ?? '')}@${process.env.DB_HOST ?? 'localhost'}:${toNumber(process.env.DB_PORT, 5432)}/${process.env.DB_NAME ?? 'financial_management'}`,
+  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN ?? '',
+  TELEGRAM_ALLOWED_CHAT_IDS: process.env.TELEGRAM_ALLOWED_CHAT_IDS ?? '',
+  BACKUP_INTERVAL_HOURS: toNumber(process.env.BACKUP_INTERVAL_HOURS, 24),
+  BACKUP_RETENTION_COUNT: toNumber(process.env.BACKUP_RETENTION_COUNT, 14),
 }

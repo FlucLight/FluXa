@@ -3,17 +3,59 @@ import type { AccountTransferRecord } from 'shared'
 
 const OWNER_ID = 'a0000000-0000-0000-0000-000000000001'
 
-export async function findAll(filter: { from: string | undefined; to: string | undefined } = { from: undefined, to: undefined }): Promise<AccountTransferRecord[]> {
+export type TransferSortOrder = 'newest' | 'oldest' | 'most' | 'least'
+
+function resolveOrderClause(sort: TransferSortOrder | undefined): string {
+  switch (sort) {
+    case 'oldest': return 'occurred_at ASC, created_at ASC'
+    case 'most': return 'amount DESC, occurred_at DESC'
+    case 'least': return 'amount ASC, occurred_at DESC'
+    case 'newest':
+    default: return 'occurred_at DESC, created_at DESC'
+  }
+}
+
+export interface TransferFilter {
+  from: string | undefined
+  to: string | undefined
+  sort: TransferSortOrder | undefined
+  limit?: number | undefined
+  offset?: number | undefined
+}
+
+export async function findAll(
+  filter: TransferFilter = { from: undefined, to: undefined, sort: undefined },
+): Promise<AccountTransferRecord[]> {
   const conditions = [`user_id = $1`, `is_deleted = false`]
   const values: unknown[] = [OWNER_ID]
   let idx = 2
   if (filter.from) { conditions.push(`occurred_at >= $${idx++}`); values.push(filter.from) }
   if (filter.to) { conditions.push(`occurred_at <= $${idx++}`); values.push(filter.to) }
-  const { rows } = await pool.query<AccountTransferRecord>(
-    `SELECT * FROM account_transfers WHERE ${conditions.join(' AND ')} ORDER BY occurred_at DESC`,
+  const order = resolveOrderClause(filter.sort)
+  let sql = `SELECT * FROM account_transfers WHERE ${conditions.join(' AND ')} ORDER BY ${order}`
+  if (filter.limit !== undefined) {
+    sql += ` LIMIT $${idx++}`
+    values.push(filter.limit)
+  }
+  if (filter.offset !== undefined) {
+    sql += ` OFFSET $${idx++}`
+    values.push(filter.offset)
+  }
+  const { rows } = await pool.query<AccountTransferRecord>(sql, values)
+  return rows
+}
+
+export async function countAll(filter: Omit<TransferFilter, 'limit' | 'offset'>): Promise<number> {
+  const conditions = [`user_id = $1`, `is_deleted = false`]
+  const values: unknown[] = [OWNER_ID]
+  let idx = 2
+  if (filter.from) { conditions.push(`occurred_at >= $${idx++}`); values.push(filter.from) }
+  if (filter.to) { conditions.push(`occurred_at <= $${idx++}`); values.push(filter.to) }
+  const { rows } = await pool.query<{ count: string }>(
+    `SELECT COUNT(*) AS count FROM account_transfers WHERE ${conditions.join(' AND ')}`,
     values,
   )
-  return rows
+  return Number(rows[0]?.count ?? 0)
 }
 
 export async function create(data: {

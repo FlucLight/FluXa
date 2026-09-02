@@ -6,6 +6,7 @@ import { Sidebar } from './components/Sidebar'
 import { MenuIcon } from './components/Icons'
 import { ThemeProvider } from './components/ThemeContext'
 import { ToastProvider } from './components/Toast'
+import { Accounts } from './pages/Accounts'
 import { Budgets } from './pages/Budgets'
 import { Dashboard } from './pages/Dashboard'
 import { Export } from './pages/Export'
@@ -49,6 +50,7 @@ export default function App() {
                 <main className="min-w-0 flex-1 overflow-y-auto">
                   <Routes>
                     <Route path="/" element={<Dashboard />} />
+                    <Route path="/accounts" element={<Accounts />} />
                     <Route path="/transactions" element={<Transactions />} />
                     <Route path="/transfers" element={<Transfers />} />
                     <Route path="/budgets" element={<Budgets />} />

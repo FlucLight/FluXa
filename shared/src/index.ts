@@ -9,6 +9,9 @@ export type PaymentMethodType = (typeof PAYMENT_METHOD_TYPES)[number]
 export const TRANSACTION_SOURCES = ['web', 'telegram_bot', 'recurring'] as const
 export type TransactionSource = (typeof TRANSACTION_SOURCES)[number]
 
+export const RECURRING_INTERVALS = ['day', 'week', 'month'] as const
+export type RecurringInterval = (typeof RECURRING_INTERVALS)[number]
+
 export interface UserRecord {
   id: string
   name: string
@@ -32,6 +35,7 @@ export interface PaymentMethodRecord {
   type: PaymentMethodType
   aliases: string[] | null
   current_balance: string | null
+  initial_balance: string
   created_at: Date
 }
 
@@ -44,6 +48,7 @@ export interface TransactionRecord {
   amount: string
   description: string | null
   raw_input: string | null
+  telegram_chat_id: string | null
   occurred_at: Date
   source: TransactionSource
   needs_review: boolean
@@ -85,6 +90,11 @@ export interface RecurringTransactionRecord {
   description: string
   day_of_month: number
   is_active: boolean
+  interval: RecurringInterval
+  interval_steps: number
+  target_count: number | null
+  times_generated: number
+  next_due_at: Date | null
   last_generated_at: Date | null
   created_at: Date
 }
@@ -120,6 +130,7 @@ export const createPaymentMethodSchema = z.object({
   name: z.string().min(1).max(100),
   type: paymentMethodTypeSchema,
   aliases: z.array(z.string().min(1).max(50)).max(50).nullish(),
+  initial_balance: z.coerce.number().min(-1e12).max(1e12).default(0),
 })
 export type CreatePaymentMethodInput = z.infer<typeof createPaymentMethodSchema>
 
@@ -141,3 +152,36 @@ export type CreateTransactionInput = z.infer<typeof createTransactionSchema>
 
 export const updateTransactionSchema = createTransactionSchema.partial()
 export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>
+
+const recurringIntervalSchema = z.enum(RECURRING_INTERVALS)
+
+export const createRecurringSchema = z.object({
+  type: transactionTypeSchema,
+  category_id: idSchema,
+  payment_method_id: idSchema,
+  amount: z.coerce.number().positive().max(1e12),
+  description: z.string().min(1).max(200),
+  interval: recurringIntervalSchema.default('month'),
+  interval_steps: z.coerce.number().int().min(1).max(365).default(1),
+  day_of_month: z.coerce.number().int().min(1).max(28).default(1),
+  target_count: z.coerce.number().int().min(1).max(100000).nullish(),
+})
+export type CreateRecurringInput = z.infer<typeof createRecurringSchema>
+
+export const updateRecurringSchema = createRecurringSchema
+  .pick({
+    type: true,
+    category_id: true,
+    payment_method_id: true,
+    amount: true,
+    description: true,
+    interval: true,
+    interval_steps: true,
+    day_of_month: true,
+    target_count: true,
+  })
+  .partial()
+  .extend({
+    is_active: z.boolean().optional(),
+  })
+export type UpdateRecurringInput = z.infer<typeof updateRecurringSchema>

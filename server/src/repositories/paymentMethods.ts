@@ -23,12 +23,13 @@ export async function create(data: {
   name: string
   type: 'cash' | 'bank' | 'ewallet'
   aliases?: string[] | null
+  initial_balance?: number
 }): Promise<PaymentMethodRecord> {
   const { rows } = await pool.query<PaymentMethodRecord>(
-    `INSERT INTO payment_methods (user_id, name, type, aliases)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO payment_methods (user_id, name, type, aliases, initial_balance)
+     VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
-    [OWNER_ID, data.name, data.type, data.aliases ?? null],
+    [OWNER_ID, data.name, data.type, data.aliases ?? null, data.initial_balance ?? 0],
   )
   return rows[0]!
 }
@@ -39,6 +40,7 @@ export async function update(
     name?: string
     type?: 'cash' | 'bank' | 'ewallet'
     aliases?: string[] | null
+    initial_balance?: number
   },
 ): Promise<PaymentMethodRecord | null> {
   const fields: string[] = []
@@ -48,6 +50,7 @@ export async function update(
   if (data.name !== undefined) { fields.push(`name = $${idx++}`); values.push(data.name) }
   if (data.type !== undefined) { fields.push(`type = $${idx++}`); values.push(data.type) }
   if (data.aliases !== undefined) { fields.push(`aliases = $${idx++}`); values.push(data.aliases) }
+  if (data.initial_balance !== undefined) { fields.push(`initial_balance = $${idx++}`); values.push(data.initial_balance) }
 
   if (fields.length === 0) return findById(id)
 

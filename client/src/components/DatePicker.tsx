@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { CalendarIcon, CloseIcon } from './Icons'
+import { toLocalDateInput } from '../utils'
 
 interface DatePickerProps {
   value: string
@@ -22,7 +23,7 @@ export function DatePicker({
   const containerRef = useRef<HTMLDivElement>(null)
   const popupRef = useRef<HTMLDivElement>(null)
 
-  const parsedDate = value ? new Date(value + 'T00:00:00') : new Date()
+  const parsedDate = value ? new Date(value + 'T00:00:00') : new Date(`${toLocalDateInput()}T00:00:00`)
   const [viewYear, setViewYear] = useState(parsedDate.getFullYear())
   const [viewMonth, setViewMonth] = useState(parsedDate.getMonth())
 
@@ -106,11 +107,7 @@ export function DatePicker({
 
   const handleSetToday = (e: React.MouseEvent) => {
     e.stopPropagation()
-    const now = new Date()
-    const y = now.getFullYear()
-    const m = String(now.getMonth() + 1).padStart(2, '0')
-    const d = String(now.getDate()).padStart(2, '0')
-    onChange(`${y}-${m}-${d}`)
+    onChange(toLocalDateInput())
     setIsOpen(false)
   }
 
@@ -131,7 +128,7 @@ export function DatePicker({
     }).format(d)
   }
 
-  const today = new Date()
+  const today = new Date(`${toLocalDateInput()}T00:00:00`)
   const isTodayMonth = today.getFullYear() === viewYear && today.getMonth() === viewMonth
   const todayDay = today.getDate()
   const selectedDayNum = value ? parseInt(value.split('-')[2] ?? '0', 10) : 0
@@ -287,7 +284,7 @@ export function DateTimePicker({
   onChange,
   className = '',
 }: DateTimePickerProps) {
-  const datePart = value ? value.slice(0, 10) : new Date().toISOString().slice(0, 10)
+  const datePart = value ? value.slice(0, 10) : toLocalDateInput()
   const timePart = value && value.length >= 16 ? value.slice(11, 16) : '12:00'
 
   const handleDateChange = (newDate: string) => {

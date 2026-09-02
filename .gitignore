@@ -10,6 +10,9 @@ dist-ssr/
 .env.local
 .env.*.local
 
+# Local backups
+backups/
+
 # Logs
 *.log
 npm-debug.log*

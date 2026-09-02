@@ -3,12 +3,14 @@ import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
+import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
 import { CategorySymbolIcon, CloseIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
-import { formatRp, getPresetDateRange } from '../utils'
+import { formatRp, getPresetDateRange, getWitaDateParts } from '../utils'
 
 export function Budgets() {
   const qc = useQueryClient()
@@ -16,13 +18,16 @@ export function Budgets() {
 
   const [showForm, setShowForm] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [pageSize, setPageSize] = useState<PageSize>(10)
+  const [page, setPage] = useState(0)
 
   const now = new Date()
-  const month = now.getMonth() + 1
-  const year = now.getFullYear()
+  const witaToday = getWitaDateParts(now)
+  const month = witaToday.month
+  const year = witaToday.year
   const { from, to } = getPresetDateRange('this_month')
 
-  const { data: budgets = [] } = useQuery({
+  const { data: budgets = [], isLoading: budgetsLoading } = useQuery({
     queryKey: ['budgets', month, year],
     queryFn: () => api.budgets.list(month, year),
   })
@@ -56,6 +61,11 @@ export function Budgets() {
     const pct = parseFloat(b.limit_amount) > 0 ? (spent / parseFloat(b.limit_amount)) * 100 : 0
     return { ...b, spent, pct }
   })
+  const budgetTotalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(budgetsWithSpend.length / pageSize))
+  const budgetPage = Math.min(page, budgetTotalPages - 1)
+  const visibleBudgets = pageSize === 'all'
+    ? budgetsWithSpend
+    : budgetsWithSpend.slice(budgetPage * pageSize, (budgetPage + 1) * pageSize)
 
   return (
     <div className="w-full min-w-0 max-w-5xl animate-fade-in p-4 sm:p-6 md:p-8 flex flex-col gap-5">
@@ -73,14 +83,18 @@ export function Budgets() {
         </Button>
       </div>
 
-      {budgetsWithSpend.length === 0 && (
-        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
-          <p className="text-xs text-[var(--color-ink-muted)]">Belum ada limit budget yang diatur bulan ini.</p>
-        </div>
+      {budgetsLoading && <ListSkeleton rows={4} />}
+      {!budgetsLoading && budgetsWithSpend.length === 0 && (
+        <EmptyState
+          title="Belum ada budget bulan ini"
+          description="Atur limit pengeluaran berdasarkan kategori."
+          actionLabel="Set Budget Kategori"
+          onAction={() => setShowForm(true)}
+        />
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {budgetsWithSpend.map((b) => {
+        {visibleBudgets.map((b) => {
           const cat = catMap[b.category_id]
           const isOver = b.pct >= 100
           const isNear = b.pct >= 80 && !isOver
@@ -134,6 +148,17 @@ export function Budgets() {
           )
         })}
       </div>
+
+      {budgetsWithSpend.length > 0 && (
+        <Pagination
+          totalItems={budgetsWithSpend.length}
+          pageSize={pageSize}
+          page={budgetPage}
+          onPageSizeChange={setPageSize}
+          onPageChange={setPage}
+          label="budget"
+        />
+      )}
 
       {showForm && (
         <BudgetForm

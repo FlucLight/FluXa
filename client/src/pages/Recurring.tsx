@@ -1,14 +1,38 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import type { RecurringInterval } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
+import { EmptyState, ListSkeleton } from '../components/ListStates'
+import { FilterBar } from '../components/FilterBar'
+import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { Field, Input } from '../components/Form'
 import { CategorySymbolIcon, CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
-import { formatRp } from '../utils'
+import { formatDateShort, formatRp, type SortOrder } from '../utils'
+
+const INTERVAL_OPTIONS: SelectOption[] = [
+  { value: 'day:3', label: 'Per 3 hari' },
+  { value: 'week:1', label: 'Per minggu' },
+  { value: 'week:2', label: 'Per 2 minggu' },
+  { value: 'month:1', label: 'Per bulan' },
+]
+
+const STATUS_OPTIONS: SelectOption[] = [
+  { value: '', label: 'Semua Status' },
+  { value: 'active', label: 'Aktif' },
+  { value: 'inactive', label: 'Nonaktif' },
+  { value: 'completed', label: 'Target tercapai' },
+]
+
+function intervalLabel(interval: RecurringInterval, steps: number): string {
+  if (interval === 'day') return `Per ${steps} hari`
+  if (interval === 'week') return steps === 1 ? 'Per minggu' : `Per ${steps} minggu`
+  return steps === 1 ? 'Per bulan' : `Per ${steps} bulan`
+}
 
 export function Recurring() {
   const qc = useQueryClient()
@@ -16,6 +40,10 @@ export function Recurring() {
 
   const [showForm, setShowForm] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [statusFilter, setStatusFilter] = useState('')
+  const [sort, setSort] = useState<SortOrder | ''>('')
+  const [pageSize, setPageSize] = useState<PageSize>(10)
+  const [page, setPage] = useState(0)
 
   const { data: items = [], isLoading } = useQuery({
     queryKey: ['recurring'],
@@ -31,6 +59,29 @@ export function Recurring() {
   })
   const catMap = Object.fromEntries(categories.map((c) => [c.id, c]))
   const pmMap = Object.fromEntries(pms.map((p) => [p.id, p]))
+  const filteredItems = items
+    .filter((item) => {
+      if (statusFilter === 'active') return item.is_active
+      if (statusFilter === 'inactive') return !item.is_active
+      if (statusFilter === 'completed') return item.target_count !== null && item.times_generated >= item.target_count
+      return true
+    })
+    .slice()
+    .sort((a, b) => {
+      if (!sort) return 0
+      if (sort === 'most' || sort === 'least') {
+        const difference = parseFloat(a.amount) - parseFloat(b.amount)
+        return sort === 'most' ? -difference : difference
+      }
+      const aDate = a.next_due_at ? new Date(a.next_due_at).getTime() : Number.POSITIVE_INFINITY
+      const bDate = b.next_due_at ? new Date(b.next_due_at).getTime() : Number.POSITIVE_INFINITY
+      return sort === 'oldest' ? aDate - bDate : bDate - aDate
+    })
+  const recurringTotalPages = pageSize === 'all' ? 1 : Math.max(1, Math.ceil(filteredItems.length / pageSize))
+  const recurringPage = Math.min(page, recurringTotalPages - 1)
+  const visibleItems = pageSize === 'all'
+    ? filteredItems
+    : filteredItems.slice(recurringPage * pageSize, (recurringPage + 1) * pageSize)
 
   const toggleMut = useMutation({
     mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
@@ -69,17 +120,52 @@ export function Recurring() {
         </Button>
       </div>
 
-      {isLoading && <p className="text-xs text-[var(--color-ink-faint)]">Memuat data...</p>}
+      <FilterBar
+        preset="all"
+        onPresetChange={() => undefined}
+        showPeriod={false}
+        statusFilter={statusFilter}
+        onStatusFilterChange={(value) => {
+          setStatusFilter(value)
+          setPage(0)
+        }}
+        statusOptions={STATUS_OPTIONS}
+        sort={sort}
+        onSortChange={(value) => {
+          setSort(value)
+          setPage(0)
+        }}
+        onReset={() => {
+          setStatusFilter('')
+          setSort('')
+          setPage(0)
+        }}
+      />
+
+      {isLoading && <ListSkeleton rows={pageSize === 'all' ? 6 : Number(pageSize)} />}
       {!isLoading && items.length === 0 && (
-        <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-8 text-center shadow-xs">
-          <p className="text-xs text-[var(--color-ink-muted)]">Belum ada jadwal tagihan rutin.</p>
-        </div>
+        <EmptyState
+          title="Belum ada jadwal tagihan"
+          description="Tambahkan tagihan rutin untuk mengatur pembayaran otomatis."
+          actionLabel="Tambah Tagihan"
+          onAction={() => setShowForm(true)}
+        />
+      )}
+
+      {!isLoading && items.length > 0 && filteredItems.length === 0 && (
+        <EmptyState
+          title="Tidak ada tagihan sesuai filter"
+          description="Coba ubah status atau urutan daftar."
+        />
       )}
 
       <div className="flex flex-col gap-2.5">
-        {items.map((item) => {
+        {visibleItems.map((item) => {
           const cat = catMap[item.category_id]
           const isExpense = item.type === 'expense'
+          const progress = item.target_count === null
+            ? null
+            : Math.min(100, (item.times_generated / item.target_count) * 100)
           return (
             <div
               key={item.id}
@@ -109,8 +195,30 @@ export function Recurring() {
                   )}
                 </div>
                 <div className="text-[11px] text-[var(--color-ink-muted)] mt-1">
-                  Tanggal {item.day_of_month} tiap bulan · {cat ? cat.name : '-'} ·{' '}
+                  {intervalLabel(item.interval, item.interval_steps)}
+                  {item.interval === 'month' ? ` tanggal ${item.day_of_month}` : ''} · {cat ? cat.name : '-'} ·{' '}
                   {pmMap[item.payment_method_id]?.name ?? '-'}
+                  {item.next_due_at ? ` · berikutnya ${formatDateShort(item.next_due_at)}` : ''}
+                </div>
+                <div className="mt-2 max-w-md">
+                  {progress === null ? (
+                    <span className="text-[11px] text-[var(--color-ink-faint)]">
+                      Sudah dibayar {item.times_generated} kali
+                    </span>
+                  ) : (
+                    <>
+                      <div className="mb-1 flex items-center justify-between text-[11px] text-[var(--color-ink-faint)]">
+                        <span>Pembayaran</span>
+                        <span className="tabular-nums">{item.times_generated}/{item.target_count}</span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-[2px] bg-[var(--color-surface-sunken)]">
+                        <div
+                          className="h-full rounded-[2px] bg-[var(--color-positive)] transition-all"
+                          style={{ width: `${progress}%` }}
+                        />
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -141,6 +249,17 @@ export function Recurring() {
           )
         })}
       </div>
+
+      {filteredItems.length > 0 && (
+        <Pagination
+          totalItems={filteredItems.length}
+          pageSize={pageSize}
+          page={recurringPage}
+          onPageSizeChange={setPageSize}
+          onPageChange={setPage}
+          label="tagihan"
+        />
+      )}
 
       {showForm && (
         <RecurringForm categories={categories} pms={pms} onClose={() => setShowForm(false)} />
@@ -179,7 +298,10 @@ function RecurringForm({
     payment_method_id: '',
     amount: '',
     description: '',
+    interval: 'month' as RecurringInterval,
+    interval_steps: '1',
     day_of_month: '1',
+    target_count: '',
   })
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
   const filtered = categories.filter((c) => c.type === form.type)
@@ -192,7 +314,10 @@ function RecurringForm({
         payment_method_id: form.payment_method_id,
         amount: parseFloat(form.amount),
         description: form.description,
+        interval: form.interval,
+        interval_steps: parseInt(form.interval_steps),
         day_of_month: parseInt(form.day_of_month),
+        target_count: form.target_count ? parseInt(form.target_count) : null,
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['recurring'] })
@@ -264,6 +389,47 @@ function RecurringForm({
           />
         </Field>
 
+        <Field label="Interval Pembayaran">
+          <CustomSelect
+            value={`${form.interval}:${form.interval_steps}`}
+            onChange={(value) => {
+              const [interval, steps] = value.split(':')
+              setForm((current) => ({
+                ...current,
+                interval: interval as RecurringInterval,
+                interval_steps: steps ?? '1',
+              }))
+            }}
+            options={INTERVAL_OPTIONS}
+          />
+        </Field>
+
+        {form.interval === 'month' && (
+          <Field label="Tanggal Eksekusi Tiap Bulan (1–28)">
+            <Input
+              type="number"
+              min="1"
+              max="28"
+              required
+              value={form.day_of_month}
+              onChange={(e) => set('day_of_month', e.target.value)}
+              className="!py-2"
+            />
+          </Field>
+        )}
+
+        <Field label="Target Pembayaran (opsional)">
+          <Input
+            type="number"
+            min="1"
+            max="100000"
+            value={form.target_count}
+            onChange={(e) => set('target_count', e.target.value)}
+            placeholder="Contoh: 12 kali"
+            className="!py-2"
+          />
+        </Field>
+
         <Field label="Kategori">
           <CustomSelect
             value={form.category_id}
@@ -280,18 +446,6 @@ function RecurringForm({
             onChange={(v) => set('payment_method_id', v)}
             options={pmOptions}
             placeholder="Pilih metode bayar..."
-          />
-        </Field>
-
-        <Field label="Tanggal Eksekusi Tiap Bulan (1–28)">
-          <Input
-            type="number"
-            min="1"
-            max="28"
-            required
-            value={form.day_of_month}
-            onChange={(e) => set('day_of_month', e.target.value)}
-            className="!py-2"
           />
         </Field>
 

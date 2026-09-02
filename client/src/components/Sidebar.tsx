@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom'
 import {
   BudgetIcon,
   CloseIcon,
+  CreditCardIcon,
   DashboardIcon,
   ExportIcon,
   RecurringIcon,
@@ -14,6 +15,7 @@ import { ThemeToggle } from './ThemeToggle'
 const links = [
   { to: '/', label: 'Dashboard', icon: DashboardIcon },
   { to: '/transactions', label: 'Transaksi', icon: TransactionIcon },
+  { to: '/accounts', label: 'Akun & Saldo', icon: CreditCardIcon },
   { to: '/transfers', label: 'Transfer', icon: TransferIcon },
   { to: '/budgets', label: 'Budget', icon: BudgetIcon },
   { to: '/recurring', label: 'Berulang', icon: RecurringIcon },

@@ -12,21 +12,39 @@ const DAYS: Record<string, number> = {
 
 const NON_MINGGU_DAYS = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'ahad'] as const
 
+function witaCalendar(now: Date): Date {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Makassar',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(now)
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]))
+  return new Date(Date.UTC(Number(values['year']), Number(values['month']) - 1, Number(values['day'])))
+}
+
+function atWitaNoon(date: Date): Date {
+  const year = date.getUTCFullYear()
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0')
+  const day = String(date.getUTCDate()).padStart(2, '0')
+  return new Date(`${year}-${month}-${day}T12:00:00+08:00`)
+}
+
 function atNPeriodsAgo(now: Date, unit: 'hari' | 'minggu' | 'bulan' | 'tahun', n: number): Date {
-  const d = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0)
-  if (unit === 'hari') d.setDate(d.getDate() - n)
-  else if (unit === 'minggu') d.setDate(d.getDate() - n * 7)
-  else if (unit === 'bulan') d.setMonth(d.getMonth() - n)
-  else d.setFullYear(d.getFullYear() - n)
-  return d
+  const date = witaCalendar(now)
+  if (unit === 'hari') date.setUTCDate(date.getUTCDate() - n)
+  else if (unit === 'minggu') date.setUTCDate(date.getUTCDate() - n * 7)
+  else if (unit === 'bulan') date.setUTCMonth(date.getUTCMonth() - n)
+  else date.setUTCFullYear(date.getUTCFullYear() - n)
+  return atWitaNoon(date)
 }
 
 function previousWeekday(now: Date, wd: number): Date {
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0, 0)
-  let diff = today.getDay() - wd
+  const today = witaCalendar(now)
+  let diff = today.getUTCDay() - wd
   if (diff <= 0) diff += 7
-  today.setDate(today.getDate() - diff)
-  return today
+  today.setUTCDate(today.getUTCDate() - diff)
+  return atWitaNoon(today)
 }
 
 export function extractDatePhrase(text: string, now = new Date()): ParsedDate | null {

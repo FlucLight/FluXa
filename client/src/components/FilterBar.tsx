@@ -2,7 +2,7 @@ import { CustomSelect, type SelectOption } from './CustomSelect'
 import { DatePicker } from './DatePicker'
 import { CalendarIcon, CategorySymbolIcon, CloseIcon, CreditCardIcon } from './Icons'
 import { Input } from './Form'
-import { PRESET_OPTIONS, type PeriodPreset } from '../utils'
+import { PRESET_OPTIONS, SORT_OPTIONS, type PeriodPreset, type SortOrder } from '../utils'
 
 interface CategoryItem {
   id: string
@@ -34,8 +34,14 @@ interface FilterBarProps {
   onTypeFilterChange?: (t: string) => void
   search?: string
   onSearchChange?: (q: string) => void
+  sort?: SortOrder | ''
+  onSortChange?: (s: SortOrder | '') => void
+  statusFilter?: string
+  onStatusFilterChange?: (status: string) => void
+  statusOptions?: SelectOption[]
   onReset?: () => void
   quickPresets?: PeriodPreset[]
+  showPeriod?: boolean
 }
 
 const DEFAULT_QUICK_PRESETS: PeriodPreset[] = ['today', '3days', '7days', 'this_month', '3months', 'all']
@@ -57,17 +63,25 @@ export function FilterBar({
   onTypeFilterChange,
   search,
   onSearchChange,
+  sort = '',
+  onSortChange,
+  statusFilter = '',
+  onStatusFilterChange,
+  statusOptions = [],
   onReset,
   quickPresets = DEFAULT_QUICK_PRESETS,
+  showPeriod = true,
 }: FilterBarProps) {
   const hasActiveFilters =
-    preset !== 'this_month' ||
+    (showPeriod && preset !== 'this_month' && preset !== 'all') ||
     Boolean(selectedCategory) ||
     Boolean(selectedPm) ||
     Boolean(typeFilter) ||
     Boolean(search) ||
-    Boolean(customFrom) ||
-    Boolean(customTo)
+    Boolean(sort) ||
+    Boolean(statusFilter) ||
+    (showPeriod && Boolean(customFrom)) ||
+    (showPeriod && Boolean(customTo))
 
   // Opsi Tipe Transaksi
   const typeOptions: SelectOption[] = [
@@ -112,61 +126,63 @@ export function FilterBar({
     })),
   ]
 
-  return (
-    <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-xs">
-      {/* Baris 1: Quick Preset Chips */}
-      <div className="flex items-center justify-between gap-2 flex-wrap">
-        <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-[11px] font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider mr-1">
-            Periode:
-          </span>
-          {quickPresets.map((p) => {
-            const opt = PRESET_OPTIONS.find((o) => o.value === p)
-            if (!opt) return null
-            const isActive = preset === p
-            return (
-              <button
-                key={p}
-                type="button"
-                onClick={() => onPresetChange(p)}
-                className={`text-xs px-2.5 py-1.5 rounded-[6px] font-medium transition-colors cursor-pointer ${
-                  isActive
-                    ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs font-semibold'
-                    : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-ink)]'
-                }`}
-              >
-                {opt.label}
-              </button>
-            )
-          })}
-          <button
-            type="button"
-            onClick={() => onPresetChange('custom')}
-            className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-[6px] font-medium transition-colors cursor-pointer ${
-              preset === 'custom'
-                ? 'bg-[var(--color-ink)] text-[var(--color-surface-raised)] shadow-xs font-semibold'
-                : 'bg-[var(--color-surface-sunken)] text-[var(--color-ink-muted)] hover:bg-[var(--color-border)] hover:text-[var(--color-ink)]'
-            }`}
-          >
-            <CalendarIcon size={12} />
-            <span>Kustom</span>
-          </button>
-        </div>
+  const periodOptions: SelectOption[] = [
+    ...quickPresets
+      .map((value) => PRESET_OPTIONS.find((option) => option.value === value))
+      .filter((option): option is (typeof PRESET_OPTIONS)[number] => Boolean(option))
+      .map((option) => ({ value: option.value, label: option.label })),
+    ...PRESET_OPTIONS
+      .filter((option) => !quickPresets.includes(option.value))
+      .map((option) => ({
+        value: option.value,
+        label: option.label,
+        icon: option.value === 'custom' ? <CalendarIcon size={13} /> : undefined,
+      })),
+  ]
 
-        {hasActiveFilters && onReset && (
-          <button
-            type="button"
-            onClick={onReset}
-            className="inline-flex items-center gap-1 text-[11px] text-[var(--color-ink-faint)] hover:text-[var(--color-negative)] transition-colors cursor-pointer font-medium px-2 py-1 rounded-[4px] hover:bg-[var(--color-surface-sunken)]"
-          >
-            <CloseIcon size={10} />
-            <span>Reset Filter</span>
-          </button>
-        )}
-      </div>
+  return (
+    <div className="sticky top-0 z-20 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-md">
+      {showPeriod && (
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">
+              Periode waktu
+            </label>
+            <div className="w-full sm:w-64">
+              <CustomSelect
+                value={preset}
+                onChange={(value) => onPresetChange(value as PeriodPreset)}
+                options={periodOptions}
+                placeholder="Pilih periode..."
+              />
+            </div>
+          </div>
+          {hasActiveFilters && onReset && (
+            <button
+              type="button"
+              onClick={onReset}
+              className="self-end inline-flex items-center gap-1 rounded-[5px] px-2 py-1 text-[11px] font-semibold text-[var(--color-ink-faint)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-negative)] sm:self-auto"
+            >
+              <CloseIcon size={11} />
+              <span>Reset Filter</span>
+            </button>
+          )}
+        </div>
+      )}
+
+      {!showPeriod && hasActiveFilters && onReset && (
+        <button
+          type="button"
+          onClick={onReset}
+          className="self-end inline-flex items-center gap-1 rounded-[5px] px-2 py-1 text-[11px] font-semibold text-[var(--color-ink-faint)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-negative)]"
+        >
+          <CloseIcon size={11} />
+          <span>Reset Filter</span>
+        </button>
+      )}
 
       {/* Baris 2: Custom Date Picker Popups */}
-      {preset === 'custom' && (
+      {showPeriod && preset === 'custom' && onCustomFromChange && onCustomToChange && (
         <div className="flex items-center gap-3 p-3 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-[8px] flex-wrap animate-in fade-in duration-100">
           <span className="text-xs text-[var(--color-ink-muted)] font-medium">Rentang:</span>
           <div className="w-full sm:w-44">
@@ -187,8 +203,7 @@ export function FilterBar({
         </div>
       )}
 
-      {/* Baris 3: Dropdowns Elegan & Search Input */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2.5 pt-2 border-t border-[var(--color-border)]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2.5 pt-2 border-t border-[var(--color-border)]">
         {onTypeFilterChange && (
           <div>
             <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
@@ -244,6 +259,34 @@ export function FilterBar({
               value={search ?? ''}
               onChange={(e) => onSearchChange(e.target.value)}
               className="!py-2"
+            />
+          </div>
+        )}
+
+        {onStatusFilterChange && (
+          <div>
+            <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
+              Status
+            </label>
+            <CustomSelect
+              value={statusFilter}
+              onChange={onStatusFilterChange}
+              options={statusOptions}
+              placeholder="Semua Status"
+            />
+          </div>
+        )}
+
+        {onSortChange && (
+          <div>
+            <label className="text-[10px] text-[var(--color-ink-faint)] uppercase tracking-wider font-semibold block mb-1">
+              Urutan
+            </label>
+            <CustomSelect
+              value={sort}
+              onChange={(value) => onSortChange(value as SortOrder | '')}
+              options={SORT_OPTIONS}
+              placeholder="Urutkan..."
             />
           </div>
         )}

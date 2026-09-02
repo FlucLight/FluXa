@@ -8,6 +8,7 @@ import { DateTimePicker } from './DatePicker'
 import { Field, Input, Textarea } from './Form'
 import { CategorySymbolIcon, CreditCardIcon } from './Icons'
 import { Modal } from './Modal'
+import { fromLocalDateTimeInput, toLocalDateTimeInput } from '../utils'
 
 type Props = { existing?: TransactionRecord; onClose: () => void }
 
@@ -28,9 +29,7 @@ export function TransactionForm({ existing, onClose }: Props) {
     category_id: existing?.category_id ?? '',
     payment_method_id: existing?.payment_method_id ?? '',
     description: existing?.description ?? '',
-    occurred_at: existing?.occurred_at
-      ? new Date(existing.occurred_at).toISOString().slice(0, 16)
-      : new Date().toISOString().slice(0, 16),
+    occurred_at: toLocalDateTimeInput(existing?.occurred_at),
   })
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
@@ -43,7 +42,7 @@ export function TransactionForm({ existing, onClose }: Props) {
         category_id: form.category_id,
         payment_method_id: form.payment_method_id,
         description: form.description || null,
-        occurred_at: new Date(form.occurred_at).toISOString(),
+        occurred_at: fromLocalDateTimeInput(form.occurred_at),
         source: 'web' as const,
         needs_review: false,
       }
@@ -53,6 +52,7 @@ export function TransactionForm({ existing, onClose }: Props) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] })
+      qc.invalidateQueries({ queryKey: ['summary-balances'] })
       onClose()
     },
   })

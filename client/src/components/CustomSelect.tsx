@@ -100,7 +100,7 @@ export function CustomSelect({
         aria-expanded={isOpen}
         aria-haspopup="listbox"
         onClick={() => setIsOpen((prev) => !prev)}
-        className={`flex items-center justify-between gap-2 w-full px-3 py-2 text-xs rounded-[6px] transition-all bg-[var(--color-surface-sunken)] border border-[var(--color-border)] text-[var(--color-ink)] hover:border-[var(--color-border-strong)] focus:outline-none focus:ring-1 focus:ring-[var(--color-focus)] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
+        className={`flex items-center justify-between gap-2 w-full px-3 py-2 text-xs rounded-[6px] transition-all bg-[var(--color-surface-raised)] border border-[var(--color-border-strong)] text-[var(--color-ink)] shadow-xs hover:bg-[var(--color-surface-sunken)] hover:border-[var(--color-ink-faint)] focus:outline-none focus:ring-2 focus:ring-[var(--color-focus)] focus:ring-offset-1 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer ${
           isOpen ? 'ring-1 ring-[var(--color-focus)] border-[var(--color-border-strong)]' : ''
         }`}
       >
@@ -146,7 +146,7 @@ export function CustomSelect({
           ref={menuRef}
           role="listbox"
           style={menuStyle}
-          className={`fixed z-[9999] min-w-[200px] overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[8px] shadow-2xl p-1 animate-dropdown-in ${
+          className={`fixed z-[9999] min-w-[200px] overflow-y-auto bg-[var(--color-surface-raised)] border border-[var(--color-border-strong)] rounded-[8px] shadow-2xl p-1 animate-dropdown-in ${
             openUpwards ? 'origin-bottom' : 'origin-top'
           }`}
         >

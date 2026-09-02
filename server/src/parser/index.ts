@@ -23,9 +23,6 @@ interface KnownCategory {
   keywords: string[] | null
 }
 
-const AMOUNT_RE =
-  /(\d[\d.,]*)(?:\s*(?:rb|ribu|k|jt|juta|m|ratus|ratus ribu))?/gi
-
 const AMOUNT_SUFFIX: Record<string, number> = {
   rb: 1_000, ribu: 1_000, k: 1_000,
   jt: 1_000_000, juta: 1_000_000,
@@ -33,14 +30,28 @@ const AMOUNT_SUFFIX: Record<string, number> = {
   ratus: 100, 'ratus ribu': 100_000,
 }
 
+function parseNumericAmount(raw: string, suffix: string): number {
+  let normalized = raw
+  if (raw.includes('.') && raw.includes(',')) {
+    normalized = raw.replace(/\./g, '').replace(',', '.')
+  } else if (raw.includes(',')) {
+    const fractionLength = raw.split(',')[1]?.length ?? 0
+    normalized = fractionLength === 3 && !suffix ? raw.replace(',', '') : raw.replace(',', '.')
+  } else if (raw.includes('.')) {
+    const parts = raw.split('.')
+    const groupedThousands = parts.length > 1 && parts.slice(1).every((part) => part.length === 3)
+    normalized = groupedThousands ? raw.replace(/\./g, '') : raw
+  }
+  return parseFloat(normalized)
+}
+
 function extractAmount(text: string): { amount: number | null; rest: string } {
   const re = /(\d[\d.,]*)(?:\s*(rb|ribu|k|jt|juta|ratus ribu|ratus|m))?/i
   const match = re.exec(text)
   if (!match) return { amount: null, rest: text }
 
-  const raw = match[1]!.replace(/\./g, '').replace(',', '.')
-  const num = parseFloat(raw)
   const suffix = match[2]?.toLowerCase() ?? ''
+  const num = parseNumericAmount(match[1]!, suffix)
   const multiplier = AMOUNT_SUFFIX[suffix] ?? 1
   const amount = Math.round(num * multiplier)
 
