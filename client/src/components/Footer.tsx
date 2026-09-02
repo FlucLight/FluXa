@@ -29,7 +29,7 @@ function SocialLink({
 export function Footer() {
   return (
     <footer className="shrink-0 border-t border-[var(--color-border)] bg-[var(--color-surface-raised)] px-6 py-4">
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-1">
         <div className="flex items-center gap-2">
           <SocialLink href="https://github.com/FlucLight" label="GitHub" bg="#24292e">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -59,8 +59,11 @@ export function Footer() {
             </svg>
           </SocialLink>
         </div>
+        <p className="text-center text-sm font-semibold text-[var(--color-ink)]">
+          Made by <a className="text-[var(--color-focus)] hover:underline" href="https://github.com/FlucLight" target="_blank" rel="noopener noreferrer">Rahmat Alfarizi</a>
+        </p>
         <p className="text-center text-[11px] text-[var(--color-ink-faint)]">
-          Dibuat dengan semangat oleh Rahmat Alfarizi · License belum ditentukan
+          Personal project · built to keep my own finances in check
         </p>
       </div>
     </footer>
