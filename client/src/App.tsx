@@ -34,8 +34,8 @@ export default function App() {
               <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                 <header className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 md:hidden">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-6 w-6 items-center justify-center rounded-[5px] bg-[var(--color-ink)] text-xs font-bold tracking-wider text-[var(--color-surface-raised)] font-display">
-                      FX
+                    <div className="flex h-6 w-6 overflow-hidden rounded-[5px]">
+                      <img src="/elaina_profil.jpg" alt="FluXa" className="h-full w-full object-cover" />
                     </div>
                     <span className="font-display text-base font-bold tracking-tight text-[var(--color-ink)]">
                       FluXa

@@ -48,8 +48,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         <div className="flex flex-col gap-1">
           <div className="px-3 py-3 mb-2 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-6 h-6 bg-[var(--color-ink)] rounded-[5px] flex items-center justify-center text-[var(--color-surface-raised)] text-xs font-bold font-display tracking-wider">
-                FX
+              <div className="h-6 w-6 overflow-hidden rounded-[5px]">
+                <img src="/elaina_profil.jpg" alt="FluXa" className="h-full w-full object-cover" />
               </div>
               <span className="text-[var(--color-ink)] font-bold text-base font-display tracking-tight">
                 FluXa
