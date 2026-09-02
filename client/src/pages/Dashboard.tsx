@@ -42,14 +42,29 @@ export function Dashboard() {
   const [selectedPm, setSelectedPm] = useState('')
   const [recentPageSize, setRecentPageSize] = useState<PageSize>(5)
   const [recentPage, setRecentPage] = useState(0)
+  const [monthNavOffset, setMonthNavOffset] = useState(0)
+
+  const monthRangeISO = (offset: number) => {
+    const today = getWitaDateParts()
+    const start = new Date(Date.UTC(today.year, today.month - 1 + offset, 1))
+    const end = new Date(Date.UTC(today.year, today.month - 1 + offset + 1, 0))
+    const pad = (n: number) => String(n).padStart(2, '0')
+    const startDate = `${start.getUTCFullYear()}-${pad(start.getUTCMonth() + 1)}-${pad(start.getUTCDate())}`
+    const endDate = `${end.getUTCFullYear()}-${pad(end.getUTCMonth() + 1)}-${pad(end.getUTCDate())}`
+    return { from: fromLocalDateInput(startDate), to: fromLocalDateInput(endDate, true) }
+  }
+
+  const monthOverride = monthNavOffset !== 0 ? monthRangeISO(monthNavOffset) : null
 
   const dateRange =
-    preset === 'custom'
-      ? {
-          from: customFrom ? fromLocalDateInput(customFrom) : undefined,
-          to: customTo ? fromLocalDateInput(customTo, true) : undefined,
-        }
-      : getPresetDateRange(preset)
+    monthOverride
+      ? { from: monthOverride.from, to: monthOverride.to }
+      : preset === 'custom'
+        ? {
+            from: customFrom ? fromLocalDateInput(customFrom) : undefined,
+            to: customTo ? fromLocalDateInput(customTo, true) : undefined,
+          }
+        : getPresetDateRange(preset)
 
   const params: Record<string, string> = {}
   if (dateRange.from) params['from'] = dateRange.from
@@ -94,6 +109,7 @@ export function Dashboard() {
     setCustomTo('')
     setSelectedCategory('')
     setSelectedPm('')
+    setMonthNavOffset(0)
     setRecentPage(0)
   }
 
@@ -198,6 +214,43 @@ export function Dashboard() {
         onPmChange={setSelectedPm}
         onReset={handleReset}
       />
+
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-3 py-2">
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            onClick={() => setMonthNavOffset((offset) => offset - 1)}
+            aria-label="Bulan sebelumnya"
+            className="flex h-7 w-7 items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] text-[var(--color-ink)] transition-colors hover:border-[var(--color-border-strong)] cursor-pointer"
+          >
+            ‹
+          </button>
+          <span className="min-w-32 text-center text-xs font-semibold text-[var(--color-ink)] tabular-nums">
+            {new Intl.DateTimeFormat('id-ID', {
+              month: 'long',
+              year: 'numeric',
+              timeZone: 'Asia/Makassar',
+            }).format(dateRange.from ? new Date(dateRange.from) : new Date())}
+          </span>
+          <button
+            type="button"
+            onClick={() => setMonthNavOffset((offset) => offset + 1)}
+            aria-label="Bulan berikutnya"
+            className="flex h-7 w-7 items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] text-[var(--color-ink)] transition-colors hover:border-[var(--color-border-strong)] cursor-pointer"
+          >
+            ›
+          </button>
+        </div>
+        {monthNavOffset !== 0 && (
+          <button
+            type="button"
+            onClick={() => setMonthNavOffset(0)}
+            className="text-[11px] font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] underline-offset-2 hover:underline cursor-pointer"
+          >
+            Kembali ke bulan ini
+          </button>
+        )}
+      </div>
 
       {isLoading ? (
         <DashboardSkeleton />

@@ -106,6 +106,35 @@ export function Recurring() {
     },
   })
 
+  const dueInfo = (iso?: Date | string | null) => {
+    if (!iso) return null
+    const due = new Date(iso)
+    if (isNaN(due.getTime())) return null
+    const today = new Date()
+    const ms = due.getTime() - today.getTime()
+    const days = Math.ceil(ms / (24 * 60 * 60 * 1000))
+    if (days < 0) return { label: `Terlewat ${Math.abs(days)} hari`, tone: 'overdue' as const }
+    if (days === 0) return { label: 'Jatuh tempo hari ini', tone: 'overdue' as const }
+    if (days === 1) return { label: 'Jatuh tempo besok', tone: 'soon' as const }
+    if (days <= 7) return { label: `Jatuh tempo ${days} hari lagi`, tone: 'soon' as const }
+    return null
+  }
+
+  const dueBadge = (info: { label: string; tone: 'overdue' | 'soon' } | null) => {
+    if (!info) return null
+    return (
+      <span
+        className={`text-[10px] px-1.5 py-0.5 rounded-[4px] font-medium ${
+          info.tone === 'overdue'
+            ? 'bg-[var(--color-negative-soft)] text-[var(--color-negative)]'
+            : 'bg-[var(--color-warning-soft)] text-[var(--color-warning)]'
+        }`}
+      >
+        {info.label}
+      </span>
+    )
+  }
+
   return (
     <div className="w-full min-w-0 max-w-5xl animate-fade-in p-4 sm:p-6 md:p-8 flex flex-col gap-5">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -193,6 +222,7 @@ export function Recurring() {
                       Nonaktif
                     </span>
                   )}
+                  {item.is_active && dueBadge(dueInfo(item.next_due_at))}
                 </div>
                 <div className="text-[11px] text-[var(--color-ink-muted)] mt-1">
                   {intervalLabel(item.interval, item.interval_steps)}

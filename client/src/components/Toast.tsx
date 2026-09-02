@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { CloseIcon, CircleAlertIcon, CircleCheckIcon, InfoIcon } from './Icons'
-import { ToastContext, type ToastMessage } from './toast-context'
+import { ToastContext, type ToastAction, type ToastMessage } from './toast-context'
 import type { ToastType } from './toast-types'
 
 export type { ToastType } from './toast-types'
@@ -8,24 +8,31 @@ export type { ToastType } from './toast-types'
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toasts, setToasts] = useState<ToastMessage[]>([])
 
-  const addToast = (message: string, type: ToastType = 'info', title?: string) => {
+  const removeToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id))
+  }
+
+  const addToast = (
+    message: string,
+    type: ToastType = 'info',
+    title?: string,
+    action?: ToastAction,
+  ) => {
     const id = Math.random().toString(36).substring(2, 9)
-    setToasts((prev) => [...prev, { id, message, type, title }])
+    setToasts((prev) => [...prev, { id, message, type, title, action }])
 
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id))
     }, 4000)
   }
 
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id))
-  }
-
   const value = {
     toast: addToast,
-    success: (msg: string, title?: string) => addToast(msg, 'success', title),
+    success: (msg: string, title?: string, action?: ToastAction) =>
+      addToast(msg, 'success', title, action),
     error: (msg: string, title?: string) => addToast(msg, 'error', title),
-    info: (msg: string, title?: string) => addToast(msg, 'info', title),
+    info: (msg: string, title?: string, action?: ToastAction) =>
+      addToast(msg, 'info', title, action),
   }
 
   return (
@@ -52,6 +59,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               <div className="flex flex-col gap-0.5">
                 {t.title && <span className="font-bold text-[var(--color-ink)]">{t.title}</span>}
                 <span className="text-[var(--color-ink-muted)] leading-relaxed">{t.message}</span>
+                {t.action && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      t.action!.onClick()
+                      removeToast(t.id)
+                    }}
+                    className="mt-1 self-start rounded-[5px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-2.5 py-1 text-[11px] font-semibold text-[var(--color-ink)] transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-border)]"
+                  >
+                    {t.action.label}
+                  </button>
+                )}
               </div>
             </div>
 

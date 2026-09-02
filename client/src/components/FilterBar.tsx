@@ -141,7 +141,7 @@ export function FilterBar({
   ]
 
   return (
-    <div className="sticky top-0 z-20 bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-md">
+    <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-md sm:sticky sm:top-0 sm:z-20">
       {showPeriod && (
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:gap-3">

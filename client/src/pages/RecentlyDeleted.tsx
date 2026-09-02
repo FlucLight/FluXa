@@ -36,7 +36,9 @@ export function RecentlyDeleted() {
     mutationFn: (id: string) => api.transactions.restore(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] })
+      qc.invalidateQueries({ queryKey: ['recent-transactions'] })
       qc.invalidateQueries({ queryKey: ['summary-balances'] })
+      qc.invalidateQueries({ queryKey: ['budgets'] })
       qc.invalidateQueries({ queryKey: ['transactions-deleted'] })
       success('Transaksi berhasil dipulihkan kembali')
       setRestoringId(null)

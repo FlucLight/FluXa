@@ -52,7 +52,9 @@ export function TransactionForm({ existing, onClose }: Props) {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['transactions'] })
+      qc.invalidateQueries({ queryKey: ['recent-transactions'] })
       qc.invalidateQueries({ queryKey: ['summary-balances'] })
+      qc.invalidateQueries({ queryKey: ['budgets'] })
       onClose()
     },
   })

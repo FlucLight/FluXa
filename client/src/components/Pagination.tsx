@@ -26,7 +26,7 @@ export function Pagination({
   const lastItem = totalItems === 0 ? 0 : pageSize === 'all' ? totalItems : Math.min(totalItems, (currentPage + 1) * pageSize)
 
   return (
-    <div className="sticky bottom-0 z-10 flex flex-col gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-4 shadow-lg sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 py-4 shadow-lg sm:sticky sm:bottom-0 sm:z-10 sm:flex-row sm:items-center sm:justify-between">
       <div className="text-sm text-[var(--color-ink-muted)]">
         Menampilkan <strong className="font-bold text-[var(--color-ink)]">{firstItem}–{lastItem}</strong> dari{' '}
         <strong className="font-bold text-[var(--color-ink)]">{totalItems}</strong> {label}
@@ -57,7 +57,7 @@ export function Pagination({
             aria-label="Halaman sebelumnya"
             onClick={() => onPageChange(Math.max(0, currentPage - 1))}
             disabled={currentPage === 0}
-            className="min-h-9 rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3.5 text-sm font-bold text-[var(--color-ink)] transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-border)] disabled:pointer-events-none disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-1 whitespace-nowrap min-h-9 rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3.5 text-sm font-bold text-[var(--color-ink)] transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-border)] disabled:pointer-events-none disabled:opacity-40"
           >
             ‹ Sebelumnya
           </button>
@@ -69,7 +69,7 @@ export function Pagination({
             aria-label="Halaman berikutnya"
             onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
             disabled={currentPage >= totalPages - 1}
-            className="min-h-9 rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3.5 text-sm font-bold text-[var(--color-ink)] transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-border)] disabled:pointer-events-none disabled:opacity-40"
+            className="inline-flex items-center justify-center gap-1 whitespace-nowrap min-h-9 rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] px-3.5 text-sm font-bold text-[var(--color-ink)] transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-border)] disabled:pointer-events-none disabled:opacity-40"
           >
             Selanjutnya ›
           </button>
