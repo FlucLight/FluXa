@@ -9,6 +9,28 @@ import * as recurringRepo from '../repositories/recurring'
 
 const OWNER_ID = 'a0000000-0000-0000-0000-000000000001'
 
+function formatCsvDate(iso: string | Date): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ''
+  const parts = new Intl.DateTimeFormat('id-ID', {
+    timeZone: 'Asia/Makassar',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(d)
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? ''
+  return `${get('day')}/${get('month')}/${get('year')} ${get('hour')}:${get('minute')}`
+}
+
+function formatCsvAmount(value: string): string {
+  const num = Number(value)
+  if (!Number.isFinite(num)) return value
+  return String(Math.round(num * 100) / 100)
+}
+
 export async function exportCsv(req: Request, res: Response): Promise<void> {
   const { from, to } = req.query as Record<string, string | undefined>
   const txs = await txRepo.findAll({ from, to, category_id: undefined, payment_method_id: undefined, type: undefined, deleted: false, search: undefined, sort: undefined, limit: undefined, offset: undefined })
@@ -17,17 +39,19 @@ export async function exportCsv(req: Request, res: Response): Promise<void> {
   const catMap = Object.fromEntries(categories.map(c => [c.id, c.name]))
   const pmMap = Object.fromEntries(pms.map(p => [p.id, p.name]))
 
-  const header = ['id', 'tanggal', 'tipe', 'jumlah', 'kategori', 'metode', 'keterangan', 'source']
-  const rows = txs.map(t => [
-    t.id,
-    new Date(t.occurred_at).toISOString(),
-    t.type,
-    t.amount,
-    catMap[t.category_id] ?? '',
-    pmMap[t.payment_method_id] ?? '',
-    (t.description ?? '').replace(/"/g, '""'),
-    t.source,
-  ].map(v => `"${v}"`).join(','))
+  const header = ['tanggal', 'tipe', 'jumlah', 'kategori', 'metode', 'keterangan', 'sumber']
+  const rows = txs
+    .slice()
+    .sort((a, b) => new Date(a.occurred_at).getTime() - new Date(b.occurred_at).getTime())
+    .map(t => [
+      formatCsvDate(t.occurred_at),
+      t.type === 'expense' ? 'Pengeluaran' : 'Pemasukan',
+      formatCsvAmount(t.amount),
+      catMap[t.category_id] ?? '',
+      pmMap[t.payment_method_id] ?? '',
+      (t.description ?? '').replace(/"/g, '""'),
+      t.source,
+    ].map(v => `"${v}"`).join(','))
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8')
   res.setHeader('Content-Disposition', 'attachment; filename="transaksi.csv"')

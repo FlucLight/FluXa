@@ -3,6 +3,16 @@ import { useRef, useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { useToast } from '../components/useToast'
+import { getWitaDateParts } from '../utils'
+
+function pad(n: number): string {
+  return String(n).padStart(2, '0')
+}
+
+function transactionFileName(): string {
+  const { year, month, day } = getWitaDateParts()
+  return `transaksi (${pad(day)}-${pad(month)}-${year}).csv`
+}
 
 export function Export() {
   const qc = useQueryClient()
@@ -69,7 +79,7 @@ export function Export() {
               onClick={() => {
                 api.export.csv()
                   .then((b) => {
-                    download(b, 'transaksi.csv')
+                    download(b, transactionFileName())
                     success('File CSV transaksi berhasil diunduh')
                   })
                   .catch((err) => toastError((err as Error).message, 'Gagal Download'))
