@@ -2,6 +2,7 @@ import { Suspense, lazy, useState } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
 import { ErrorBoundary } from './components/ErrorBoundary'
+import { Footer } from './components/Footer'
 import { QuickInput } from './components/QuickInput'
 import { Sidebar } from './components/Sidebar'
 import { MenuIcon } from './components/Icons'
@@ -70,6 +71,7 @@ export default function App() {
                   </Routes>
                   </Suspense>
                 </main>
+                <Footer />
               </div>
             </div>
           </BrowserRouter>
