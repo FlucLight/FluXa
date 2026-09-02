@@ -51,25 +51,27 @@ export default function App() {
                   </button>
                 </header>
                 <QuickInput />
-                <main className="min-w-0 flex-1 overflow-y-auto">
-                  <Suspense
-                    fallback={
-                      <div className="flex min-h-[40vh] items-center justify-center">
-                        <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-focus)]" />
-                      </div>
-                    }
-                  >
-                    <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/accounts" element={<Accounts />} />
-                    <Route path="/transactions" element={<Transactions />} />
-                    <Route path="/transfers" element={<Transfers />} />
-                    <Route path="/budgets" element={<Budgets />} />
-                    <Route path="/recurring" element={<Recurring />} />
-                    <Route path="/export" element={<Export />} />
-                    <Route path="/deleted" element={<RecentlyDeleted />} />
-                  </Routes>
-                  </Suspense>
+                <main className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+                  <div className="flex-1">
+                    <Suspense
+                      fallback={
+                        <div className="flex min-h-[40vh] items-center justify-center">
+                          <span className="h-5 w-5 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-focus)]" />
+                        </div>
+                      }
+                    >
+                      <Routes>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/accounts" element={<Accounts />} />
+                        <Route path="/transactions" element={<Transactions />} />
+                        <Route path="/transfers" element={<Transfers />} />
+                        <Route path="/budgets" element={<Budgets />} />
+                        <Route path="/recurring" element={<Recurring />} />
+                        <Route path="/export" element={<Export />} />
+                        <Route path="/deleted" element={<RecentlyDeleted />} />
+                      </Routes>
+                    </Suspense>
+                  </div>
                   <Footer />
                 </main>
               </div>
