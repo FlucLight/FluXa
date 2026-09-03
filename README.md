@@ -2,38 +2,34 @@
 
 <img src="https://img.shields.io/badge/FluXa-Personal%20Finance-334155?style=for-the-badge&labelColor=1B1C1F&color=334155" alt="FluXa Personal Finance" height="40">
 
-### Personal finance, clear and under control.
+### Catat, pantau, dan kendalikan keuangan pribadimu — cukup lewat chat.
 
-Web app + **bot Telegram** untuk mencatat pemasukan, pengeluaran, transfer dana, budget, dan transaksi rutin — cukup chat, tanpa spreadsheet yang berantakan.
+FluXa adalah aplikasi pencatatan keuangan pribadi dengan dua pintu masuk: **web app** yang responsif dan **bot Telegram**. Tanpa spreadsheet berantakan, tanpa biaya LLM.
 
 <p>
-  <img src="https://img.shields.io/badge/Telegram%20Bot-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&labelColor=1B1C1F" alt="Telegram Bot">
-  <img src="https://img.shields.io/badge/Quick%20Input-Live%20Parse-3D7C72?style=for-the-badge&labelColor=1B1C1F" alt="Quick Input">
-  <img src="https://img.shields.io/badge/Backups-Automatic-2E7D5B?style=for-the-badge&labelColor=1B1C1F" alt="Automatic Backups">
+  <img src="https://img.shields.io/badge/React-19-4F7C8A?style=flat-square&logo=react&logoColor=white" alt="React 19">
+  <img src="https://img.shields.io/badge/TypeScript-6%2B-356B8C?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript 6+">
+  <img src="https://img.shields.io/badge/Express-5-3F454B?style=flat-square&logo=express&logoColor=white" alt="Express 5">
+  <img src="https://img.shields.io/badge/PostgreSQL-14%2B-4B6F9E?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL 14+">
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-3A7887?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
+  <img src="https://img.shields.io/badge/Telegram%20Bot-26A5E4?style=flat-square&logo=telegram&logoColor=white" alt="Telegram Bot">
 </p>
 
 <p>
-  <img src="https://img.shields.io/github/last-commit/FlucLight/personal-finance-tracker?style=for-the-badge&label=updated&labelColor=5A5C61&color=2E7D5B" alt="Last update">
-  <img src="https://img.shields.io/github/commit-activity/y/FlucLight/personal-finance-tracker?style=for-the-badge&label=activity&labelColor=5A5C61&color=A9782E" alt="Commit activity">
-  <img src="https://img.shields.io/badge/status-active%20development-3D7C72?style=for-the-badge&labelColor=ECECE9" alt="Active development">
+  <img src="https://img.shields.io/github/last-commit/FlucLight/personal-finance-tracker?style=flat-square&label=updated&color=2E7D5B" alt="Last update">
+  <img src="https://img.shields.io/badge/status-active%20development-3D7C72?style=flat-square" alt="Active development">
+  <img src="https://img.shields.io/badge/license-unlicensed-lightgrey?style=flat-square" alt="License">
 </p>
 
 <p>
-  <img src="https://img.shields.io/badge/React-19-4F7C8A?style=for-the-badge&logo=react&logoColor=white" alt="React 19">
-  <img src="https://img.shields.io/badge/TypeScript-6%2B-356B8C?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 6+">
-  <img src="https://img.shields.io/badge/Express-5-3F454B?style=for-the-badge&logo=express&logoColor=white" alt="Express 5">
-  <img src="https://img.shields.io/badge/PostgreSQL-14%2B-4B6F9E?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL 14+">
-  <img src="https://img.shields.io/badge/Tailwind_CSS-4-3A7887?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS 4">
-</p>
-
-<p>
-  <a href="#quick-start"><b>Quick Start</b></a> ·
+  <a href="#tentang-fluxa"><b>Tentang</b></a> ·
   <a href="#fitur-unggulan"><b>Fitur Unggulan</b></a> ·
   <a href="#bot-telegram"><b>Bot Telegram</b></a> ·
-  <a href="#fitur"><b>Semua Fitur</b></a> ·
+  <a href="#quick-start"><b>Quick Start</b></a> ·
+  <a href="#fitur-lengkap"><b>Fitur Lengkap</b></a> ·
   <a href="#cara-menggunakan"><b>Cara Pakai</b></a> ·
   <a href="#api"><b>API</b></a> ·
-  <a href="https://github.com/FlucLight/personal-finance-tracker"><b>Repository</b></a>
+  <a href="#roadmap"><b>Roadmap</b></a>
 </p>
 
 </div>
@@ -43,9 +39,11 @@ Web app + **bot Telegram** untuk mencatat pemasukan, pengeluaran, transfer dana,
 > [!NOTE]
 > Bahasa yang digunakan pada FluXa dan dokumentasi ini adalah Bahasa Indonesia, disesuaikan dengan target pengguna utama.
 
+<br>
+
 ## Tentang FluXa
 
-FluXa adalah sistem pencatatan keuangan pribadi dengan **dua pintu masuk**: **web app** yang responsif dan **bot Telegram**. Data tersimpan di PostgreSQL, backend menyediakan REST API, dan frontend menampilkan ringkasan finansial dalam dashboard yang bersih — dengan desain minimalis hitam-putih beraksen hijau & merah untuk pemasukan/pengeluaran.
+Data tersimpan di PostgreSQL, backend menyediakan REST API, dan frontend menampilkan ringkasan finansial dalam dashboard yang bersih — desain minimalis hitam-putih beraksen hijau & merah untuk pemasukan/pengeluaran.
 
 Inti dari FluXa adalah **Quick Input**: tulis transaksi seperti sedang mengobrol, dan sistem mem-parsing-nya menjadi data terstruktur — di web maupun di Telegram, tanpa biaya LLM sama sekali.
 
@@ -58,17 +56,28 @@ Semua nominal, metode pembayaran, kategori, tanggal, dan keterangan dibaca otoma
 
 <br>
 
+<!--
+## Tampilan
+
+<div align="center">
+<img src="docs/screenshot-dashboard.png" width="800" alt="Dashboard FluXa">
+<p><i>Dashboard — ringkasan bulanan, tren, dan saldo per akun</i></p>
+</div>
+
+> Tambahkan screenshot dashboard, halaman transaksi, dan bot Telegram di sini untuk menunjukkan tampilan aslinya.
+-->
+
 ## Fitur Unggulan
 
 | # | Fitur | Keunggulan |
-|:--|:--|:--|
-| 1 | **Bot Telegram** | Catat transaksi langsung dari chat, ringkasan & saldo satu ketukan, undo/edit, backup ke chat — berjalan lokal via long polling, tanpa perlu server publik. |
+|:-:|:--|:--|
+| 1 | **Bot Telegram** | Catat transaksi langsung dari chat, ringkasan & saldo satu ketukan, undo/edit, backup ke chat — berjalan lokal via long polling, tanpa server publik. |
 | 2 | **Quick Input otomatis** | Auto-parse saat mengetik (debounce 350ms) di web, cukup satu tombol **Simpan**. Mendukung angka `15rb`, `1.5jt`, `15.000`, `15k` dan frasa tanggal seperti `kemarin`, `senin lalu`, `2 minggu lalu`. |
 | 3 | **Dashboard bulanan** | Ringkasan total, rasio tabungan, tren, breakdown kategori, saldo per akun, dan progress budget — dengan navigasi antar bulan `‹ ›`. |
 | 4 | **Manajemen akun & saldo** | Saldo awal, saldo berjalan per akun, transfer antar cash/bank/e-wallet. |
 | 5 | **Transaksi berulang** | Template tagihan/pemasukan rutin dengan interval fleksibel, progress pencapaian, dan pengingat jatuh tempo di dashboard. |
-| 6 | **Backup otomatis** | Backup JSON lengkap dijadwalkan otomatis (default tiap 24 jam, retensi 14 file), plus backup on-demand lewat bot Telegram. |
-| 7 | **Mendukung WITA** | Semantic hari & waktu konsisten dalam zona waktu `Asia/Makassar` (UTC+8), dari parser, dashboard, hingga bot. |
+| 6 | **Backup otomatis** | Backup JSON lengkap terjadwal (default tiap 24 jam, retensi 14 file), plus backup on-demand lewat bot Telegram. |
+| 7 | **Zona waktu WITA** | Semantik hari & waktu konsisten dalam `Asia/Makassar` (UTC+8), dari parser hingga dashboard dan bot. |
 
 <br>
 
@@ -76,7 +85,7 @@ Semua nominal, metode pembayaran, kategori, tanggal, dan keterangan dibaca otoma
 
 > Fitur andalan FluXa. Semua interaksi lewat chat — tanpa membuka browser.
 
-Built-in sebagai **local bot** menggunakan Telegram **long polling** (native fetch, tanpa dependency eksternal), jadi cukup jalan di mesin yang sama dengan server — **tidak perlu webhook, HTTPS, atau server publik**.
+Berjalan sebagai **local bot** menggunakan Telegram **long polling** (native `fetch`, tanpa dependency eksternal) — cukup jalan di mesin yang sama dengan server, **tidak perlu webhook, HTTPS, atau server publik**.
 
 ### Perintah
 
@@ -85,15 +94,13 @@ Built-in sebagai **local bot** menggunakan Telegram **long polling** (native fet
 | `/ringkasan` atau `/ringkasan hari\|minggu\|bulan\|semua` | Ringkasan keuangan (default: bulan berjalan) |
 | `/saldo` | Saldo setiap akun |
 | `/undo` | Batalkan transaksi Telegram terakhir |
-| `/edit` | Edit transaksi Telegram terakhir (ubah kategori, nominal, metode, tanggal, keterangan) |
+| `/edit` | Edit transaksi Telegram terakhir |
 | `/backup` | Kirim file backup JSON lengkap ke chat |
 | `/id` | Tampilkan chat ID kamu |
-| `/batal` | Batalkan proses/penyusunan yang sedang berjalan |
+| `/batal` | Batalkan proses yang sedang berjalan |
 | `/help` atau `/start` | Tampilkan bantuan & panel menu |
 
 ### Panel Menu
-
-Saat membuka chat, bot menyajikan **inline keyboard**:
 
 ```text
 [ Makan ]          [ Transportasi ]
@@ -104,16 +111,16 @@ Saat membuka chat, bot menyajikan **inline keyboard**:
 [ Backup ]         [ Bantuan ]
 ```
 
-Alur **pencatatan** dibimbing langkah demi langkah lewat tombol:
+Alur **pencatatan terpandu** dibimbing langkah demi langkah lewat tombol:
 
 1. Pilih **kategori** (Makan, Transportasi, Belanja, Tagihan, Gaji, Lainnya)
-2. Pilih **nominal** (tombol cepat seperti `10rb`, `25rb`, `100rb`) atau ketik custom (`35rb`, `1.5jt`)
+2. Pilih **nominal** (tombol cepat `10rb` / `25rb` / `100rb`) atau ketik custom (`35rb`, `1.5jt`)
 3. Pilih **metode pembayaran** (dari database, dengan alias)
-4. Pilih **tanggal** (`Hari ini`, `Kemarin`, `Tanggal lain` dengan format `YYYY-MM-DD`)
+4. Pilih **tanggal** (`Hari ini`, `Kemarin`, atau `YYYY-MM-DD`)
 5. Ketik **keterangan** (opsional)
-6. Tinjau hasil preview, tekan **Simpan** atau **Batal**
+6. Tinjau preview, tekan **Simpan** atau **Batal**
 
-Atau, langsung **ketik kalimat bebas** seperti `Gaji 5jt mandiri` dan bot menampilkan preview untuk dikonfirmasi:
+Atau langsung **ketik kalimat bebas**:
 
 ```text
 Input:  wifi 300rb mandiri
@@ -126,88 +133,13 @@ Output:
 
 ### Keamanan & Isolasi
 
-- Hanya **chat yang terdaftar** (`TELEGRAM_ALLOWED_CHAT_IDS`) yang boleh menggunakan bot.
-- Semua transaksi dan state bot di-scope per chat — `/undo` dan `/edit` hanya menyentuh transaksi yang dicatat **dari chat tersebut**.
+- Hanya **chat terdaftar** (`TELEGRAM_ALLOWED_CHAT_IDS`) yang boleh menggunakan bot.
+- Transaksi dan state bot di-scope per chat — `/undo` dan `/edit` hanya menyentuh transaksi dari chat tersebut.
 - Bot tidak pernah mengirim data ke pihak lain; backup dikirim hanya ke chat terdaftar.
 
 <br>
 
-## Fitur
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### Pencatatan
-
-- CRUD pemasukan dan pengeluaran
-- Soft delete, **hapus massal** (checkbox) + **Undo** via toast
-- Restore transaksi dari "Terhapus Baru-baru ini"
-- Input tanggal & waktu manual, dukung **backdating** via frasa tanggal
-- Format mata uang Rupiah (angka tabular)
-- Kategori & payment method dari database, dengan alias
-
-### Quick Input
-
-- Parser rule-based murni — **tanpa biaya LLM**
-- Auto-parse saat mengetik (debounce 350ms), simpan 1 klik
-- Nominal: `15000`, `15.000`, `15rb`, `15 ribu`, `15k`, `1.5jt`
-- Frasa tanggal: `hari ini`, `kemarin`, `kemarin lusa`, `senin lalu`, `minggu lalu`, `2 minggu yang lalu`, `bulan lalu`, `3 hari yang lalu`, dll (sesuai zona WITA)
-- Pencocokan kategori via keyword & payment method via nama/alias
-- Confidence `high` / `low`; transaksi tidak yakin ditandai `review`
-
-### Dashboard
-
-- Total pemasukan, pengeluaran, saldo bersih & rasio tabungan
-- Navigasi bulan `‹ ›` dengan tombol "Kembali ke bulan ini"
-- Tren pemasukan & pengeluaran, breakdown per kategori
-- Saldo setiap akun, status & progress budget
-- Transaksi terbaru dan **pengingat transaksi rutin** yang jatuh tempo
-- Filter periode preset (Hari Ini, 3 Hari, 7 Hari, Bulan Ini, dst) & kustom
-
-</td>
-<td width="50%" valign="top">
-
-### Pengelolaan Dana
-
-- Transfer antar cash, bank, e-wallet — tanpa menyentuh total saldo
-- Saldo awal & saldo berjalan per akun
-- Budget bulanan per kategori dengan progress bar
-- Transaksi berulang: interval harian/mingguan/bulanan, tanggal 1–28, target & progress pencapaian
-- Auto-generate transaksi rutin saat server aktif
-
-### Backup & Import
-
-- Export transaksi ke **CSV**
-- **Backup otomatis berkala** (JSON) — interval & retensi bisa diatur via env
-- Import JSON (v2) mencakup kategori, payment method, saldo (incl. saldo awal), transfer, & transaksi berulang, dengan pencegahan duplikasi ID
-- Backup **on-demand dari bot Telegram** (`/backup`)
-
-### Tampilan
-
-- Mode Light & Dark
-- Custom modal, toast (dengan aksi Undo), dropdown, calendar picker
-- Layout responsif — **kartu list di mobile**, tabel penuh di desktop
-- Filter sticky hanya di desktop (mobile bebas hambatan gulir)
-- Sidebar desktop → drawer di layar kecil
-
-### Rekayasa
-
-- Monorepo npm workspaces: `client` / `server` / `shared` (tipe bersama)
-- REST API divalidasi Zod, repository pattern
-- Code-splitting dengan `React.lazy` (bundle utama ~288 kB)
-- Test parser self-check (`npm run test:parser`) & test utilitas (`npm run test:utils`)
-- Dukungan penuh zona waktu **WITA (Asia/Makassar)**
-
-</td>
-</tr>
-</table>
-
-<br>
-
 ## Teknologi
-
-<div align="center">
 
 | Layer | Teknologi |
 |:--|:--|
@@ -222,8 +154,6 @@ Output:
 | **Validation** | Zod |
 | **Test** | `node:test` + `tsx` |
 | **Monorepo** | npm workspaces |
-
-</div>
 
 <br>
 
@@ -280,7 +210,6 @@ npm install
 ```powershell
 Copy-Item .env.example .env
 ```
-
 </details>
 
 <details>
@@ -289,7 +218,6 @@ Copy-Item .env.example .env
 ```bash
 cp .env.example .env
 ```
-
 </details>
 
 Isi `.env`:
@@ -320,7 +248,7 @@ npm run migrate    # membuat tabel & data default
 
 ### 4. Jalankan Development Server
 
-Butuh dua terminal dari root project; **Terminal 1 menjalankan backend + bot Telegram**:
+Butuh dua terminal aktif dari root project:
 
 ```bash
 # Terminal 1 — backend (REST API + backup + bot Telegram)
@@ -337,21 +265,81 @@ npm run dev:client
 | Health check | `GET http://localhost:5000/health` |
 
 > [!WARNING]
-> Jika hanya menjalankan `npm run dev:client` tanpa backend, permintaan `/api/*` akan gagal (koneksi ditolak). Kedua terminal harus aktif.
-
-Jika backend tidak dijalankan, sebenarnya web app tetap bisa dibuka tapi semua data tidak akan muncul.
+> Menjalankan `npm run dev:client` tanpa backend akan membuat semua permintaan `/api/*` gagal (koneksi ditolak). Kedua terminal harus aktif.
 
 ### 5. Aktifkan Bot Telegram
 
 1. Buat bot lewat [@BotFather](https://t.me/BotFather) dan salin token ke `TELEGRAM_BOT_TOKEN`.
-2. Jalankan server tanpa `TELEGRAM_ALLOWED_CHAT_IDS` — bot masuk **mode setup**: balas pesan mana pun dengan chat ID kamu, atau kirim `/id`.
-3. Isi `TELEGRAM_ALLOWED_CHAT_IDS=123456789` (pisahkan beberapa chat ID dengan koma), lalu restart server.
+2. Jalankan server tanpa `TELEGRAM_ALLOWED_CHAT_IDS` — bot masuk **mode setup**: balas pesan apa pun dengan chat ID kamu, atau kirim `/id`.
+3. Isi `TELEGRAM_ALLOWED_CHAT_IDS=123456789` (pisahkan beberapa ID dengan koma), lalu restart server.
 4. Buka chat bot, tekan **Start** atau `/start` — panel menu muncul.
 
 ```text
 [telegram] Mode setup: kirim pesan untuk mendapatkan chat ID
 [telegram] Polling aktif untuk @FluXaFinanceBot
 ```
+
+<br>
+
+## Fitur Lengkap
+
+<table>
+<tr>
+<td width="50%" valign="top">
+
+**Pencatatan**
+- CRUD pemasukan dan pengeluaran
+- Soft delete, hapus massal (checkbox) + Undo via toast
+- Restore transaksi dari "Terhapus Baru-baru ini"
+- Backdating via frasa tanggal
+- Format mata uang Rupiah (angka tabular)
+- Kategori & payment method dari database, dengan alias
+
+**Quick Input**
+- Parser rule-based murni — tanpa biaya LLM
+- Auto-parse saat mengetik (debounce 350ms)
+- Nominal: `15000`, `15.000`, `15rb`, `15 ribu`, `15k`, `1.5jt`
+- Frasa tanggal: `hari ini`, `kemarin`, `senin lalu`, `2 minggu yang lalu`, dll
+- Confidence `high` / `low`; transaksi tidak yakin ditandai `review`
+
+**Dashboard**
+- Total pemasukan, pengeluaran, saldo bersih & rasio tabungan
+- Navigasi bulan `‹ ›` + "Kembali ke bulan ini"
+- Tren, breakdown kategori, saldo per akun, progress budget
+- Transaksi terbaru & pengingat transaksi rutin
+- Filter periode preset & kustom
+
+</td>
+<td width="50%" valign="top">
+
+**Pengelolaan Dana**
+- Transfer antar cash, bank, e-wallet — tanpa memengaruhi total saldo
+- Saldo awal & saldo berjalan per akun
+- Budget bulanan per kategori dengan progress bar
+- Transaksi berulang: interval harian/mingguan/bulanan, target & progress
+- Auto-generate transaksi rutin saat server aktif
+
+**Backup & Import**
+- Export transaksi ke CSV
+- Backup otomatis berkala (JSON) — interval & retensi via env
+- Import JSON (v2): kategori, payment method, saldo, transfer, transaksi berulang, dengan pencegahan duplikasi ID
+- Backup on-demand dari bot Telegram (`/backup`)
+
+**Tampilan**
+- Mode Light & Dark
+- Custom modal, toast (dengan aksi Undo), dropdown, calendar picker
+- Layout responsif — kartu list di mobile, tabel penuh di desktop
+- Sidebar desktop → drawer di layar kecil
+
+**Rekayasa**
+- Monorepo npm workspaces: `client` / `server` / `shared`
+- REST API divalidasi Zod, repository pattern
+- Code-splitting dengan `React.lazy`
+- Test parser & utilitas (`node:test` + `tsx`)
+
+</td>
+</tr>
+</table>
 
 <br>
 
@@ -363,13 +351,13 @@ Jika backend tidak dijalankan, sebenarnya web app tetap bisa dibuka tapi semua d
 
 **Catat cepat:** ketik langsung, misalnya `Salon 120rb dana kemarin` → cek preview → **Simpan**.
 
-**Catat terpandu:** ketik `/start` → **pilih kategori** di panel menu → ikuti alur tombol (kategori → nominal → metode → tanggal → keterangan).
+**Catat terpandu:** ketik `/start` → pilih kategori di panel menu → ikuti alur tombol.
 
-**Cek kondisi keuangan:** `/ringkasan bulan`, `/ringkasan semua`, atau tap **Ringkasan** di menu.
+**Cek kondisi keuangan:** `/ringkasan bulan`, `/ringkasan semua`, atau tap **Ringkasan**.
 
 **Cek saldo per akun:** `/saldo` atau tap **Saldo akun**.
 
-**Koreksi kesalahan:** `/undo` untuk membatalkan transaksi terakhir dari chat, `/edit` untuk mengubahnya (ulangi alur penyusunan dengan data lama).
+**Koreksi kesalahan:** `/undo` untuk membatalkan transaksi terakhir, `/edit` untuk mengubahnya.
 
 **Backup:** `/backup` — file JSON dikirim ke chat kamu.
 
@@ -380,10 +368,10 @@ Jika backend tidak dijalankan, sebenarnya web app tetap bisa dibuka tapi semua d
 <br>
 
 1. Buka menu **Dashboard**.
-2. Gunakan tombol `‹ ›` untuk berpindah bulan, atau preset periode: Hari Ini, 3 Hari Terakhir, 7 Hari, Bulan Ini, 3 Bulan, Semua Waktu.
-3. Gunakan filter kategori dan metode pembayaran bila diperlukan (sticky di desktop).
+2. Gunakan tombol `‹ ›` untuk berpindah bulan, atau preset periode (Hari Ini, 3 Hari, 7 Hari, Bulan Ini, dst).
+3. Gunakan filter kategori dan metode pembayaran bila diperlukan.
 4. Pilih **Kustom** untuk menentukan tanggal mulai dan selesai sendiri.
-5. Perhatikan pengingat transaksi rutin yang akan/n sudah jatuh tempo.
+5. Perhatikan pengingat transaksi rutin yang jatuh tempo.
 
 </details>
 
@@ -392,8 +380,8 @@ Jika backend tidak dijalankan, sebenarnya web app tetap bisa dibuka tapi semua d
 <br>
 
 1. Ketik transaksi pada kolom Quick di **Dashboard** atau **Transaksi**.
-2. Hasil parsing tampil otomatis (debounce 350ms) — nominal, kategori, metode, tanggal.
-3. Klik **Simpan**. Tidak perlu tombol Preview terpisah.
+2. Hasil parsing tampil otomatis (debounce 350ms).
+3. Klik **Simpan**.
 4. Jika hasil kurang yakin, cek transaksi bertanda `review`.
 
 **Contoh:**
@@ -413,9 +401,9 @@ Internet 300rb mandiri 2 minggu yang lalu
 
 1. Buka menu **Transaksi** — daftar kartu (mobile) / tabel (desktop).
 2. Klik **Catat Transaksi** untuk input manual.
-3. Gunakan filter: periode, kategori, tipe, metode, dan kata kunci (debounce search).
+3. Gunakan filter: periode, kategori, tipe, metode, dan kata kunci.
 4. Atur jumlah item per halaman (5/10/20/50/Semua) dan navigasi halaman.
-5. Tandai checkbox untuk **hapus massal** — klik **Hapus Terpilih (n)**, lalu manfaatkan **Undo** pada toast bila salah.
+5. Tandai checkbox untuk hapus massal, manfaatkan **Undo** pada toast bila salah.
 
 </details>
 
@@ -423,8 +411,8 @@ Internet 300rb mandiri 2 minggu yang lalu
 <summary><b>Akun & Saldo</b></summary>
 <br>
 
-1. Buka menu **Akun** untuk menambah/mengelola payment method (bank, cash, e-wallet).
-2. Atur **saldo awal** — saldo berjalan dihitung otomatis dari transaksi.
+1. Buka menu **Akun** untuk menambah/mengelola payment method.
+2. Atur saldo awal — saldo berjalan dihitung otomatis dari transaksi.
 3. Pantau saldo setiap akun di Dashboard dan via bot Telegram (`/saldo`).
 
 </details>
@@ -433,7 +421,7 @@ Internet 300rb mandiri 2 minggu yang lalu
 <summary><b>Transfer Dana</b></summary>
 <br>
 
-Gunakan menu **Transfer** untuk memindahkan dana dari satu akun ke akun lain. Transfer **tidak** menambah pemasukan dan **tidak** mengurangi pengeluaran pada dashboard — hanya menggeser saldo antar akun.
+Gunakan menu **Transfer** untuk memindahkan dana antar akun. Transfer tidak menambah pemasukan dan tidak mengurangi pengeluaran pada dashboard — hanya menggeser saldo antar akun.
 
 </details>
 
@@ -441,10 +429,9 @@ Gunakan menu **Transfer** untuk memindahkan dana dari satu akun ke akun lain. Tr
 <summary><b>Budget</b></summary>
 <br>
 
-1. Buka menu **Budget**.
-2. Klik **Set Budget Kategori**.
-3. Pilih kategori pengeluaran dan nominal batas bulanan.
-4. Pantau progress bar pemakaian.
+1. Buka menu **Budget** → **Set Budget Kategori**.
+2. Pilih kategori pengeluaran dan nominal batas bulanan.
+3. Pantau progress bar pemakaian.
 
 | Progress | Status |
 |:--|:--|
@@ -459,9 +446,9 @@ Gunakan menu **Transfer** untuk memindahkan dana dari satu akun ke akun lain. Tr
 <br>
 
 1. Buka menu **Berulang**.
-2. Buat template tagihan atau pemasukan rutin (interval harian/mingguan/bulanan, tanggal 1–28).
-3. Pantau **progress** (berapa kali sudah berjalan) dan badge **jatuh tempo** di dashboard.
-4. Aktifkan/nonaktifkan template sesuai kebutuhan; server auto-generate transaksi rutin saat aktif.
+2. Buat template tagihan/pemasukan rutin (interval harian/mingguan/bulanan, tanggal 1–28).
+3. Pantau progress dan badge jatuh tempo di dashboard.
+4. Aktifkan/nonaktifkan template sesuai kebutuhan.
 
 </details>
 
@@ -472,10 +459,10 @@ Gunakan menu **Transfer** untuk memindahkan dana dari satu akun ke akun lain. Tr
 Buka menu **Export / Backup**:
 
 - Download **CSV** untuk daftar transaksi aktif.
-- Download **JSON** (v2) untuk backup menyeluruh: kategori, payment method, saldo awal & transfer, transaksi, budget, dan transaksi berulang.
+- Download **JSON** (v2) untuk backup menyeluruh.
 - Pilih **File JSON Backup** untuk memulihkan data (duplikasi ID dicegah).
 
-Backup juga berjalan **otomatis** sesuai `BACKUP_INTERVAL_HOURS` (default 24 jam) dengan retensi `BACKUP_RETENTION_COUNT` (default 14 file) di folder `server/backups/`.
+Backup juga berjalan otomatis sesuai `BACKUP_INTERVAL_HOURS` (default 24 jam) dengan retensi `BACKUP_RETENTION_COUNT` (default 14 file) di `server/backups/`.
 
 </details>
 
@@ -493,11 +480,7 @@ Backup juga berjalan **otomatis** sesuai `BACKUP_INTERVAL_HOURS` (default 24 jam
 
 ## API
 
-Base URL development:
-
-```text
-http://localhost:5000/api
-```
+Base URL development: `http://localhost:5000/api`
 
 <details>
 <summary><b>Transactions</b></summary>
@@ -513,7 +496,7 @@ POST   /transactions/parse
 POST   /transactions/quick
 ```
 
-Filter yang tersedia: `from` · `to` · `category_id` · `type` · `payment_method_id` · `deleted` · `q` (kata kunci) · `page` · `limit` · `sort_by` · `sort_dir`
+Filter tersedia: `from` · `to` · `category_id` · `type` · `payment_method_id` · `deleted` · `q` · `page` · `limit` · `sort_by` · `sort_dir`
 
 </details>
 
@@ -543,7 +526,7 @@ PATCH  /payment-methods/:id
 DELETE /payment-methods/:id
 ```
 
-Mendukung `type` (atau `account_type`), alias, dan **saldo awal** (`initial_balance`).
+Mendukung `type` (atau `account_type`), alias, dan saldo awal (`initial_balance`).
 
 </details>
 
@@ -554,8 +537,6 @@ Mendukung `type` (atau `account_type`), alias, dan **saldo awal** (`initial_bala
 GET    /summary/totals?from=...&to=...
 GET    /summary/balances
 ```
-
-`/summary/totals` mengembalikan total pemasukan, pengeluaran, saldo bersih, dan rasio tabungan. `/summary/balances` mengembalikan saldo per akun (dipakai oleh Dashboard & bot Telegram).
 
 </details>
 
@@ -611,7 +592,7 @@ POST   /export/json
 │  │  ├─ pages/                # Dashboard, Transaksi, Akun, Budget, Berulang, Transfer, dll
 │  │  ├─ api.ts                # Klien API (TanStack Query)
 │  │  ├─ App.tsx               # Routing + code-splitting
-│  │  ├─ utils.test.ts         # Test utilitas (node:test + tsx)
+│  │  ├─ utils.test.ts         # Test utilitas
 │  │  └─ utils.ts              # Format Rupiah, WITA, dll
 │  └─ package.json
 ├─ server/                     # Backend (Express 5)
@@ -631,9 +612,6 @@ POST   /export/json
 ├─ shared/
 │  └─ src/index.ts             # Tipe & konstanta bersama
 ├─ .env.example
-├─ .gitignore
-├─ package.json
-├─ package-lock.json
 └─ README.md
 ```
 
@@ -672,8 +650,8 @@ POST   /export/json
 ## Keamanan
 
 - `.env` tidak boleh di-commit.
-- Bot Telegram **hanya** melayani chat ID yang terdaftar di `TELEGRAM_ALLOWED_CHAT_IDS`.
-- File backup JSON berisi data sensitif — simpan dengan aman, dan jaga akses ke folder `server/backups/`.
+- Bot Telegram hanya melayani chat ID yang terdaftar di `TELEGRAM_ALLOWED_CHAT_IDS`.
+- File backup JSON berisi data sensitif — simpan dengan aman dan jaga akses ke `server/backups/`.
 - Gunakan password database khusus production.
 - Tambahkan autentikasi sebelum API dibuka ke internet.
 
@@ -681,12 +659,6 @@ POST   /export/json
 
 <div align="center">
 
-## License
-
-Belum ditentukan.
-
-<br>
-
-<sub>Dibuat oleh <a href="https://github.com/FlucLight">FlucLight</a></sub>
+<sub>Dibuat oleh <a href="https://github.com/FlucLight">FlucLight</a> · License belum ditentukan</sub>
 
 </div>
