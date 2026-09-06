@@ -41,11 +41,8 @@ interface FilterBarProps {
   onStatusFilterChange?: (status: string) => void
   statusOptions?: SelectOption[]
   onReset?: () => void
-  quickPresets?: PeriodPreset[]
   showPeriod?: boolean
 }
-
-const DEFAULT_QUICK_PRESETS: PeriodPreset[] = ['today', '3days', '7days', 'this_month', '3months', 'all']
 
 export function FilterBar({
   preset,
@@ -70,7 +67,6 @@ export function FilterBar({
   onStatusFilterChange,
   statusOptions = [],
   onReset,
-  quickPresets = DEFAULT_QUICK_PRESETS,
   showPeriod = true,
 }: FilterBarProps) {
   const hasActiveFilters =
@@ -127,19 +123,11 @@ export function FilterBar({
     })),
   ]
 
-  const periodOptions: SelectOption[] = [
-    ...quickPresets
-      .map((value) => PRESET_OPTIONS.find((option) => option.value === value))
-      .filter((option): option is (typeof PRESET_OPTIONS)[number] => Boolean(option))
-      .map((option) => ({ value: option.value, label: option.label })),
-    ...PRESET_OPTIONS
-      .filter((option) => !quickPresets.includes(option.value))
-      .map((option) => ({
-        value: option.value,
-        label: option.label,
-        icon: option.value === 'custom' ? <CalendarIcon size={13} /> : undefined,
-      })),
-  ]
+  const periodOptions: SelectOption[] = PRESET_OPTIONS.map((option) => ({
+    value: option.value,
+    label: option.label,
+    icon: option.value === 'custom' ? <CalendarIcon size={13} /> : undefined,
+  }))
 
   return (
     <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-4 flex flex-col gap-3 shadow-md sm:sticky sm:top-0 sm:z-20">
