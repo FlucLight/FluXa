@@ -5,16 +5,24 @@ import { CloseIcon } from './Icons'
 
 type Props = { title: string; children: React.ReactNode; onClose: () => void }
 
+const FORM_CONTROL_SELECTOR =
+  'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [role="option"]'
+
 export function Modal({ title, children, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
   const titleId = useId()
+  const onCloseRef = useRef(onClose)
+
+  useEffect(() => {
+    onCloseRef.current = onClose
+  })
 
   useEffect(() => {
     previouslyFocused.current = document.activeElement as HTMLElement | null
 
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') onCloseRef.current()
     }
     document.addEventListener('keydown', handler)
 
@@ -23,8 +31,14 @@ export function Modal({ title, children, onClose }: Props) {
     const dialog = ref.current
 
     const focusFirst = () => {
-      const first = dialog?.querySelector<HTMLElement>(focusableSelector)
-      first?.focus()
+      if (!dialog) return
+      const control = dialog.querySelector<HTMLElement>(FORM_CONTROL_SELECTOR)
+      if (control) {
+        control.focus()
+        return
+      }
+      const first = dialog.querySelector<HTMLElement>(focusableSelector)
+      ;(first ?? dialog).focus()
     }
 
     const trap = (e: KeyboardEvent) => {
@@ -57,7 +71,7 @@ export function Modal({ title, children, onClose }: Props) {
       cancelAnimationFrame(frame)
       previouslyFocused.current?.focus()
     }
-  }, [onClose])
+  }, [onCloseRef])
 
   useEffect(() => {
     const originalStyle = window.getComputedStyle(document.body).overflow

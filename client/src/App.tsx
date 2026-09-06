@@ -46,7 +46,7 @@ export default function App() {
           <QueryClientProvider client={qc}>
             <ErrorBoundary>
               <BrowserRouter>
-            <div className="flex h-screen h-[100dvh] min-w-0 overflow-hidden bg-[var(--color-surface)] text-[var(--color-ink)]">
+            <div className="flex h-screen h-[100svh] h-[100dvh] min-w-0 overflow-hidden bg-[var(--color-surface)] text-[var(--color-ink)]">
               <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
               <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                 <header className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 md:hidden">
@@ -61,7 +61,7 @@ export default function App() {
                   </button>
                 </header>
                 <QuickInput />
-                <main className="flex min-w-0 flex-1 flex-col overflow-y-auto">
+                <main className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto">
                   <div className="flex-1">
                     <Suspense
                       fallback={
