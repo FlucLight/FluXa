@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
     "db:setup": "tsx scripts/setup-db.ts",
     "migrate": "tsx scripts/migrate.ts up",
     "migrate:down": "tsx scripts/migrate.ts down",
