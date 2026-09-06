@@ -129,34 +129,76 @@ export async function importJson(req: Request, res: Response): Promise<void> {
     recurring?: Array<Record<string, unknown>>
   }
 
+  const mapCategory = new Map<string, string>()
+  const mapPaymentMethod = new Map<string, string>()
+
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
 
     if (categories?.length) {
       for (const c of categories) {
-        await client.query(
-          `INSERT INTO categories (id, user_id, name, type, icon, keywords, created_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO NOTHING`,
-          [c['id'], OWNER_ID, c['name'], c['type'], c['icon'] ?? null, c['keywords'] ?? null, c['created_at']],
+        const backupId = c['id'] as string
+        const name = c['name'] as string
+        const type = c['type'] as string
+        if (!backupId || !name || !type) continue
+
+        const existing = await client.query(
+          `SELECT id FROM categories WHERE user_id = $1 AND name = $2 AND type = $3 LIMIT 1`,
+          [OWNER_ID, name, type],
         )
+        if ((existing.rowCount ?? 0) > 0) {
+          mapCategory.set(backupId, existing.rows[0].id as string)
+          continue
+        }
+
+        const inserted = await client.query(
+          `INSERT INTO categories (id, user_id, name, type, icon, keywords, created_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT (id) DO NOTHING
+           RETURNING id`,
+          [backupId, OWNER_ID, name, type, c['icon'] ?? null, c['keywords'] ?? null, c['created_at']],
+        )
+        mapCategory.set(backupId, (inserted.rows[0]?.id as string) ?? backupId)
       }
     }
     if (paymentMethods?.length) {
       for (const p of paymentMethods) {
-        await client.query(
-          `INSERT INTO payment_methods (id, user_id, name, type, aliases, current_balance, initial_balance, created_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO NOTHING`,
-          [p['id'], OWNER_ID, p['name'], p['type'], p['aliases'] ?? null, p['current_balance'] ?? null, p['initial_balance'] ?? 0, p['created_at']],
+        const backupId = p['id'] as string
+        const name = p['name'] as string
+        if (!backupId || !name) continue
+
+        const existing = await client.query(
+          `SELECT id FROM payment_methods WHERE user_id = $1 AND name = $2 LIMIT 1`,
+          [OWNER_ID, name],
         )
+        if ((existing.rowCount ?? 0) > 0) {
+          mapPaymentMethod.set(backupId, existing.rows[0].id as string)
+          continue
+        }
+
+        const inserted = await client.query(
+          `INSERT INTO payment_methods (id, user_id, name, type, aliases, current_balance, initial_balance, created_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+           ON CONFLICT (id) DO NOTHING
+           RETURNING id`,
+          [backupId, OWNER_ID, name, p['type'], p['aliases'] ?? null, p['current_balance'] ?? null, p['initial_balance'] ?? 0, p['created_at']],
+        )
+        mapPaymentMethod.set(backupId, (inserted.rows[0]?.id as string) ?? backupId)
       }
     }
+
+    const resolveCategory = (id: unknown): unknown =>
+      typeof id === 'string' ? mapCategory.get(id) ?? id : id
+    const resolvePaymentMethod = (id: unknown): unknown =>
+      typeof id === 'string' ? mapPaymentMethod.get(id) ?? id : id
+
     if (transactions?.length) {
       for (const t of transactions) {
         await client.query(
           `INSERT INTO transactions (id, user_id, category_id, payment_method_id, type, amount, description, raw_input, occurred_at, source, telegram_chat_id, needs_review, is_deleted, deleted_at, created_at)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15) ON CONFLICT (id) DO NOTHING`,
-          [t['id'], OWNER_ID, t['category_id'], t['payment_method_id'], t['type'], t['amount'], t['description'] ?? null,
+          [t['id'], OWNER_ID, resolveCategory(t['category_id']), resolvePaymentMethod(t['payment_method_id']), t['type'], t['amount'], t['description'] ?? null,
            t['raw_input'] ?? null, t['occurred_at'], t['source'] ?? 'web', t['telegram_chat_id'] ?? null, t['needs_review'] ?? false,
            t['is_deleted'] ?? false, t['deleted_at'] ?? null, t['created_at']],
         )
@@ -166,8 +208,9 @@ export async function importJson(req: Request, res: Response): Promise<void> {
       for (const b of budgets) {
         await client.query(
           `INSERT INTO budgets (id, user_id, category_id, month, year, limit_amount, created_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT (id) DO NOTHING`,
-          [b['id'], OWNER_ID, b['category_id'], b['month'], b['year'], b['limit_amount'], b['created_at']],
+           VALUES ($1,$2,$3,$4,$5,$6,$7)
+           ON CONFLICT (user_id, category_id, month, year) DO NOTHING`,
+          [b['id'], OWNER_ID, resolveCategory(b['category_id']), b['month'], b['year'], b['limit_amount'], b['created_at']],
         )
       }
     }
@@ -176,7 +219,7 @@ export async function importJson(req: Request, res: Response): Promise<void> {
         await client.query(
           `INSERT INTO account_transfers (id, user_id, from_payment_method_id, to_payment_method_id, amount, description, occurred_at, is_deleted, deleted_at, created_at)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING`,
-          [t['id'], OWNER_ID, t['from_payment_method_id'], t['to_payment_method_id'], t['amount'], t['description'] ?? null,
+          [t['id'], OWNER_ID, resolvePaymentMethod(t['from_payment_method_id']), resolvePaymentMethod(t['to_payment_method_id']), t['amount'], t['description'] ?? null,
            t['occurred_at'], t['is_deleted'] ?? false, t['deleted_at'] ?? null, t['created_at']],
         )
       }
@@ -186,7 +229,7 @@ export async function importJson(req: Request, res: Response): Promise<void> {
         await client.query(
           `INSERT INTO recurring_transactions (id, user_id, category_id, payment_method_id, type, amount, description, day_of_month, is_active, last_generated_at, created_at, interval, interval_steps, target_count, times_generated, next_due_at)
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16) ON CONFLICT (id) DO NOTHING`,
-          [r['id'], OWNER_ID, r['category_id'], r['payment_method_id'], r['type'], r['amount'], r['description'], r['day_of_month'],
+          [r['id'], OWNER_ID, resolveCategory(r['category_id']), resolvePaymentMethod(r['payment_method_id']), r['type'], r['amount'], r['description'], r['day_of_month'],
            r['is_active'] ?? true, r['last_generated_at'] ?? null, r['created_at'], r['interval'] ?? 'month', r['interval_steps'] ?? 1,
            r['target_count'] ?? null, r['times_generated'] ?? 0, r['next_due_at'] ?? null],
         )
