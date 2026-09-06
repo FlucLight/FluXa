@@ -10,6 +10,7 @@ import { ThemeProvider } from './components/ThemeContext'
 import { ToastProvider } from './components/Toast'
 import { ProfileProvider } from './components/ProfileContext'
 import { useProfile } from './components/profile-context'
+import { useVisualViewportHeight } from './components/useVisualViewportHeight'
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })))
 const Accounts = lazy(() => import('./pages/Accounts').then((m) => ({ default: m.Accounts })))
@@ -38,6 +39,7 @@ function MobileLogo() {
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const viewportHeight = useVisualViewportHeight()
 
   return (
     <ThemeProvider>
@@ -46,7 +48,10 @@ export default function App() {
           <QueryClientProvider client={qc}>
             <ErrorBoundary>
               <BrowserRouter>
-            <div className="flex h-screen h-[100svh] h-[100dvh] min-w-0 overflow-hidden bg-[var(--color-surface)] text-[var(--color-ink)]">
+            <div
+              className="flex h-screen h-[100svh] h-[100dvh] min-w-0 overflow-hidden bg-[var(--color-surface)] text-[var(--color-ink)]"
+              style={{ height: viewportHeight }}
+            >
               <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
               <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
                 <header className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--color-border)] bg-[var(--color-surface-raised)] px-4 md:hidden">

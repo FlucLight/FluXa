@@ -185,6 +185,7 @@ html.dark .card-hover:hover {
   body {
     min-width: 320px;
     overflow-x: hidden;
+    overflow-y: hidden;
   }
 
   /* Custom scrollbars — light mode */
