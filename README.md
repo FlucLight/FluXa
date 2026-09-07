@@ -59,6 +59,38 @@ Setiap **akun baru otomatis di-seed** dengan kategori & payment method default m
 
 <br>
 
+## Tangkapan Layar
+
+<div align="center">
+<img src="docs/screenshot-dashboardv2.png" width="820" alt="Dashboard FluXa">
+<p><i>Dashboard — ringkasan bulanan, tren, breakdown kategori, saldo per akun, dan progress budget</i></p>
+</div>
+
+<br>
+
+<table>
+<tr>
+<td width="50%" align="center">
+<img src="docs/screenshot-quick-input.png" width="380" alt="Quick Input">
+<p><i>Quick Input — ketik transaksi, hasil parsing muncul otomatis sebelum disimpan</i></p>
+</td>
+<td width="50%" align="center">
+<img src="docs/screenshot-telegram-chat.png" width="380" alt="Bot Telegram">
+<p><i>Bot Telegram — catat transaksi dari chat dengan konfirmasi</i></p>
+</td>
+</tr>
+<tr>
+<td width="50%" align="center">
+<img src="docs/screenshot-transactions.png" width="380" alt="Halaman Transaksi">
+<p><i>Halaman Transaksi — tabel, filter, dan hapus massal</i></p>
+</td>
+<td width="50%" align="center">
+<img src="docs/screenshot-dashboard.png" width="380" alt="Dashboard (tampilan lain)">
+<p><i>Dashboard — tampilan lain dari ringkasan keuangan</i></p>
+</td>
+</tr>
+</table>
+
 ## Fitur Unggulan
 
 | # | Fitur | Keunggulan |
