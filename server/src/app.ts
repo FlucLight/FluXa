@@ -15,8 +15,12 @@ import exportRouter from './routes/export'
 import summaryRouter from './routes/summary'
 import profileRouter from './routes/profile'
 import path from 'node:path'
+import cookieParser from 'cookie-parser'
 import { runDue } from './repositories/recurring'
+import { purgeExpiredSessions } from './repositories/sessions'
 import { backupIntervalMs, createBackup } from './services/backup'
+import authRouter from './routes/auth'
+import { requireAuth } from './middleware/auth'
 
 const app = express()
 
@@ -44,12 +48,25 @@ app.use('/api', rateLimit({
 }))
 
 app.use(express.json({ limit: '10mb' }))
+app.use(cookieParser())
 
 app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() })
 })
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 20,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+})
+app.use('/api/auth/login', authLimiter)
+app.use('/api/auth/register', authLimiter)
+
+app.use('/api/auth', authRouter)
+app.use('/api', requireAuth)
 
 app.use('/api/categories', categoriesRouter)
 app.use('/api/payment-methods', paymentMethodsRouter)
@@ -91,6 +108,7 @@ function scheduleDailyRecurring(): void {
     } catch (e) {
       console.error('[recurring] Error:', e)
     }
+    purgeExpiredSessions().catch(() => {})
     scheduleDailyRecurring()
   }, msUntil)
   recurringTimer.push(timer)

@@ -1,7 +1,7 @@
 import { pool } from '../config/db'
+import { userId } from '../services/identity'
 import type { TransactionRecord } from 'shared'
 
-const OWNER_ID = 'a0000000-0000-0000-0000-000000000001'
 
 export type SortOrder = 'newest' | 'oldest' | 'most' | 'least'
 
@@ -36,7 +36,7 @@ const DEFAULT_FILTER: ListFilter = {
 
 function buildConditions(filter: ListFilter): { conditions: string[]; values: unknown[]; nextIndex: number } {
   const conditions: string[] = [`user_id = $1`]
-  const values: unknown[] = [OWNER_ID]
+  const values: unknown[] = [userId()]
   let idx = 2
 
   conditions.push(`is_deleted = $${idx++}`)
@@ -95,7 +95,7 @@ export async function countAll(filter: ListFilter = DEFAULT_FILTER): Promise<num
 export async function findById(id: string): Promise<TransactionRecord | null> {
   const { rows } = await pool.query<TransactionRecord>(
     'SELECT * FROM transactions WHERE id = $1 AND user_id = $2',
-    [id, OWNER_ID],
+    [id, userId()],
   )
   return rows[0] ?? null
 }
@@ -106,7 +106,7 @@ export async function findLatestTelegram(chatId: number): Promise<TransactionRec
      WHERE user_id = $1 AND source = 'telegram_bot' AND telegram_chat_id = $2 AND is_deleted = false
      ORDER BY created_at DESC
      LIMIT 1`,
-    [OWNER_ID, chatId],
+    [userId(), chatId],
   )
   return rows[0] ?? null
 }
@@ -129,7 +129,7 @@ export async function create(data: {
      VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8::timestamptz, now()), $9, $10, $11)
      RETURNING *`,
     [
-      OWNER_ID,
+      userId(),
       data.type,
       data.amount,
       data.category_id,
@@ -171,7 +171,7 @@ export async function update(
 
   if (fields.length === 0) return findById(id)
 
-  values.push(id, OWNER_ID)
+  values.push(id, userId())
   const { rows } = await pool.query<TransactionRecord>(
     `UPDATE transactions SET ${fields.join(', ')}
      WHERE id = $${idx++} AND user_id = $${idx} AND is_deleted = false
@@ -185,7 +185,7 @@ export async function softDelete(id: string): Promise<boolean> {
   const { rowCount } = await pool.query(
     `UPDATE transactions SET is_deleted = true, deleted_at = now()
      WHERE id = $1 AND user_id = $2 AND is_deleted = false`,
-    [id, OWNER_ID],
+    [id, userId()],
   )
   return (rowCount ?? 0) > 0
 }
@@ -195,7 +195,7 @@ export async function restore(id: string): Promise<TransactionRecord | null> {
     `UPDATE transactions SET is_deleted = false, deleted_at = null
      WHERE id = $1 AND user_id = $2 AND is_deleted = true
      RETURNING *`,
-    [id, OWNER_ID],
+    [id, userId()],
   )
   return rows[0] ?? null
 }

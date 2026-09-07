@@ -212,3 +212,28 @@ export const updateBudgetSchema = createBudgetSchema
   .pick({ limit_amount: true })
   .partial()
 export type UpdateBudgetInput = z.infer<typeof updateBudgetSchema>
+
+export interface AuthUser {
+  id: string
+  name: string
+  email: string | null
+}
+
+export const registerSchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  email: z.string().trim().toLowerCase().email().max(255),
+  password: z.string().min(8).max(200),
+})
+export type RegisterInput = z.infer<typeof registerSchema>
+
+export const loginSchema = z.object({
+  email: z.string().trim().toLowerCase().email().max(255),
+  password: z.string().min(1).max(200),
+})
+export type LoginInput = z.infer<typeof loginSchema>
+
+export const changePasswordSchema = z.object({
+  current_password: z.string().min(1).max(200),
+  new_password: z.string().min(8).max(200),
+})
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>

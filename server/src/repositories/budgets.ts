@@ -1,11 +1,11 @@
 import { pool } from '../config/db'
+import { userId } from '../services/identity'
 import type { BudgetRecord } from 'shared'
 
-const OWNER_ID = 'a0000000-0000-0000-0000-000000000001'
 
 export async function findAll(month?: number, year?: number): Promise<BudgetRecord[]> {
   const conditions = [`user_id = $1`]
-  const values: unknown[] = [OWNER_ID]
+  const values: unknown[] = [userId()]
   let idx = 2
   if (month) { conditions.push(`month = $${idx++}`); values.push(month) }
   if (year) { conditions.push(`year = $${idx++}`); values.push(year) }
@@ -28,7 +28,7 @@ export async function create(data: {
      ON CONFLICT (user_id, category_id, month, year)
      DO UPDATE SET limit_amount = EXCLUDED.limit_amount
      RETURNING *`,
-    [OWNER_ID, data.category_id, data.month, data.year, data.limit_amount],
+    [userId(), data.category_id, data.month, data.year, data.limit_amount],
   )
   return rows[0]!
 }
@@ -36,7 +36,7 @@ export async function create(data: {
 export async function update(id: string, limit_amount: number): Promise<BudgetRecord | null> {
   const { rows } = await pool.query<BudgetRecord>(
     `UPDATE budgets SET limit_amount = $1 WHERE id = $2 AND user_id = $3 RETURNING *`,
-    [limit_amount, id, OWNER_ID],
+    [limit_amount, id, userId()],
   )
   return rows[0] ?? null
 }
@@ -44,7 +44,7 @@ export async function update(id: string, limit_amount: number): Promise<BudgetRe
 export async function remove(id: string): Promise<boolean> {
   const { rowCount } = await pool.query(
     `DELETE FROM budgets WHERE id = $1 AND user_id = $2`,
-    [id, OWNER_ID],
+    [id, userId()],
   )
   return (rowCount ?? 0) > 0
 }

@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import type { FormEvent } from 'react'
 import { NavLink } from 'react-router-dom'
 import {
   BudgetIcon,
@@ -12,6 +14,8 @@ import {
 } from './Icons'
 import { ThemeToggle } from './ThemeToggle'
 import { AvatarEditor } from './AvatarEditor'
+import { useAuth } from './useAuth'
+import { useToast } from './useToast'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: DashboardIcon },
@@ -30,6 +34,43 @@ type SidebarProps = {
 }
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
+  const { user, logout, changePassword } = useAuth()
+  const toast = useToast()
+  const [editingPassword, setEditingPassword] = useState(false)
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleLogout() {
+    try {
+      await logout()
+    } finally {
+      onClose()
+    }
+  }
+
+  async function handleChangePassword(e: FormEvent) {
+    e.preventDefault()
+    if (newPassword !== confirmPassword) {
+      toast.error('Konfirmasi kata sandi tidak cocok')
+      return
+    }
+    setSubmitting(true)
+    try {
+      await changePassword(currentPassword, newPassword)
+      toast.success('Kata sandi berhasil diganti')
+      setEditingPassword(false)
+      setCurrentPassword('')
+      setNewPassword('')
+      setConfirmPassword('')
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal mengganti kata sandi')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <>
       {isOpen && (
@@ -90,7 +131,79 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         </div>
 
         <div className="flex flex-col gap-2 pt-2 border-t border-[var(--color-border)]">
+          {user && (
+            <div className="px-3 py-1">
+              <div className="truncate text-xs font-semibold text-[var(--color-ink)]">{user.name}</div>
+              <div className="truncate text-[11px] text-[var(--color-ink-faint)]">{user.email}</div>
+            </div>
+          )}
+
+          {editingPassword ? (
+            <form onSubmit={handleChangePassword} className="flex flex-col gap-2 px-3 py-2">
+              <input
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Kata sandi saat ini"
+                autoComplete="current-password"
+                className="w-full bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[5px] px-2.5 py-1.5 text-[11px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-focus)]"
+              />
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Kata sandi baru (min. 8)"
+                autoComplete="new-password"
+                className="w-full bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[5px] px-2.5 py-1.5 text-[11px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-focus)]"
+              />
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Ulangi kata sandi baru"
+                autoComplete="new-password"
+                className="w-full bg-[var(--color-surface-sunken)] border border-[var(--color-border)] rounded-[5px] px-2.5 py-1.5 text-[11px] text-[var(--color-ink)] placeholder:text-[var(--color-ink-faint)] focus:outline-none focus:border-[var(--color-focus)]"
+              />
+              <div className="flex gap-1.5">
+                <button
+                  type="submit"
+                  disabled={submitting || !currentPassword || !newPassword || !confirmPassword}
+                  className="flex-1 rounded-[5px] bg-[var(--color-focus)] px-2 py-1.5 text-[11px] font-bold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  {submitting ? 'Menyimpan…' : 'Simpan'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingPassword(false)
+                    setCurrentPassword('')
+                    setNewPassword('')
+                    setConfirmPassword('')
+                  }}
+                  className="rounded-[5px] border border-[var(--color-border)] px-2 py-1.5 text-[11px] font-semibold text-[var(--color-ink-muted)] transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)]"
+                >
+                  Batal
+                </button>
+              </div>
+            </form>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setEditingPassword(true)}
+              className="mx-3 w-[calc(100%-1.5rem)] rounded-[5px] border border-[var(--color-border)] px-3 py-1.5 text-[11px] font-semibold text-[var(--color-ink-muted)] text-center transition-colors hover:bg-[var(--color-surface-sunken)] hover:text-[var(--color-ink)] cursor-pointer"
+            >
+              Ganti Kata Sandi
+            </button>
+          )}
+
           <ThemeToggle />
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="mx-3 mb-1 flex items-center justify-center gap-1.5 rounded-[5px] border border-[var(--color-negative)]/40 px-3 py-1.5 text-[11px] font-semibold text-[var(--color-negative)] transition-colors hover:bg-[var(--color-negative-soft)] cursor-pointer"
+          >
+            Keluar
+          </button>
           <div className="px-3 text-[11px] text-[var(--color-ink-faint)]">
             FluXa Personal Finance
           </div>

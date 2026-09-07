@@ -31,6 +31,10 @@ export interface Env {
   TELEGRAM_ALLOWED_CHAT_IDS: string
   BACKUP_INTERVAL_HOURS: number
   BACKUP_RETENTION_COUNT: number
+  JWT_SECRET: string
+  JWT_ACCESS_TTL_MINUTES: number
+  AUTH_SESSION_DAYS: number
+  COOKIE_SECURE: boolean
 }
 
 function toNumber(value: string | undefined, fallback: number): number {
@@ -52,4 +56,8 @@ export const env: Env = {
   TELEGRAM_ALLOWED_CHAT_IDS: process.env.TELEGRAM_ALLOWED_CHAT_IDS ?? '',
   BACKUP_INTERVAL_HOURS: toNumber(process.env.BACKUP_INTERVAL_HOURS, 24),
   BACKUP_RETENTION_COUNT: toNumber(process.env.BACKUP_RETENTION_COUNT, 14),
+  JWT_SECRET: process.env.JWT_SECRET ?? '',
+  JWT_ACCESS_TTL_MINUTES: toNumber(process.env.JWT_ACCESS_TTL_MINUTES, 15),
+  AUTH_SESSION_DAYS: toNumber(process.env.AUTH_SESSION_DAYS, 30),
+  COOKIE_SECURE: process.env.COOKIE_SECURE !== 'false' && process.env.COOKIE_SECURE !== '0',
 }

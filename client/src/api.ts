@@ -1,12 +1,16 @@
 import type {
   AccountTransferRecord,
+  AuthUser,
   BudgetRecord,
   CategoryRecord,
+  ChangePasswordInput,
   CreateCategoryInput,
   CreatePaymentMethodInput,
   CreateTransactionInput,
+  LoginInput,
   PaymentMethodRecord,
   RecurringTransactionRecord,
+  RegisterInput,
   TransactionRecord,
   UpdateCategoryInput,
   UpdatePaymentMethodInput,
@@ -39,25 +43,63 @@ async function rawFetch(path: string, init?: RequestInit): Promise<Response> {
     headers.set('Content-Type', 'application/json')
   }
   try {
-    return await fetch(BASE + path, { ...init, headers, signal: controller.signal })
+    return await fetch(BASE + path, { ...init, credentials: 'include', headers, signal: controller.signal })
   } finally {
     clearTimeout(timeout)
   }
 }
 
+let refreshPromise: Promise<boolean> | null = null
+
+async function ensureFreshSession(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        const res = await rawFetch('/auth/refresh', { method: 'POST' })
+        return res.ok
+      } catch {
+        return false
+      } finally {
+        refreshPromise = null
+      }
+    })()
+  }
+  return refreshPromise
+}
+
+const NO_AUTO_REFRESH = new Set(['/auth/login', '/auth/register'])
+
+async function toError(res: Response): Promise<Error> {
+  const body = await res.json().catch(() => ({}))
+  const err = new Error((body as { error?: string }).error ?? `HTTP ${res.status}`) as Error & { status?: number }
+  err.status = res.status
+  return err
+}
+
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   let attempt = 0
+  let refreshed = false
   for (;;) {
     try {
       const res = await rawFetch(path, init)
+      if (res.status === 401 && !refreshed && !NO_AUTO_REFRESH.has(path)) {
+        refreshed = true
+        const ok = await ensureFreshSession()
+        if (ok) {
+          attempt++
+          await delay(300)
+          continue
+        }
+      }
       if (!res.ok && res.status !== 204) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error((body as { error?: string }).error ?? `HTTP ${res.status}`)
+        throw await toError(res)
       }
       if (res.status === 204) return undefined as T
       return res.json()
     } catch (err) {
-      const retriable = attempt < RETRY_COUNT && !((err as Error).name === 'AbortError')
+      const status = (err as { status?: number }).status
+      const isClientError = typeof status === 'number' && status >= 400 && status < 500
+      const retriable = attempt < RETRY_COUNT && !isClientError && !((err as Error).name === 'AbortError')
       if (retriable) {
         attempt++
         await delay(300 * attempt)
@@ -69,6 +111,17 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  auth: {
+    me: () => req<{ user: AuthUser }>('/auth/me'),
+    register: (data: RegisterInput) =>
+      req<{ user: AuthUser }>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
+    login: (data: LoginInput) =>
+      req<{ user: AuthUser }>('/auth/login', { method: 'POST', body: JSON.stringify(data) }),
+    logout: () => req<void>('/auth/logout', { method: 'POST' }),
+    changePassword: (data: ChangePasswordInput) =>
+      req<{ ok: boolean }>('/auth/change-password', { method: 'POST', body: JSON.stringify(data) }),
+  },
+
   categories: {
     list: (type?: 'expense' | 'income') =>
       req<CategoryRecord[]>(`/categories${type ? `?type=${type}` : ''}`),
@@ -181,17 +234,17 @@ export const api = {
 
   export: {
     csv: async () => {
-      const res = await fetch('/api/export/csv')
+      const res = await fetch('/api/export/csv', { credentials: 'include' })
       if (!res.ok) throw new Error('Gagal mengunduh CSV')
       return res.blob()
     },
     xlsx: async () => {
-      const res = await fetch('/api/export/xlsx')
+      const res = await fetch('/api/export/xlsx', { credentials: 'include' })
       if (!res.ok) throw new Error('Gagal mengunduh Excel')
       return res.blob()
     },
     json: async () => {
-      const res = await fetch('/api/export/json')
+      const res = await fetch('/api/export/json', { credentials: 'include' })
       if (!res.ok) throw new Error('Gagal mengunduh JSON')
       return res.blob()
     },
@@ -203,7 +256,7 @@ export const api = {
     upload: async (file: File) => {
       const fd = new FormData()
       fd.append('file', file)
-      const res = await fetch('/api/profile/photo', { method: 'POST', body: fd })
+      const res = await fetch('/api/profile/photo', { method: 'POST', body: fd, credentials: 'include' })
       if (!res.ok) {
         const body = await res.json().catch(() => ({}))
         throw new Error((body as { error?: string }).error ?? 'Gagal mengunggah foto profil')
@@ -226,4 +279,4 @@ export interface ParseResult {
   occurred_at: string | null
 }
 
-export type { BudgetRecord, AccountTransferRecord, RecurringTransactionRecord }
+export type { AuthUser, BudgetRecord, AccountTransferRecord, RecurringTransactionRecord }

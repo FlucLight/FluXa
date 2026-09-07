@@ -1,12 +1,12 @@
 import { pool } from '../config/db'
+import { userId } from '../services/identity'
 import type { PaymentMethodRecord } from 'shared'
 
-const OWNER_ID = 'a0000000-0000-0000-0000-000000000001'
 
 export async function findAll(): Promise<PaymentMethodRecord[]> {
   const { rows } = await pool.query<PaymentMethodRecord>(
     'SELECT * FROM payment_methods WHERE user_id = $1 ORDER BY type, name',
-    [OWNER_ID],
+    [userId()],
   )
   return rows
 }
@@ -14,7 +14,7 @@ export async function findAll(): Promise<PaymentMethodRecord[]> {
 export async function findById(id: string): Promise<PaymentMethodRecord | null> {
   const { rows } = await pool.query<PaymentMethodRecord>(
     'SELECT * FROM payment_methods WHERE id = $1 AND user_id = $2',
-    [id, OWNER_ID],
+    [id, userId()],
   )
   return rows[0] ?? null
 }
@@ -29,7 +29,7 @@ export async function create(data: {
     `INSERT INTO payment_methods (user_id, name, type, aliases, initial_balance)
      VALUES ($1, $2, $3, $4, $5)
      RETURNING *`,
-    [OWNER_ID, data.name, data.type, data.aliases ?? null, data.initial_balance ?? 0],
+    [userId(), data.name, data.type, data.aliases ?? null, data.initial_balance ?? 0],
   )
   return rows[0]!
 }
@@ -54,7 +54,7 @@ export async function update(
 
   if (fields.length === 0) return findById(id)
 
-  values.push(id, OWNER_ID)
+  values.push(id, userId())
   const { rows } = await pool.query<PaymentMethodRecord>(
     `UPDATE payment_methods SET ${fields.join(', ')} WHERE id = $${idx++} AND user_id = $${idx} RETURNING *`,
     values,
@@ -65,7 +65,7 @@ export async function update(
 export async function remove(id: string): Promise<boolean> {
   const { rowCount } = await pool.query(
     'DELETE FROM payment_methods WHERE id = $1 AND user_id = $2',
-    [id, OWNER_ID],
+    [id, userId()],
   )
   return (rowCount ?? 0) > 0
 }

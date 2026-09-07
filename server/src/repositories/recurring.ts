@@ -1,7 +1,7 @@
 import { pool } from '../config/db'
+import { userId } from '../services/identity'
 import type { RecurringInterval, RecurringTransactionRecord } from 'shared'
 
-const OWNER_ID = 'a0000000-0000-0000-0000-000000000001'
 
 type Interval = RecurringInterval
 
@@ -77,7 +77,7 @@ function advanceFrom(rec: { interval: Interval; interval_steps: number; day_of_m
 export async function findAll(): Promise<RecurringTransactionRecord[]> {
   const { rows } = await pool.query<RecurringTransactionRecord>(
     `SELECT * FROM recurring_transactions WHERE user_id = $1 ORDER BY is_active DESC, next_due_at ASC NULLS LAST, day_of_month`,
-    [OWNER_ID],
+    [userId()],
   )
   return rows
 }
@@ -103,7 +103,7 @@ export async function create(data: {
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11::date)
      RETURNING *`,
     [
-      OWNER_ID,
+      userId(),
       data.category_id,
       data.payment_method_id,
       data.type,
@@ -188,7 +188,7 @@ export async function update(
     values.push(formatDate(nextDue))
   }
 
-  values.push(id, OWNER_ID)
+  values.push(id, userId())
   const { rows } = await pool.query<RecurringTransactionRecord>(
     `UPDATE recurring_transactions SET ${fields.join(', ')} WHERE id = $${idx++} AND user_id = $${idx} RETURNING *`,
     values,
@@ -199,7 +199,7 @@ export async function update(
 export async function findById(id: string): Promise<RecurringTransactionRecord | null> {
   const { rows } = await pool.query<RecurringTransactionRecord>(
     `SELECT * FROM recurring_transactions WHERE id = $1 AND user_id = $2`,
-    [id, OWNER_ID],
+    [id, userId()],
   )
   return rows[0] ?? null
 }
@@ -207,7 +207,7 @@ export async function findById(id: string): Promise<RecurringTransactionRecord |
 export async function remove(id: string): Promise<boolean> {
   const { rowCount } = await pool.query(
     `DELETE FROM recurring_transactions WHERE id = $1 AND user_id = $2`,
-    [id, OWNER_ID],
+    [id, userId()],
   )
   return (rowCount ?? 0) > 0
 }
@@ -222,11 +222,11 @@ export async function runDue(): Promise<number> {
 
     const { rows: due } = await client.query<RecurringTransactionRecord>(
       `SELECT * FROM recurring_transactions
-       WHERE user_id = $1 AND is_active = true
-         AND next_due_at IS NOT NULL AND next_due_at <= $2::date
+       WHERE is_active = true
+         AND next_due_at IS NOT NULL AND next_due_at <= $1::date
          AND (target_count IS NULL OR times_generated < target_count)
        FOR UPDATE`,
-      [OWNER_ID, todayStr],
+      [todayStr],
     )
 
     let generated = 0
@@ -237,7 +237,7 @@ export async function runDue(): Promise<number> {
       await client.query(
         `INSERT INTO transactions (user_id, category_id, payment_method_id, type, amount, description, source, occurred_at)
          VALUES ($1, $2, $3, $4, $5, $6, 'recurring', $7::timestamp)`,
-        [OWNER_ID, r.category_id, r.payment_method_id, r.type, r.amount, r.description, occurredAt + ' 12:00:00'],
+        [r.user_id, r.category_id, r.payment_method_id, r.type, r.amount, r.description, occurredAt + ' 12:00:00'],
       )
 
       const nextDue = advanceFrom(

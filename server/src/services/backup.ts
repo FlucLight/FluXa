@@ -3,7 +3,6 @@ import { resolve } from 'node:path'
 import { pool } from '../config/db'
 import { env } from '../config/env'
 
-const OWNER_ID = 'a0000000-0000-0000-0000-000000000001'
 const BACKUP_DIR = resolve(process.cwd(), 'backups')
 
 export function backupDirectory(): string {
@@ -11,7 +10,7 @@ export function backupDirectory(): string {
 }
 
 async function rows(table: string): Promise<unknown[]> {
-  const result = await pool.query(`SELECT * FROM ${table} WHERE user_id = $1 ORDER BY created_at`, [OWNER_ID])
+  const result = await pool.query(`SELECT * FROM ${table} ORDER BY created_at`)
   return result.rows
 }
 

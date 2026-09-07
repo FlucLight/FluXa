@@ -1,6 +1,6 @@
 import { pool } from '../config/db'
+import { userId } from '../services/identity'
 
-const OWNER_ID = 'a0000000-0000-0000-0000-000000000001'
 
 export interface SummaryTotals {
   income: number
@@ -18,7 +18,7 @@ export interface AccountBalance {
 
 export async function totals(from?: string, to?: string): Promise<SummaryTotals> {
   const conditions = ['user_id = $1', 'is_deleted = false']
-  const values: unknown[] = [OWNER_ID]
+  const values: unknown[] = [userId()]
   let index = 2
   if (from) {
     conditions.push(`occurred_at >= $${index++}`)
@@ -78,7 +78,7 @@ export async function accountBalances(): Promise<AccountBalance[]> {
      ) sent ON sent.payment_method_id = pm.id
      WHERE pm.user_id = $1
      ORDER BY pm.type, pm.name`,
-    [OWNER_ID],
+    [userId()],
   )
   return rows.map((row) => ({ ...row, balance: Number(row.balance) }))
 }
