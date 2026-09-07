@@ -159,6 +159,17 @@ async function resolveChatUser(chatId: number): Promise<AuthUser | null> {
 }
 
 const LINK_CODE_PATTERN = /^[a-z2-9]{8}$/i
+const START_LINK_PATTERN = /^\/start\s+([a-z2-9]{8})$/i
+const LINK_COMMAND_PATTERN = /^(?:link|\/link)\s+([a-z2-9]{8})$/i
+
+function extractLinkCode(text: string): string | null {
+  if (!text) return null
+  const startMatch = START_LINK_PATTERN.exec(text)
+  if (startMatch) return startMatch[1]!
+  const linkMatch = LINK_COMMAND_PATTERN.exec(text)
+  if (linkMatch) return linkMatch[1]!
+  return LINK_CODE_PATTERN.test(text) ? text : null
+}
 
 async function handleLinkCommand(chatId: number, code: string): Promise<void> {
   const result = await linkRepo.confirmLinkWithCode(hashToken(code), chatId)
@@ -744,6 +755,11 @@ async function handleText(message: TelegramMessage): Promise<void> {
   if (!text) return
 
   const command = text.toLowerCase()
+  const startLinkMatch = START_LINK_PATTERN.exec(text)
+  if (startLinkMatch) {
+    await handleLinkCommand(chatId, startLinkMatch[1]!)
+    return
+  }
   if (command === '/start' || command === '/help') {
     pending.delete(chatId)
     builders.delete(chatId)
@@ -755,7 +771,7 @@ async function handleText(message: TelegramMessage): Promise<void> {
     await handleUnlinkCommand(chatId)
     return
   }
-  const linkMatch = /^(?:link|\/link)\s+([a-z2-9]{8})$/i.exec(text)
+  const linkMatch = LINK_COMMAND_PATTERN.exec(text)
   if (linkMatch) {
     await handleLinkCommand(chatId, linkMatch[1]!)
     return
@@ -881,8 +897,13 @@ async function poll(offset: number): Promise<number> {
       if (chatId == null) continue
 
       const user = await resolveChatUser(chatId)
+      const linkCode = extractLinkCode(update.message?.text?.trim() ?? '')
       if (!user) {
-        await sendMessage(chatId, NOT_LINKED_TEXT)
+        if (linkCode) {
+          await handleLinkCommand(chatId, linkCode)
+        } else {
+          await sendMessage(chatId, NOT_LINKED_TEXT)
+        }
         continue
       }
 

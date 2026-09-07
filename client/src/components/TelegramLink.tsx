@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { api } from '../api'
 import type { TelegramLinkStatus } from '../api'
 import { useToast } from './useToast'
+import { CopyIcon, TelegramIcon } from './Icons'
 
 export function TelegramLink() {
   const toast = useToast()
@@ -61,6 +62,16 @@ export function TelegramLink() {
     }
   }
 
+  async function handleCopy() {
+    if (!code) return
+    try {
+      await navigator.clipboard.writeText(code)
+      toast.success('Kode disalin')
+    } catch {
+      toast.error('Gagal menyalin kode')
+    }
+  }
+
   async function handleRevoke() {
     if (loading) return
     if (!window.confirm('Lepas tautan Telegram ini?')) return
@@ -111,12 +122,30 @@ export function TelegramLink() {
           ) : code ? (
             <>
               <p className="px-1 text-[11px] font-semibold text-[var(--color-ink)]">Kirim kode ini ke bot:</p>
-              <div className="rounded-[6px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)] px-3 py-2 text-center">
-                <span className="font-mono text-lg font-bold tracking-[0.2em] text-[var(--color-ink)]">{code}</span>
+              <div className="flex items-stretch gap-1.5">
+                <div className="flex-1 rounded-[6px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)] px-3 py-2 text-center">
+                  <span className="font-mono text-lg font-bold tracking-[0.2em] text-[var(--color-ink)]">{code}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCopy}
+                  title="Salin kode"
+                  className="flex items-center justify-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface)] px-2.5 text-[var(--color-ink-muted)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] cursor-pointer"
+                >
+                  <CopyIcon size={15} />
+                </button>
               </div>
+              <a
+                href={`https://t.me/fluclight_finance_bot?start=${code}`}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-1.5 rounded-[6px] bg-[var(--color-focus)] px-3 py-2 text-xs font-bold text-white transition-opacity hover:opacity-90 cursor-pointer"
+              >
+                <TelegramIcon size={15} />
+                Buka bot &amp; kirim kode
+              </a>
               <p className="px-1 text-[10px] text-[var(--color-ink-faint)]">
-                Buka FluXa di Telegram, ketik <span className="font-mono">/link {code}</span>.
-                {countdown ? ` (${countdown})` : ''}
+                Kode terkirim otomatis ke bot saat chat dibuka. {countdown}
               </p>
             </>
           ) : (
@@ -124,6 +153,15 @@ export function TelegramLink() {
               <p className="px-1 text-[10px] text-[var(--color-ink-faint)]">
                 Hubungkan chat Telegram agar transaksi via bot masuk ke akun Anda.
               </p>
+              <a
+                href="https://t.me/fluclight_finance_bot"
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-1 rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2 text-[11px] font-medium text-[var(--color-ink-muted)] transition-colors hover:border-[var(--color-border-strong)] hover:text-[var(--color-ink)] cursor-pointer"
+              >
+                <TelegramIcon size={13} />
+                Buka @fluclight_finance_bot
+              </a>
               <button
                 type="button"
                 onClick={handleStart}
