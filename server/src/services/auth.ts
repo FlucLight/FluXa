@@ -15,6 +15,19 @@ if (!secret) {
   console.warn('[auth] JWT_SECRET tidak di-set — menggunakan secret pengembangan yang TIDAK aman untuk produksi.')
 }
 
+const usesFallbackSecret = env.JWT_SECRET === ''
+const secretFingerprint = secret ? createHash('sha256').update(secret).digest('hex').slice(0, 8) : 'EMPTY'
+
+function decodeJwt(token: string): { header: jwt.JwtHeader | null; payload: jwt.JwtPayload | null } {
+  try {
+    const decoded = jwt.decode(token, { complete: true }) as { header: jwt.JwtHeader; payload: jwt.JwtPayload } | null
+    if (!decoded) return { header: null, payload: null }
+    return { header: decoded.header, payload: decoded.payload }
+  } catch {
+    return { header: null, payload: null }
+  }
+}
+
 export const ACCESS_COOKIE = 'fluxa_at'
 export const REFRESH_COOKIE = 'fluxa_rt'
 
@@ -74,11 +87,60 @@ export function signAccessToken(userId: string): string {
 export function verifyAccessToken(token: string): string | null {
   try {
     const payload = jwt.verify(token, secret!)
-    if (typeof payload.sub !== 'string') return null
+    if (typeof payload.sub !== 'string') {
+      console.error('[AUTH DEBUG][/me] verify OK tapi sub bukan string:', JSON.stringify({
+        payload,
+        serverTime: new Date().toISOString(),
+        secretFingerprint,
+        usesFallbackSecret,
+      }))
+      return null
+    }
     return payload.sub
-  } catch {
+  } catch (error) {
+    const decoded = decodeJwt(token)
+    const claims = decoded.payload
+    const nowSec = Math.floor(Date.now() / 1000)
+    const expIn = typeof claims?.exp === 'number' ? claims.exp - nowSec : null
+    console.error('[AUTH DEBUG][/me] verify failed:', JSON.stringify({
+      errorName: (error as Error)?.name ?? null,
+      errorMessage: (error as Error)?.message ?? null,
+      headerAlg: decoded.header?.alg ?? null,
+      decodedClaims: claims
+        ? { iss: claims.iss, aud: claims.aud, sub: claims.sub, exp: claims.exp, iat: claims.iat }
+        : null,
+      serverTime: new Date().toISOString(),
+      nowEpochSec: nowSec,
+      expInSeconds: expIn,
+      expDate: typeof claims?.exp === 'number' ? new Date(claims.exp * 1000).toISOString() : null,
+      secretFingerprint,
+      usesFallbackSecret,
+    }))
     return null
   }
+}
+
+export function logDebugIssuedAccess(tag: string, access: string): void {
+  const { header, payload } = decodeJwt(access)
+  const cookie = accessCookieOptions()
+  console.log(`[AUTH DEBUG][${tag}] new token issued:`, JSON.stringify({
+    headerAlg: header?.alg ?? null,
+    claims: payload
+      ? { iss: payload.iss, aud: payload.aud, sub: payload.sub, exp: payload.exp, iat: payload.iat }
+      : null,
+    serverTime: new Date().toISOString(),
+    expDate: typeof payload?.exp === 'number' ? new Date(payload.exp * 1000).toISOString() : null,
+    cookie: {
+      name: ACCESS_COOKIE,
+      httpOnly: true,
+      secure: env.COOKIE_SECURE,
+      sameSite: baseCookieOptions.sameSite,
+      path: cookie.path ?? '/',
+      maxAgeMs: cookie.maxAge ?? null,
+    },
+    secretFingerprint,
+    usesFallbackSecret,
+  }))
 }
 
 export interface IssuedSession {

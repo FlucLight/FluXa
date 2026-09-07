@@ -6,6 +6,7 @@ import {
   hashPassword,
   hashToken,
   issueSession,
+  logDebugIssuedAccess,
   revokeSessionByRawToken,
   rotateSession,
   setAuthCookies,
@@ -86,6 +87,7 @@ export async function refresh(req: Request, res: Response): Promise<void> {
   }
 
   sendSession(res, 200, session)
+  logDebugIssuedAccess('/refresh', session.access)
 }
 
 export async function me(req: Request, res: Response): Promise<void> {
