@@ -159,8 +159,8 @@ async function resolveChatUser(chatId: number): Promise<AuthUser | null> {
 }
 
 const LINK_CODE_PATTERN = /^[a-z2-9]{8}$/i
-const START_LINK_PATTERN = /^\/start\s+([a-z2-9]{8})$/i
-const LINK_COMMAND_PATTERN = /^(?:link|\/link)\s+([a-z2-9]{8})$/i
+const START_LINK_PATTERN = /^\/start\s*([a-z2-9]{8})$/i
+const LINK_COMMAND_PATTERN = /^(?:link|\/link)\s*([a-z2-9]{8})$/i
 
 function extractLinkCode(text: string): string | null {
   if (!text) return null
