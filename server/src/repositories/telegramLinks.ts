@@ -73,7 +73,7 @@ export async function confirmLinkWithCode(
 
     const row = pending.rows[0]
     await client.query(
-      `UPDATE telegram_links SET chat_id = $2, linked_at = now(), expires_at = NULL WHERE id = $1`,
+      `UPDATE telegram_links SET chat_id = $2, linked_at = now() WHERE id = $1`,
       [row.id, String(chatId)],
     )
     await client.query('COMMIT')
