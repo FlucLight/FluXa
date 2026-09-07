@@ -48,7 +48,8 @@ export async function googleCallback(req: Request, res: Response): Promise<void>
   }
 
   try {
-    const profile = await exchangeGoogleCode(incomingState, storedState)
+    const currentUrl = new URL(req.originalUrl, `${env.PUBLIC_BASE}/`)
+    const profile = await exchangeGoogleCode(currentUrl, storedState)
     if (!profile || !profile.emailVerified) {
       res.redirect(`${env.CLIENT_ORIGIN}/login?google_error=verify`)
       return

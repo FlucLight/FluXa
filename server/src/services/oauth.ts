@@ -42,13 +42,9 @@ export interface GoogleProfile {
   emailVerified: boolean
 }
 
-export async function exchangeGoogleCode(code: string, expectedState: string): Promise<GoogleProfile | null> {
+export async function exchangeGoogleCode(currentUrl: URL, expectedState: string): Promise<GoogleProfile | null> {
   const config = await googleConfig()
   if (!config) return null
-
-  const currentUrl = new URL(redirectUri())
-  currentUrl.searchParams.set('code', code)
-  currentUrl.searchParams.set('state', expectedState)
 
   const tokenSet = await oidc.authorizationCodeGrant(config, currentUrl, { expectedState })
   const claims = tokenSet.claims()
