@@ -1,8 +1,22 @@
+import type { PoolClient } from 'pg'
 import { pool } from '../config/db'
 import { LEGACY_USER_ID } from '../services/identity'
 import type { AuthUser } from '../services/identity'
 
 const USER_COLS = 'id, name, email, avatar_url, created_at'
+
+export async function seedDefaultsForUser(client: PoolClient, userId: string): Promise<void> {
+  await client.query(
+    `INSERT INTO categories (user_id, name, type, icon, keywords)
+     SELECT $1, name, type, icon, keywords FROM categories WHERE user_id = $2`,
+    [userId, LEGACY_USER_ID],
+  )
+  await client.query(
+    `INSERT INTO payment_methods (user_id, name, type, aliases, initial_balance)
+     SELECT $1, name, type, aliases, 0 FROM payment_methods WHERE user_id = $2`,
+    [userId, LEGACY_USER_ID],
+  )
+}
 
 export interface StoredUser extends AuthUser {
   password_hash: string | null
@@ -119,6 +133,7 @@ export async function claimOrCreateGoogleUser(input: {
       [input.name, input.email, input.googleSub],
     )
     if (!created.rows[0]) throw new Error('Failed to create account')
+    await seedDefaultsForUser(client, created.rows[0].id)
     await client.query('COMMIT')
     return { user: toAuthUser(created.rows[0]) }
   } catch (error) {
@@ -179,6 +194,7 @@ export async function registerUser(input: {
       [input.name, input.email, input.passwordHash],
     )
     if (!created.rows[0]) throw new Error('Failed to create account')
+    await seedDefaultsForUser(client, created.rows[0].id)
     await client.query('COMMIT')
     return { user: toAuthUser(created.rows[0]), claimedLegacy: false }
   } catch (error) {
