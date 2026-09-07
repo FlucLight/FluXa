@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -29,9 +31,85 @@ import {
   type PeriodPreset,
 } from '../utils'
 
+type TrendChartType = 'bar' | 'line'
+type TrendGranularity = 'hour' | 'day' | 'week' | 'month'
+
+const TREND_CHART_TYPE_KEY = 'fluxa:trend-chart-type'
+const WITA_MS = 8 * 60 * 60 * 1000
+const DAY_MS = 24 * 60 * 60 * 1000
+const MONTH_SHORT = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
+
+function trendGranularityFor(fromMs: number, toMs: number): TrendGranularity {
+  const days = Math.ceil((toMs - fromMs) / DAY_MS)
+  if (days <= 1) return 'hour'
+  if (days <= 31) return 'day'
+  if (days <= 180) return 'week'
+  return 'month'
+}
+
+function trendBucketStart(ms: number, g: TrendGranularity): number {
+  const t = ms + WITA_MS
+  const d = new Date(t)
+  switch (g) {
+    case 'hour':
+      return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), d.getUTCHours())).getTime() - WITA_MS
+    case 'day':
+      return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate())).getTime() - WITA_MS
+    case 'week': {
+      const start = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()))
+      start.setUTCDate(start.getUTCDate() - ((start.getUTCDay() + 6) % 7))
+      return start.getTime() - WITA_MS
+    }
+    case 'month':
+      return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).getTime() - WITA_MS
+  }
+}
+
+function trendBucketLabel(startMs: number, g: TrendGranularity, includeYear: boolean): string {
+  const d = new Date(startMs + WITA_MS)
+  const day = d.getUTCDate()
+  const mon = d.getUTCMonth()
+  const pad = (n: number) => String(n).padStart(2, '0')
+  switch (g) {
+    case 'hour':
+      return `${pad(d.getUTCHours())}:00`
+    case 'day':
+      return `${day} ${MONTH_SHORT[mon]}`
+    case 'week': {
+      const end = new Date(d)
+      end.setUTCDate(end.getUTCDate() + 6)
+      const eDay = end.getUTCDate()
+      const eMon = end.getUTCMonth()
+      return mon === eMon
+        ? `${day}-${eDay} ${MONTH_SHORT[mon]}`
+        : `${day} ${MONTH_SHORT[mon]} - ${eDay} ${MONTH_SHORT[eMon]}`
+    }
+    case 'month':
+      return includeYear ? `${MONTH_SHORT[mon]} ${d.getUTCFullYear()}` : MONTH_SHORT[mon]
+  }
+}
+
 export function Dashboard() {
   const { theme } = useTheme()
   const isDark = theme === 'dark'
+  const incomeColor = isDark ? '#34D399' : '#2E7D5B'
+  const expenseColor = isDark ? '#F87171' : '#B23A3A'
+
+  const [chartType, setChartType] = useState<TrendChartType>(() => {
+    try {
+      return localStorage.getItem(TREND_CHART_TYPE_KEY) === 'line' ? 'line' : 'bar'
+    } catch {
+      return 'bar'
+    }
+  })
+  const changeChartType = (t: TrendChartType) => {
+    setChartType(t)
+    try {
+      localStorage.setItem(TREND_CHART_TYPE_KEY, t)
+    } catch {
+      // ignore persistence failures (private mode, storage quota, etc.)
+    }
+  }
 
   const [preset, setPreset] = useState<PeriodPreset>('this_month')
   const [customFrom, setCustomFrom] = useState('')
@@ -157,23 +235,57 @@ export function Dashboard() {
     .filter((pm) => pm.total > 0)
     .sort((a, b) => b.total - a.total)
 
-  const dailyMap: Record<string, { date: Date; expense: number; income: number; label: string }> = {}
+  let trendMinMs = Infinity
+  let trendMaxMs = -Infinity
   for (const t of txs) {
-    const d = new Date(t.occurred_at)
-    const dateParts = getWitaDateParts(t.occurred_at)
-    const key = `${dateParts.year}-${String(dateParts.month).padStart(2, '0')}-${String(dateParts.day).padStart(2, '0')}`
-    const label = d.toLocaleDateString('id-ID', {
-      weekday: 'short',
-      day: '2-digit',
-      month: 'short',
-      timeZone: 'Asia/Makassar',
-    })
-    if (!dailyMap[key]) dailyMap[key] = { date: d, expense: 0, income: 0, label }
-    dailyMap[key]![t.type] += parseFloat(t.amount)
+    const ms = new Date(t.occurred_at).getTime()
+    if (ms < trendMinMs) trendMinMs = ms
+    if (ms > trendMaxMs) trendMaxMs = ms
   }
-  const dailyData = Object.entries(dailyMap)
-    .sort((a, b) => a[0].localeCompare(b[0]))
+  const trendFromMs = dateRange.from
+    ? new Date(dateRange.from).getTime()
+    : Number.isFinite(trendMinMs)
+      ? trendMinMs
+      : 0
+  const trendToMs = dateRange.to
+    ? new Date(dateRange.to).getTime()
+    : Number.isFinite(trendMaxMs)
+      ? trendMaxMs
+      : 0
+  const trendGranularity = trendGranularityFor(trendFromMs, trendToMs)
+  const trendIncludeYear =
+    trendGranularity === 'month' &&
+    new Date(trendFromMs).getUTCFullYear() !== new Date(trendToMs).getUTCFullYear()
+
+  const trendBuckets = new Map<number, { label: string; expense: number; income: number }>()
+  {
+    const step = trendGranularity === 'hour' ? 3600_000 : trendGranularity === 'day' ? DAY_MS : trendGranularity === 'week' ? 7 * DAY_MS : null
+    let start = trendBucketStart(trendFromMs, trendGranularity)
+    let guard = 0
+    while (start <= trendToMs && guard < 400) {
+      trendBuckets.set(start, {
+        label: trendBucketLabel(start, trendGranularity, trendIncludeYear),
+        expense: 0,
+        income: 0,
+      })
+      if (step !== null) {
+        start += step
+      } else {
+        const next = new Date(start + WITA_MS)
+        next.setUTCMonth(next.getUTCMonth() + 1)
+        start = next.getTime() - WITA_MS
+      }
+      guard += 1
+    }
+  }
+  for (const t of txs) {
+    const bucket = trendBuckets.get(trendBucketStart(new Date(t.occurred_at).getTime(), trendGranularity))
+    if (bucket) bucket[t.type] += parseFloat(t.amount)
+  }
+  const trendData = [...trendBuckets.entries()]
+    .sort((a, b) => a[0] - b[0])
     .map(([, v]) => ({ day: v.label, expense: v.expense, income: v.income }))
+  const trendMaxBars = trendData.length > 45 ? 5 : trendData.length > 28 ? 8 : trendData.length > 14 ? 12 : 20
 
   const budgetsWithSpend = budgets
     .map((b) => {
@@ -338,64 +450,174 @@ export function Dashboard() {
              </section>
            )}
 
-           {dailyData.length > 0 && (
+           {txs.length > 0 && (
             <div className="bg-[var(--color-surface-raised)] border border-[var(--color-border)] rounded-[10px] p-5 shadow-xs card-hover">
               <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <h2 className="text-xs font-semibold text-[var(--color-ink)] uppercase tracking-wider">
                   Tren Transaksi per Periode
                 </h2>
-                <div className="flex items-center gap-4 text-[11px] text-[var(--color-ink-muted)]">
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--color-positive)]" />
-                    Pemasukan
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--color-negative)]" />
-                    Pengeluaran
-                  </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex items-center gap-4 text-[11px] text-[var(--color-ink-muted)]">
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--color-positive)]" />
+                      Pemasukan
+                    </span>
+                    <span className="flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-[2px] bg-[var(--color-negative)]" />
+                      Pengeluaran
+                    </span>
+                  </div>
+                  <div
+                    className="flex items-center rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] p-0.5"
+                    role="group"
+                    aria-label="Tipe grafik tren"
+                  >
+                    <button
+                      type="button"
+                      aria-pressed={chartType === 'bar'}
+                      title="Grafik batang"
+                      onClick={() => changeChartType('bar')}
+                      className={`flex h-6 w-8 items-center justify-center rounded-[4px] transition-colors cursor-pointer ${
+                        chartType === 'bar'
+                          ? 'bg-[var(--color-surface-raised)] text-[var(--color-focus)] shadow-xs'
+                          : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+                      }`}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <rect x="1" y="7" width="3.5" height="8" rx="0.75" />
+                        <rect x="6.5" y="3" width="3.5" height="12" rx="0.75" />
+                        <rect x="12" y="5" width="3.5" height="10" rx="0.75" />
+                      </svg>
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={chartType === 'line'}
+                      title="Grafik garis"
+                      onClick={() => changeChartType('line')}
+                      className={`flex h-6 w-8 items-center justify-center rounded-[4px] transition-colors cursor-pointer ${
+                        chartType === 'line'
+                          ? 'bg-[var(--color-surface-raised)] text-[var(--color-focus)] shadow-xs'
+                          : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
+                      }`}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <path d="M1 12.5 L5.5 7.5 L9 10 L15 3.5" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
               </div>
 
               <ResponsiveContainer width="100%" height={210}>
-                <BarChart data={dailyData} barGap={3}>
-                  <CartesianGrid
-                    strokeDasharray="2 2"
-                    stroke={isDark ? '#334155' : '#ECECE9'}
-                    vertical={false}
-                  />
-                  <XAxis
-                    dataKey="day"
-                    tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#8B8D92' }}
-                    axisLine={{ stroke: isDark ? '#334155' : '#DADAD6' }}
-                    tickLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#8B8D92' }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      background: isDark ? '#111827' : '#FFFFFF',
-                      border: `1px solid ${isDark ? '#334155' : '#DADAD6'}`,
-                      borderRadius: 8,
-                      fontSize: 12,
-                      boxShadow: isDark
-                        ? '0 8px 24px rgba(0,0,0,0.45)'
-                        : '0 8px 24px rgba(0,0,0,0.08)',
-                      padding: '8px 10px',
-                    }}
-                    itemStyle={{ color: isDark ? '#E2E8F0' : '#1B1C1F' }}
-                    labelStyle={{ color: isDark ? '#94A3B8' : '#5A5C61', fontWeight: 600, marginBottom: 4 }}
-                    formatter={(v, name) => [
-                      formatRp(Number(v)),
-                      name === 'expense' ? 'Pengeluaran' : 'Pemasukan',
-                    ]}
-                  />
-                  <Bar dataKey="income" fill={isDark ? '#34D399' : '#2E7D5B'} radius={[3, 3, 0, 0]} maxBarSize={20} />
-                  <Bar dataKey="expense" fill={isDark ? '#F87171' : '#B23A3A'} radius={[3, 3, 0, 0]} maxBarSize={20} />
-                </BarChart>
+                {chartType === 'bar' ? (
+                  <BarChart data={trendData} barGap={3}>
+                    <CartesianGrid
+                      strokeDasharray="2 2"
+                      stroke={isDark ? '#334155' : '#ECECE9'}
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#8B8D92' }}
+                      axisLine={{ stroke: isDark ? '#334155' : '#DADAD6' }}
+                      tickLine={false}
+                      minTickGap={16}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#8B8D92' }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: isDark ? '#111827' : '#FFFFFF',
+                        border: `1px solid ${isDark ? '#334155' : '#DADAD6'}`,
+                        borderRadius: 8,
+                        fontSize: 12,
+                        boxShadow: isDark
+                          ? '0 8px 24px rgba(0,0,0,0.45)'
+                          : '0 8px 24px rgba(0,0,0,0.08)',
+                        padding: '8px 10px',
+                      }}
+                      itemStyle={{ color: isDark ? '#E2E8F0' : '#1B1C1F' }}
+                      labelStyle={{ color: isDark ? '#94A3B8' : '#5A5C61', fontWeight: 600, marginBottom: 4 }}
+                      formatter={(v, name) => [
+                        formatRp(Number(v)),
+                        name === 'expense' ? 'Pengeluaran' : 'Pemasukan',
+                      ]}
+                    />
+                    <Bar dataKey="income" fill={incomeColor} radius={[3, 3, 0, 0]} maxBarSize={trendMaxBars} />
+                    <Bar dataKey="expense" fill={expenseColor} radius={[3, 3, 0, 0]} maxBarSize={trendMaxBars} />
+                  </BarChart>
+                ) : (
+                  <AreaChart data={trendData}>
+                    <defs>
+                      <linearGradient id="trendGradIncome" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={incomeColor} stopOpacity={0.32} />
+                        <stop offset="95%" stopColor={incomeColor} stopOpacity={0} />
+                      </linearGradient>
+                      <linearGradient id="trendGradExpense" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor={expenseColor} stopOpacity={0.32} />
+                        <stop offset="95%" stopColor={expenseColor} stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid
+                      strokeDasharray="2 2"
+                      stroke={isDark ? '#334155' : '#ECECE9'}
+                      vertical={false}
+                    />
+                    <XAxis
+                      dataKey="day"
+                      tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#8B8D92' }}
+                      axisLine={{ stroke: isDark ? '#334155' : '#DADAD6' }}
+                      tickLine={false}
+                      minTickGap={16}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: isDark ? '#94A3B8' : '#8B8D92' }}
+                      axisLine={false}
+                      tickLine={false}
+                      tickFormatter={(v) => `${(v / 1000).toFixed(0)}k`}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        background: isDark ? '#111827' : '#FFFFFF',
+                        border: `1px solid ${isDark ? '#334155' : '#DADAD6'}`,
+                        borderRadius: 8,
+                        fontSize: 12,
+                        boxShadow: isDark
+                          ? '0 8px 24px rgba(0,0,0,0.45)'
+                          : '0 8px 24px rgba(0,0,0,0.08)',
+                        padding: '8px 10px',
+                      }}
+                      itemStyle={{ color: isDark ? '#E2E8F0' : '#1B1C1F' }}
+                      labelStyle={{ color: isDark ? '#94A3B8' : '#5A5C61', fontWeight: 600, marginBottom: 4 }}
+                      formatter={(v, name) => [
+                        formatRp(Number(v)),
+                        name === 'expense' ? 'Pengeluaran' : 'Pemasukan',
+                      ]}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="income"
+                      stroke={incomeColor}
+                      strokeWidth={2}
+                      fill="url(#trendGradIncome)"
+                      dot={{ r: 2.5, fill: incomeColor, strokeWidth: 0 }}
+                      activeDot={{ r: 4, strokeWidth: 0 }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="expense"
+                      stroke={expenseColor}
+                      strokeWidth={2}
+                      fill="url(#trendGradExpense)"
+                      dot={{ r: 2.5, fill: expenseColor, strokeWidth: 0 }}
+                      activeDot={{ r: 4, strokeWidth: 0 }}
+                    />
+                  </AreaChart>
+                )}
               </ResponsiveContainer>
             </div>
           )}
