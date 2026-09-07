@@ -113,6 +113,7 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   auth: {
     me: () => req<{ user: AuthUser }>('/auth/me'),
+    providers: () => req<{ google: boolean }>('/auth/providers'),
     register: (data: RegisterInput) =>
       req<{ user: AuthUser }>('/auth/register', { method: 'POST', body: JSON.stringify(data) }),
     login: (data: LoginInput) =>

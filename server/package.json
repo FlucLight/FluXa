@@ -32,6 +32,7 @@
     "morgan": "^1.12.0",
     "multer": "^2.3.0",
     "node-pg-migrate": "^7.9.0",
+    "openid-client": "^6.8.8",
     "pg": "^8.23.0",
     "shared": "*",
     "zod": "^4.0.0"

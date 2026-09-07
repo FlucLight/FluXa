@@ -35,6 +35,15 @@ export interface Env {
   JWT_ACCESS_TTL_MINUTES: number
   AUTH_SESSION_DAYS: number
   COOKIE_SECURE: boolean
+  PUBLIC_BASE: string
+  CLIENT_ORIGIN: string
+  GOOGLE_CLIENT_ID: string
+  GOOGLE_CLIENT_SECRET: string
+  SMTP_HOST: string
+  SMTP_PORT: number
+  SMTP_USER: string
+  SMTP_PASS: string
+  SMTP_FROM: string
 }
 
 function toNumber(value: string | undefined, fallback: number): number {
@@ -60,4 +69,13 @@ export const env: Env = {
   JWT_ACCESS_TTL_MINUTES: toNumber(process.env.JWT_ACCESS_TTL_MINUTES, 15),
   AUTH_SESSION_DAYS: toNumber(process.env.AUTH_SESSION_DAYS, 30),
   COOKIE_SECURE: process.env.COOKIE_SECURE !== 'false' && process.env.COOKIE_SECURE !== '0',
+  PUBLIC_BASE: process.env.PUBLIC_BASE ?? '',
+  CLIENT_ORIGIN: process.env.CLIENT_ORIGIN ?? '',
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? '',
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ?? '',
+  SMTP_HOST: process.env.SMTP_HOST ?? '',
+  SMTP_PORT: toNumber(process.env.SMTP_PORT, 587),
+  SMTP_USER: process.env.SMTP_USER ?? '',
+  SMTP_PASS: process.env.SMTP_PASS ?? '',
+  SMTP_FROM: process.env.SMTP_FROM ?? '',
 }
