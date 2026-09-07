@@ -55,7 +55,7 @@ export async function confirmLinkWithCode(
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
-    await client.query('SELECT pg_advisory_xact_lock($1)', [727003])
+    await client.query('SELECT pg_advisory_xact_lock($1::bigint)', [727003])
 
     const pending = await client.query<TelegramLinkRow>(
       `SELECT * FROM telegram_links

@@ -776,6 +776,14 @@ async function handleText(message: TelegramMessage): Promise<void> {
     await handleLinkCommand(chatId, linkMatch[1]!)
     return
   }
+  if (command.startsWith('/link')) {
+    await sendMessage(
+      chatId,
+      'Format tautan: /link KODE.\n\nKode didapat di web FluXa → menu Akun → "Hubungkan Telegram".',
+      menuKeyboard(),
+    )
+    return
+  }
   if (
     !pending.has(chatId) &&
     !builders.has(chatId) &&
