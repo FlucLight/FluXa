@@ -8,13 +8,13 @@ import { validate } from '../middleware/validate'
 
 const router = Router()
 
-router.get('/me', ctrl.me)
+router.get('/me', requireAuth, ctrl.me)
 router.get('/providers', oauthCtrl.providers)
 router.post('/register', validate(registerSchema), ctrl.register)
 router.post('/login', validate(loginSchema), ctrl.login)
 router.post('/logout', ctrl.logout)
 router.post('/refresh', ctrl.refresh)
-router.post('/change-password', validate(changePasswordSchema), ctrl.changePassword)
+router.post('/change-password', requireAuth, validate(changePasswordSchema), ctrl.changePassword)
 
 router.get('/google/login', oauthCtrl.googleLogin)
 router.get('/google/callback', oauthCtrl.googleCallback)

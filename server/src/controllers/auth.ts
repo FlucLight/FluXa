@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import {
+  ACCESS_COOKIE,
   REFRESH_COOKIE,
   clearAuthCookies,
   generateRefreshToken,
@@ -91,6 +92,14 @@ export async function refresh(req: Request, res: Response): Promise<void> {
 }
 
 export async function me(req: Request, res: Response): Promise<void> {
+  const accessCookie = (req.cookies as Record<string, string | undefined> | undefined)?.[ACCESS_COOKIE]
+  console.log('[AUTH DEBUG][/me] masuk:', JSON.stringify({
+    hasUser: Boolean(req.user),
+    userSub: req.user?.id ?? null,
+    accessCookiePresent: accessCookie !== undefined,
+    accessCookieLength: accessCookie ? accessCookie.length : null,
+    serverTime: new Date().toISOString(),
+  }))
   if (!req.user) {
     res.status(401).json({ error: 'Anda belum masuk' })
     return
