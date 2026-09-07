@@ -2,6 +2,8 @@ import { Router } from 'express'
 import { changePasswordSchema, loginSchema, registerSchema } from 'shared'
 import * as ctrl from '../controllers/auth'
 import * as oauthCtrl from '../controllers/oauth'
+import * as webauthnCtrl from '../controllers/webauthn'
+import { requireAuth } from '../middleware/auth'
 import { validate } from '../middleware/validate'
 
 const router = Router()
@@ -16,5 +18,12 @@ router.post('/change-password', validate(changePasswordSchema), ctrl.changePassw
 
 router.get('/google/login', oauthCtrl.googleLogin)
 router.get('/google/callback', oauthCtrl.googleCallback)
+
+router.get('/webauthn/login/start', webauthnCtrl.beginLogin)
+router.post('/webauthn/login/verify', webauthnCtrl.verifyLogin)
+router.post('/webauthn/register/start', requireAuth, webauthnCtrl.beginRegister)
+router.post('/webauthn/register/verify', requireAuth, webauthnCtrl.verifyRegister)
+router.get('/webauthn/credentials', requireAuth, webauthnCtrl.listCredentials)
+router.delete('/webauthn/credentials/:id', requireAuth, webauthnCtrl.removeCredential)
 
 export default router

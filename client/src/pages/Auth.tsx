@@ -100,8 +100,32 @@ function GoogleButton({ label }: { label: string }) {
   )
 }
 
+function PasskeyButton({ onClick }: { onClick: () => void }) {
+  const [supported] = useState(() => {
+    try {
+      return typeof window !== 'undefined' ? window.PublicKeyCredential !== undefined : false
+    } catch {
+      return false
+    }
+  })
+  if (!supported) return null
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="flex w-full items-center justify-center gap-2 rounded-[6px] border border-dashed border-[var(--color-border-strong)] bg-transparent px-3 py-2.5 text-sm font-semibold text-[var(--color-ink)] transition-colors hover:bg-[var(--color-surface-sunken)] cursor-pointer"
+    >
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <rect x="3" y="11" width="18" height="11" rx="2" />
+        <path d="M7 11V7a5 5 0 0 1 9.9-1" />
+      </svg>
+      Masuk dengan passkey / biometrik
+    </button>
+  )
+}
+
 export function Login() {
-  const { login } = useAuth()
+  const { login, loginWithPasskey } = useAuth()
   const navigate = useNavigate()
   const toast = useToast()
   const [searchParams] = useSearchParams()
@@ -130,6 +154,21 @@ export function Login() {
     }
   }
 
+  const [passkeyBusy, setPasskeyBusy] = useState(false)
+
+  async function onPasskey() {
+    setPasskeyBusy(true)
+    try {
+      await loginWithPasskey()
+      navigate('/', { replace: true })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Gagal masuk'
+      toast.error(message.includes('tidak terdaftar') ? 'Belum ada passkey terdaftar. Registrasikan lewat menu Akun' : message)
+    } finally {
+      setPasskeyBusy(false)
+    }
+  }
+
   return (
     <AuthShell
       title="Masuk"
@@ -155,6 +194,10 @@ export function Login() {
         </button>
       </form>
       <GoogleButton label="Masuk dengan Google" />
+      <div className="mt-2">
+        <PasskeyButton onClick={onPasskey} />
+        {passkeyBusy && <p className="mt-2 text-center text-xs text-[var(--color-ink-muted)]">Menunggu biometrik…</p>}
+      </div>
     </AuthShell>
   )
 }

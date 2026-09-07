@@ -14,6 +14,7 @@ import {
 } from './Icons'
 import { ThemeToggle } from './ThemeToggle'
 import { AvatarEditor } from './AvatarEditor'
+import { PasskeyManager } from './PasskeyManager'
 import { useAuth } from './useAuth'
 import { useToast } from './useToast'
 
@@ -197,6 +198,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                   </button>
                 </div>
               )}
+              <PasskeyManager />
             </div>
           )}
 

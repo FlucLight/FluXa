@@ -16,6 +16,12 @@ import type {
   UpdatePaymentMethodInput,
   UpdateTransactionInput,
 } from 'shared'
+import type {
+  AuthenticationResponseJSON,
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
+  RegistrationResponseJSON,
+} from '@simplewebauthn/browser'
 
 const BASE = '/api'
 const TIMEOUT_MS = 15000
@@ -121,6 +127,20 @@ export const api = {
     logout: () => req<void>('/auth/logout', { method: 'POST' }),
     changePassword: (data: ChangePasswordInput) =>
       req<{ ok: boolean }>('/auth/change-password', { method: 'POST', body: JSON.stringify(data) }),
+  },
+
+  webauthn: {
+    loginStart: () => req<{ options: PublicKeyCredentialRequestOptionsJSON | null }>('/auth/webauthn/login/start'),
+    loginVerify: (response: AuthenticationResponseJSON) =>
+      req<{ user: AuthUser }>('/auth/webauthn/login/verify', { method: 'POST', body: JSON.stringify({ response }) }),
+    registerStart: () => req<{ options: PublicKeyCredentialCreationOptionsJSON }>('/auth/webauthn/register/start', { method: 'POST' }),
+    registerVerify: (response: RegistrationResponseJSON, deviceName?: string) =>
+      req<{ ok: boolean }>('/auth/webauthn/register/verify', {
+        method: 'POST',
+        body: JSON.stringify({ response, device_name: deviceName ?? null }),
+      }),
+    list: () => req<{ credentials: PasskeyPublic[] }>('/auth/webauthn/credentials'),
+    remove: (id: string) => req<void>(`/auth/webauthn/credentials/${id}`, { method: 'DELETE' }),
   },
 
   categories: {
@@ -278,6 +298,13 @@ export interface ParseResult {
   confidence: 'high' | 'low'
   raw_input: string
   occurred_at: string | null
+}
+
+export interface PasskeyPublic {
+  id: string
+  device_name: string | null
+  created_at: string
+  last_used_at: string | null
 }
 
 export type { AuthUser, BudgetRecord, AccountTransferRecord, RecurringTransactionRecord }

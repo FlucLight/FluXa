@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import { startAuthentication } from '@simplewebauthn/browser'
 import { api } from '../api'
 import type { AuthUser } from '../api'
 import { AuthContext } from './auth-context'
@@ -36,6 +37,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(me)
   }, [])
 
+  const loginWithPasskey = useCallback(async () => {
+    const { options } = await api.webauthn.loginStart()
+    if (!options) throw new Error('Passkey tidak tersedia')
+    const response = await startAuthentication({ optionsJSON: options })
+    const { user: me } = await api.webauthn.loginVerify(response)
+    setUser(me)
+  }, [])
+
   const logout = useCallback(async () => {
     try {
       await api.auth.logout()
@@ -49,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, login, register, logout, changePassword }}>
+    <AuthContext.Provider value={{ user, isLoading, login, loginWithPasskey, register, logout, changePassword }}>
       {children}
     </AuthContext.Provider>
   )

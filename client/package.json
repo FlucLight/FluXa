@@ -11,6 +11,7 @@
     "test:utils": "tsx --test src/utils.test.ts"
   },
   "dependencies": {
+    "@simplewebauthn/browser": "^14.0.0",
     "@tanstack/react-query": "^5.102.8",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
