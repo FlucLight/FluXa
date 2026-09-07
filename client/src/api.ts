@@ -277,6 +277,13 @@ export const api = {
       req<{ ok: boolean; imported: Record<string, number> }>('/export/json', { method: 'POST', body: JSON.stringify(data) }),
   },
 
+  telegram: {
+    startLink: () =>
+      req<{ code: string; expires_in_seconds: number }>('/telegram/link/start', { method: 'POST' }),
+    status: () => req<{ link: TelegramLinkStatus | null }>('/telegram/link'),
+    revoke: () => req<{ ok: boolean }>('/telegram/link', { method: 'DELETE' }),
+  },
+
   profile: {
     upload: async (file: File) => {
       const fd = new FormData()
@@ -309,6 +316,12 @@ export interface PasskeyPublic {
   device_name: string | null
   created_at: string
   last_used_at: string | null
+}
+
+export interface TelegramLinkStatus {
+  status: 'pending' | 'linked'
+  chat_id: string | null
+  expires_at: string | null
 }
 
 export type { AuthUser, BudgetRecord, AccountTransferRecord, RecurringTransactionRecord }

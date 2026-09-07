@@ -20,6 +20,7 @@ import { runDue } from './repositories/recurring'
 import { purgeExpiredSessions } from './repositories/sessions'
 import { backupIntervalMs, createBackup } from './services/backup'
 import authRouter from './routes/auth'
+import telegramRouter from './routes/telegram'
 import { requireAuth } from './middleware/auth'
 
 const app = express()
@@ -77,6 +78,7 @@ app.use('/api/recurring-transactions', recurringRouter)
 app.use('/api/export', exportRouter)
 app.use('/api/summary', summaryRouter)
 app.use('/api/profile', profileRouter)
+app.use('/api/telegram', telegramRouter)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

@@ -4,10 +4,15 @@ import * as categoryRepo from '../repositories/categories'
 import * as pmRepo from '../repositories/paymentMethods'
 import * as summaryRepo from '../repositories/summary'
 import * as txRepo from '../repositories/transactions'
+import * as linkRepo from '../repositories/telegramLinks'
 import { parseResolved } from '../parser'
 import { extractDatePhrase } from '../parser/date'
 import { env } from '../config/env'
 import { createBackup } from '../services/backup'
+import { hashToken } from '../services/auth'
+import { findUserById } from '../repositories/users'
+import { LEGACY_USER_ID, runWithUser } from '../services/identity'
+import type { AuthUser } from '../services/identity'
 
 interface TelegramUser {
   id: number
@@ -135,6 +140,47 @@ function token(): string | null {
 function isAllowed(chatId: number): boolean {
   const allowed = readAllowedChatIds()
   return allowed.size > 0 && allowed.has(chatId)
+}
+
+const NOT_LINKED_TEXT =
+  'Akun Telegram ini belum tertaut ke FluXa.\n\nBuka web FluXa → menu Akun → "Hubungkan Telegram", lalu kirim kode yang muncul ke bot ini dengan format:\n\n/link KODE'
+
+async function resolveChatUser(chatId: number): Promise<AuthUser | null> {
+  const linkedUserId = await linkRepo.findUserIdByChatId(chatId)
+  if (linkedUserId) {
+    const user = await findUserById(linkedUserId)
+    if (user) return user
+  }
+  if (isAllowed(chatId)) {
+    const legacy = await findUserById(LEGACY_USER_ID)
+    if (legacy) return legacy
+  }
+  return null
+}
+
+const LINK_CODE_PATTERN = /^[a-z2-9]{8}$/i
+
+async function handleLinkCommand(chatId: number, code: string): Promise<void> {
+  const result = await linkRepo.confirmLinkWithCode(hashToken(code), chatId)
+  if (!result) {
+    await sendMessage(chatId, 'Kode tidak valid atau sudah kedaluwarsa.', menuKeyboard())
+    return
+  }
+  await sendMessage(
+    chatId,
+    `Berhasil ditautkan! Transaksi lewat bot ini sekarang masuk ke akun FluXa Anda.\n\nKetik /help untuk bantuan.`,
+    menuKeyboard(),
+  )
+}
+
+async function handleUnlinkCommand(chatId: number): Promise<void> {
+  const userId = await linkRepo.findUserIdByChatId(chatId)
+  if (!userId) {
+    await sendMessage(chatId, 'Belum ada akun yang tertaut ke chat ini.', menuKeyboard())
+    return
+  }
+  await linkRepo.revokeLink(userId)
+  await sendMessage(chatId, 'Chat ini sudah dilepas dari akun FluXa Anda.', menuKeyboard())
 }
 
 async function telegram<T>(method: string, body: Record<string, unknown>): Promise<T> {
@@ -281,6 +327,8 @@ function helpText(): string {
     '/edit — ubah transaksi Telegram terakhir',
     '/backup — kirim backup JSON',
     '/id — lihat chat ID',
+    '/link KODE — tautkan chat ke akun FluXa',
+    '/unlink — lepas chat dari akun FluXa',
     '/batal — batalkan proses',
     '',
     'Kamu juga tetap bisa mengetik transaksi lengkap.',
@@ -553,10 +601,6 @@ async function handleCallback(callback: TelegramCallbackQuery): Promise<void> {
 
   const chatId = message.chat.id
   await answerCallback(callback.id)
-  if (!isAllowed(chatId)) {
-    await sendMessage(chatId, 'Chat ID belum diizinkan. Kirim nilai ini ke pemilik bot: ' + chatId)
-    return
-  }
 
   if (data === 'help') {
     await editMessage(chatId, message.message_id, helpText(), menuKeyboard())
@@ -699,17 +743,30 @@ async function handleText(message: TelegramMessage): Promise<void> {
   const text = message.text?.trim() ?? ''
   if (!text) return
 
-  if (!isAllowed(chatId)) {
-    await sendMessage(chatId, 'Chat ID belum diizinkan. Kirim nilai ini ke pemilik bot: ' + chatId)
-    return
-  }
-
   const command = text.toLowerCase()
   if (command === '/start' || command === '/help') {
     pending.delete(chatId)
     builders.delete(chatId)
     editTargets.delete(chatId)
     await sendMessage(chatId, helpText(), menuKeyboard())
+    return
+  }
+  if (command === '/unlink' || command === 'unlink') {
+    await handleUnlinkCommand(chatId)
+    return
+  }
+  const linkMatch = /^(?:link|\/link)\s+([a-z2-9]{8})$/i.exec(text)
+  if (linkMatch) {
+    await handleLinkCommand(chatId, linkMatch[1]!)
+    return
+  }
+  if (
+    !pending.has(chatId) &&
+    !builders.has(chatId) &&
+    !editTargets.has(chatId) &&
+    LINK_CODE_PATTERN.test(text)
+  ) {
+    await handleLinkCommand(chatId, text)
     return
   }
   if (command === '/id') {
@@ -820,8 +877,19 @@ async function poll(offset: number): Promise<number> {
   })
   for (const update of updates) {
     try {
-      if (update.callback_query) await handleCallback(update.callback_query)
-      else if (update.message) await handleText(update.message)
+      const chatId = update.callback_query?.message?.chat.id ?? update.message?.chat.id
+      if (chatId == null) continue
+
+      const user = await resolveChatUser(chatId)
+      if (!user) {
+        await sendMessage(chatId, NOT_LINKED_TEXT)
+        continue
+      }
+
+      await runWithUser(user, async () => {
+        if (update.callback_query) await handleCallback(update.callback_query)
+        else if (update.message) await handleText(update.message)
+      })
     } catch (error) {
       console.error('[telegram] Error:', error)
       const chatId = update.callback_query?.message?.chat.id ?? update.message?.chat.id
@@ -846,6 +914,8 @@ export async function startTelegramBot(): Promise<void> {
       { command: 'undo', description: 'Batalkan transaksi terakhir' },
       { command: 'edit', description: 'Edit transaksi terakhir' },
       { command: 'backup', description: 'Kirim backup JSON' },
+      { command: 'link', description: 'Tautkan chat ke akun FluXa (lampirkan kode)' },
+      { command: 'unlink', description: 'Lepas chat dari akun FluXa' },
       { command: 'help', description: 'Lihat bantuan' },
     ],
   })

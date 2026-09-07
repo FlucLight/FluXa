@@ -15,6 +15,7 @@ import {
 import { ThemeToggle } from './ThemeToggle'
 import { AvatarEditor } from './AvatarEditor'
 import { PasskeyManager } from './PasskeyManager'
+import { TelegramLink } from './TelegramLink'
 import { useAuth } from './useAuth'
 import { useToast } from './useToast'
 
@@ -199,6 +200,9 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
                 </div>
               )}
               <PasskeyManager />
+              <div className="px-3">
+                <TelegramLink />
+              </div>
             </div>
           )}
 
