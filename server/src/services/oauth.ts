@@ -29,6 +29,7 @@ export async function googleAuthUrl(state: string): Promise<string | null> {
       scope: 'openid email profile',
       state,
       prompt: 'select_account',
+      redirect_uri: redirectUri(),
     })
     .toString()
 }
