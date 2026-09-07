@@ -1,5 +1,5 @@
 import { Router } from 'express'
-import { changePasswordSchema, loginSchema, registerSchema } from 'shared'
+import { changePasswordSchema, forgotPasswordSchema, loginSchema, registerSchema, resetPasswordSchema } from 'shared'
 import * as ctrl from '../controllers/auth'
 import * as oauthCtrl from '../controllers/oauth'
 import * as webauthnCtrl from '../controllers/webauthn'
@@ -18,6 +18,9 @@ router.post('/change-password', validate(changePasswordSchema), ctrl.changePassw
 
 router.get('/google/login', oauthCtrl.googleLogin)
 router.get('/google/callback', oauthCtrl.googleCallback)
+
+router.post('/forgot', validate(forgotPasswordSchema), ctrl.forgot)
+router.post('/reset', validate(resetPasswordSchema), ctrl.reset)
 
 router.get('/webauthn/login/start', webauthnCtrl.beginLogin)
 router.post('/webauthn/login/verify', webauthnCtrl.verifyLogin)

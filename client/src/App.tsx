@@ -14,6 +14,8 @@ import { useVisualViewportHeight } from './components/useVisualViewportHeight'
 import { AuthProvider } from './components/AuthProvider'
 import { useAuth } from './components/useAuth'
 import { Login, Register } from './pages/Auth'
+import { ForgotPassword } from './pages/ForgotPassword'
+import { ResetPassword } from './pages/ResetPassword'
 import type { ReactNode } from 'react'
 
 const Dashboard = lazy(() => import('./pages/Dashboard').then((m) => ({ default: m.Dashboard })))
@@ -138,6 +140,22 @@ export default function App() {
                     element={
                       <RequireGuest to="/">
                         <Register />
+                      </RequireGuest>
+                    }
+                  />
+                  <Route
+                    path="/forgot-password"
+                    element={
+                      <RequireGuest to="/">
+                        <ForgotPassword />
+                      </RequireGuest>
+                    }
+                  />
+                  <Route
+                    path="/reset-password"
+                    element={
+                      <RequireGuest to="/">
+                        <ResetPassword />
                       </RequireGuest>
                     }
                   />

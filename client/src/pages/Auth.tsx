@@ -5,7 +5,7 @@ import { api } from '../api'
 import { useAuth } from '../components/useAuth'
 import { useToast } from '../components/useToast'
 
-function Field({
+export function Field({
   label,
   type,
   value,
@@ -36,7 +36,7 @@ function Field({
   )
 }
 
-function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
+export function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle: string; children: ReactNode; footer: ReactNode }) {
   return (
     <div className="flex min-h-screen h-[100svh] items-center justify-center bg-[var(--color-surface)] px-4 py-8">
       <div className="w-full max-w-sm">
@@ -192,6 +192,11 @@ export function Login() {
         >
           {submitting ? 'Memproses…' : 'Masuk'}
         </button>
+        <div className="text-center">
+          <Link to="/forgot-password" className="text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:underline">
+            Lupa kata sandi?
+          </Link>
+        </div>
       </form>
       <GoogleButton label="Masuk dengan Google" />
       <div className="mt-2">

@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import {
   REFRESH_COOKIE,
   clearAuthCookies,
+  generateRefreshToken,
   hashPassword,
   hashToken,
   issueSession,
@@ -12,12 +13,17 @@ import {
 } from '../services/auth'
 import type { IssuedSession } from '../services/auth'
 import {
+  findUserByEmail,
   findUserWithHashByEmail,
   findUserWithHashById,
   registerUser,
   updatePasswordHash,
 } from '../repositories/users'
 import * as sessionRepo from '../repositories/sessions'
+import * as passwordsRepo from '../repositories/passwords'
+import { isMailerConfigured, sendPasswordReset } from '../services/mailer'
+
+const RESET_TOKEN_TTL_MS = 30 * 60 * 1000
 
 function userAgent(req: Request): string | null {
   return req.headers['user-agent'] ?? null
@@ -119,6 +125,48 @@ export async function changePassword(req: Request, res: Response): Promise<void>
   } else {
     await sessionRepo.revokeAllSessions(user.id)
   }
+
+  res.json({ ok: true })
+}
+
+export async function forgot(req: Request, res: Response): Promise<void> {
+  const { email } = req.body as { email: string }
+
+  const user = await findUserByEmail(email)
+  if (user && user.email) {
+    void passwordsRepo.purgeExpiredTokens()
+    const token = generateRefreshToken()
+    await passwordsRepo.createResetToken({
+      userId: user.id,
+      tokenHash: hashToken(token),
+      expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+    })
+
+    if (isMailerConfigured()) {
+      try {
+        await sendPasswordReset({ to: user.email, name: user.name, token })
+      } catch (error) {
+        console.error('[mailer] Gagal mengirim email atur ulang kata sandi:', error)
+      }
+    }
+  }
+
+  res.json({ ok: true })
+}
+
+export async function reset(req: Request, res: Response): Promise<void> {
+  const { token, new_password } = req.body as { token: string; new_password: string }
+
+  const row = await passwordsRepo.findValidToken(hashToken(token))
+  if (!row) {
+    res.status(400).json({ error: 'Tautan atur ulang tidak valid atau sudah kedaluwarsa' })
+    return
+  }
+
+  const passwordHash = await hashPassword(new_password)
+  await updatePasswordHash(row.user_id, passwordHash)
+  await passwordsRepo.consumeToken(row.id)
+  await sessionRepo.revokeAllSessions(row.user_id)
 
   res.json({ ok: true })
 }

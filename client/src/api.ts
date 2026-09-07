@@ -127,6 +127,10 @@ export const api = {
     logout: () => req<void>('/auth/logout', { method: 'POST' }),
     changePassword: (data: ChangePasswordInput) =>
       req<{ ok: boolean }>('/auth/change-password', { method: 'POST', body: JSON.stringify(data) }),
+    forgotPassword: (email: string) =>
+      req<{ ok: boolean }>('/auth/forgot', { method: 'POST', body: JSON.stringify({ email }) }),
+    resetPassword: (token: string, newPassword: string) =>
+      req<{ ok: boolean }>('/auth/reset', { method: 'POST', body: JSON.stringify({ token, new_password: newPassword }) }),
   },
 
   webauthn: {
