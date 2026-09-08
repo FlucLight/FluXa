@@ -3,6 +3,7 @@ import { startRegistration } from '@simplewebauthn/browser'
 import { api } from '../api'
 import type { PasskeyPublic } from '../api'
 import { useToast } from './useToast'
+import { ConfirmModal } from './ConfirmModal'
 
 function formatDate(value: string | null): string {
   if (!value) return '—'
@@ -16,6 +17,7 @@ export function PasskeyManager() {
   const [open, setOpen] = useState(false)
   const [credentials, setCredentials] = useState<PasskeyPublic[] | null>(null)
   const [busy, setBusy] = useState(false)
+  const [removingId, setRemovingId] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     try {
@@ -58,7 +60,13 @@ export function PasskeyManager() {
 
   async function handleRemove(id: string) {
     if (busy) return
-    if (!window.confirm('Hapus perangkat ini? Anda tidak bisa lagi masuk dari perangkat itu.')) return
+    setRemovingId(id)
+  }
+
+  async function confirmRemove() {
+    if (busy || !removingId) return
+    const id = removingId
+    setRemovingId(null)
     setBusy(true)
     try {
       await api.webauthn.remove(id)
@@ -126,6 +134,18 @@ export function PasskeyManager() {
           )}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={removingId !== null}
+        title="Hapus Passkey"
+        message="Perangkat ini tidak akan bisa dipakai lagi untuk masuk lewat biometrik. Lanjutkan?"
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={confirmRemove}
+        onCancel={() => setRemovingId(null)}
+        isLoading={busy}
+      />
     </div>
   )
 }

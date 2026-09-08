@@ -131,6 +131,34 @@
   animation: pulseSubtle 2s infinite ease-in-out;
 }
 
+@keyframes modalScaleOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.96) translateY(4px);
+  }
+}
+
+@keyframes backdropOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.animate-notify-out {
+  animation: modalScaleOut 0.12s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-backdrop-out {
+  animation: backdropOut 0.12s ease-out forwards;
+}
+
 /* Interactive Card & Button Hover Elevation */
 .card-hover {
   transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.18s ease;

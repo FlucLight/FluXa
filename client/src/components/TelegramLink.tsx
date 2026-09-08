@@ -3,6 +3,7 @@ import { api } from '../api'
 import type { TelegramLinkStatus } from '../api'
 import { useToast } from './useToast'
 import { CopyIcon, TelegramIcon } from './Icons'
+import { ConfirmModal } from './ConfirmModal'
 
 export function TelegramLink() {
   const toast = useToast()
@@ -12,6 +13,7 @@ export function TelegramLink() {
   const [pendingUntil, setPendingUntil] = useState<string | null>(null)
   const [countdown, setCountdown] = useState('')
   const [loading, setLoading] = useState(false)
+  const [confirmRevoke, setConfirmRevoke] = useState(false)
 
   const load = useCallback(async () => {
     try {
@@ -72,9 +74,14 @@ export function TelegramLink() {
     }
   }
 
-  async function handleRevoke() {
+  function handleRevoke() {
     if (loading) return
-    if (!window.confirm('Lepas tautan Telegram ini?')) return
+    setConfirmRevoke(true)
+  }
+
+  async function confirmRevokeAction() {
+    if (loading) return
+    setConfirmRevoke(false)
     setLoading(true)
     try {
       await api.telegram.revoke()
@@ -174,6 +181,18 @@ export function TelegramLink() {
           )}
         </div>
       )}
+
+      <ConfirmModal
+        isOpen={confirmRevoke}
+        title="Lepas Tautan Telegram"
+        message="Transaksi lewat bot Telegram tidak akan lagi masuk ke akun Anda. Lanjutkan?"
+        confirmLabel="Lepas tautan"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={confirmRevokeAction}
+        onCancel={() => setConfirmRevoke(false)}
+        isLoading={loading}
+      />
     </div>
   )
 }
