@@ -150,7 +150,7 @@ Sesuaikan konfigurasi database PostgreSQL dan kunci rahasia:
 ```env
 PORT=5000
 DB_USER=postgres
-DB_PASSWORD=password_postgres_kamu
+DB_PASSWORD=your_password_postgres
 DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=financial_management
