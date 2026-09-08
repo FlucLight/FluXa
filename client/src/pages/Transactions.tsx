@@ -4,6 +4,7 @@ import type { TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { ConfirmModal } from '../components/ConfirmModal'
+import { Modal } from '../components/Modal'
 import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
 import { CategoryIcon } from '../components/CategoryIcon'
@@ -27,6 +28,7 @@ export function Transactions() {
   const [editing, setEditing] = useState<TransactionRecord | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmingBulkDelete, setConfirmingBulkDelete] = useState(false)
+  const [viewingReceipt, setViewingReceipt] = useState<TransactionRecord | null>(null)
 
   const [typeFilter, setTypeFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
@@ -345,6 +347,17 @@ export function Transactions() {
                     {tx.description && (
                       <p className="mt-0.5 truncate text-[11px] text-[var(--color-ink-muted)]">{tx.description}</p>
                     )}
+                    {tx.image_url && (
+                      <button
+                        type="button"
+                        onClick={() => setViewingReceipt(tx)}
+                        className="mt-1 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-[4px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)] hover:border-[var(--color-focus)] text-[10px] font-semibold text-[var(--color-ink)] transition-colors cursor-pointer"
+                        title="Lihat foto bukti/struk"
+                      >
+                        <img src={tx.image_url} alt="Struk" className="w-3.5 h-3.5 object-cover rounded-[2px]" />
+                        <span>Lihat Struk</span>
+                      </button>
+                    )}
                     <p className="mt-1.5 text-[11px] text-[var(--color-ink-faint)] tabular-nums">
                       {formatDate(tx.occurred_at)}
                       {pm ? <span className="mx-1">·</span> : null}
@@ -440,8 +453,19 @@ export function Transactions() {
                       {formatDate(tx.occurred_at)}
                     </td>
                     <td className="px-4 py-3 text-[var(--color-ink)]">
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <span>{tx.description ?? <span className="text-[var(--color-ink-faint)]">-</span>}</span>
+                        {tx.image_url && (
+                          <button
+                            type="button"
+                            onClick={() => setViewingReceipt(tx)}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[4px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)] hover:border-[var(--color-focus)] text-[10px] font-semibold text-[var(--color-ink)] transition-colors cursor-pointer shrink-0"
+                            title="Lihat foto bukti/struk"
+                          >
+                            <img src={tx.image_url} alt="Struk" className="w-3.5 h-3.5 object-cover rounded-[2px]" />
+                            <span>Struk</span>
+                          </button>
+                        )}
                         {tx.needs_review && (
                           <span className="text-[10px] bg-[var(--color-warning-soft)] text-[var(--color-warning)] px-1.5 py-0.2 rounded-[3px] font-medium">
                             review
@@ -542,6 +566,56 @@ export function Transactions() {
         }}
         onCancel={() => setConfirmingBulkDelete(false)}
       />
+
+      {viewingReceipt && viewingReceipt.image_url && (
+        <Modal
+          title="Foto Struk / Bukti Transaksi"
+          onClose={() => setViewingReceipt(null)}
+        >
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between text-xs pb-2 border-b border-[var(--color-border)]">
+              <div>
+                <p className="font-semibold text-sm text-[var(--color-ink)]">
+                  {viewingReceipt.description ?? 'Transaksi'}
+                </p>
+                <p className="text-[11px] text-[var(--color-ink-muted)]">
+                  {formatDate(viewingReceipt.occurred_at)}
+                </p>
+              </div>
+              <span
+                className={`text-base font-bold tabular-nums ${
+                  viewingReceipt.type === 'expense' ? 'text-[var(--color-negative)]' : 'text-[var(--color-positive)]'
+                }`}
+              >
+                {viewingReceipt.type === 'expense' ? '- ' : '+ '}
+                {formatRp(viewingReceipt.amount)}
+              </span>
+            </div>
+
+            <div className="relative max-h-[60vh] overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] flex items-center justify-center p-1">
+              <img
+                src={viewingReceipt.image_url}
+                alt="Foto struk transaksi"
+                className="max-h-[58vh] w-auto max-w-full object-contain rounded-[6px]"
+              />
+            </div>
+
+            <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]">
+              <a
+                href={viewingReceipt.image_url}
+                target="_blank"
+                rel="noreferrer"
+                className="text-xs font-semibold text-[var(--color-focus)] hover:underline"
+              >
+                Buka Ukuran Asli di Tab Baru
+              </a>
+              <Button variant="secondary" onClick={() => setViewingReceipt(null)}>
+                Tutup
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   )
 }

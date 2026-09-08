@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import type { TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from './Button'
@@ -17,6 +17,9 @@ type Props = { existing?: TransactionRecord; onClose: () => void }
 export function TransactionForm({ existing, onClose }: Props) {
   const qc = useQueryClient()
   const { success, error: toastError } = useToast()
+  const fileRef = useRef<HTMLInputElement>(null)
+  const [uploadingReceipt, setUploadingReceipt] = useState(false)
+
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
@@ -33,9 +36,25 @@ export function TransactionForm({ existing, onClose }: Props) {
     payment_method_id: existing?.payment_method_id ?? '',
     description: existing?.description ?? '',
     occurred_at: toLocalDateTimeInput(existing?.occurred_at),
+    image_url: existing?.image_url ?? '',
   })
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
+
+  async function handleReceiptUpload(file: File | undefined) {
+    if (!file) return
+    setUploadingReceipt(true)
+    try {
+      const res = await api.transactions.uploadReceipt(file)
+      set('image_url', res.url)
+      success('Foto struk/bukti berhasil diunggah', 'Upload Selesai')
+    } catch (err) {
+      toastError((err as Error).message, 'Gagal Upload Foto')
+    } finally {
+      setUploadingReceipt(false)
+      if (fileRef.current) fileRef.current.value = ''
+    }
+  }
 
   const mutation = useMutation({
     mutationFn: () => {
@@ -48,6 +67,7 @@ export function TransactionForm({ existing, onClose }: Props) {
         occurred_at: fromLocalDateTimeInput(form.occurred_at),
         source: 'web' as const,
         needs_review: false,
+        image_url: form.image_url || null,
       }
       return existing
         ? api.transactions.update(existing.id, payload)
@@ -166,6 +186,60 @@ export function TransactionForm({ existing, onClose }: Props) {
             value={form.occurred_at}
             onChange={(v) => set('occurred_at', v)}
           />
+        </Field>
+
+        <Field label="Foto Struk / Bukti Transaksi (Opsional)">
+          {form.image_url ? (
+            <div className="flex items-center gap-3 p-2.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)]">
+              <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface)]">
+                <img
+                  src={form.image_url}
+                  alt="Struk transaksi"
+                  className="h-full w-full object-cover cursor-pointer"
+                  onClick={() => window.open(form.image_url, '_blank')}
+                  title="Klik untuk melihat foto penuh"
+                />
+              </div>
+              <div className="flex flex-col gap-1 min-w-0 flex-1">
+                <span className="text-xs font-semibold text-[var(--color-ink)] truncate">
+                  Foto struk terlampir
+                </span>
+                <span className="text-[11px] text-[var(--color-ink-faint)]">
+                  Klik foto untuk melihat ukuran penuh
+                </span>
+                <button
+                  type="button"
+                  onClick={() => set('image_url', '')}
+                  className="mt-0.5 self-start text-[11px] font-semibold text-[var(--color-negative)] hover:underline cursor-pointer"
+                >
+                  Hapus Foto
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                id="receipt-upload"
+                onChange={(e) => handleReceiptUpload(e.target.files?.[0])}
+              />
+              <Button
+                variant="secondary"
+                type="button"
+                className="w-full sm:w-auto !py-2"
+                disabled={uploadingReceipt}
+                onClick={() => fileRef.current?.click()}
+              >
+                {uploadingReceipt ? 'Mengunggah Foto…' : '+ Pilih Foto Struk / Bukti'}
+              </Button>
+              <span className="text-[11px] text-[var(--color-ink-faint)]">
+                Format: JPG, PNG, WEBP (maks. 10MB)
+              </span>
+            </div>
+          )}
         </Field>
 
         {mutation.isError && (

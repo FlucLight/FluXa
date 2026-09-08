@@ -122,11 +122,12 @@ export async function create(data: {
   source?: 'web' | 'telegram_bot' | 'recurring'
   telegram_chat_id?: number | null
   needs_review?: boolean
+  image_url?: string | null
 }): Promise<TransactionRecord> {
   const { rows } = await pool.query<TransactionRecord>(
     `INSERT INTO transactions
-       (user_id, type, amount, category_id, payment_method_id, description, raw_input, occurred_at, source, telegram_chat_id, needs_review)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8::timestamptz, now()), $9, $10, $11)
+       (user_id, type, amount, category_id, payment_method_id, description, raw_input, occurred_at, source, telegram_chat_id, needs_review, image_url)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, COALESCE($8::timestamptz, now()), $9, $10, $11, $12)
      RETURNING *`,
     [
       userId(),
@@ -140,6 +141,7 @@ export async function create(data: {
       data.source ?? 'web',
       data.telegram_chat_id ?? null,
       data.needs_review ?? false,
+      data.image_url ?? null,
     ],
   )
   return rows[0]!
@@ -155,6 +157,7 @@ export async function update(
     description?: string | null
     occurred_at?: string | null
     needs_review?: boolean
+    image_url?: string | null
   },
 ): Promise<TransactionRecord | null> {
   const fields: string[] = []
@@ -168,6 +171,7 @@ export async function update(
   if (data.description !== undefined) { fields.push(`description = $${idx++}`); values.push(data.description) }
   if (data.occurred_at !== undefined) { fields.push(`occurred_at = $${idx++}`); values.push(data.occurred_at) }
   if (data.needs_review !== undefined) { fields.push(`needs_review = $${idx++}`); values.push(data.needs_review) }
+  if (data.image_url !== undefined) { fields.push(`image_url = $${idx++}`); values.push(data.image_url) }
 
   if (fields.length === 0) return findById(id)
 

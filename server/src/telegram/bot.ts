@@ -1,5 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import { basename } from 'node:path'
+import path from 'node:path'
+import fs from 'node:fs'
 import * as categoryRepo from '../repositories/categories'
 import * as pmRepo from '../repositories/paymentMethods'
 import * as summaryRepo from '../repositories/summary'
@@ -13,6 +15,14 @@ import { hashToken } from '../services/auth'
 import { findUserById } from '../repositories/users'
 import { LEGACY_USER_ID, runWithUser } from '../services/identity'
 import type { AuthUser } from '../services/identity'
+
+interface TelegramPhotoSize {
+  file_id: string
+  file_unique_id: string
+  width: number
+  height: number
+  file_size?: number
+}
 
 interface TelegramUser {
   id: number
@@ -30,6 +40,8 @@ interface TelegramMessage {
   from?: TelegramUser
   date?: number
   text?: string
+  caption?: string
+  photo?: TelegramPhotoSize[]
 }
 
 interface TelegramCallbackQuery {
@@ -68,6 +80,7 @@ interface PendingTransaction {
   categoryType?: 'expense' | 'income'
   paymentMethodId?: string
   editId?: string
+  imageUrl?: string | null
 }
 
 type BuilderStage = 'amount' | 'customAmount' | 'payment' | 'date' | 'customDate' | 'details'
@@ -79,15 +92,45 @@ interface BuilderState {
   paymentMethodId: string | null
   paymentMethodName: string | null
   occurredAt: string | null
+  imageUrl?: string | null
   stage: BuilderStage
 }
 
 type SummaryPeriod = 'today' | 'week' | 'month' | 'all'
 
 const TELEGRAM_API = 'https://api.telegram.org'
+const RECEIPTS_DIR = path.join(__dirname, '..', '..', 'uploads', 'receipts')
 const pending = new Map<number, PendingTransaction>()
 const builders = new Map<number, BuilderState>()
 const editTargets = new Map<number, string>()
+const pendingPhotos = new Map<number, string>()
+
+async function ensureReceiptsDir(): Promise<void> {
+  if (!fs.existsSync(RECEIPTS_DIR)) {
+    fs.mkdirSync(RECEIPTS_DIR, { recursive: true })
+  }
+}
+
+async function downloadTelegramPhoto(fileId: string): Promise<string | null> {
+  try {
+    const fileRes = await telegram<{ file_id: string; file_path?: string }>('getFile', { file_id: fileId })
+    if (!fileRes?.file_path) return null
+    await ensureReceiptsDir()
+    const ext = path.extname(fileRes.file_path) || '.jpg'
+    const finalName = `tg-${Date.now()}-${Math.random().toString(36).substring(2, 8)}${ext}`
+    const dest = path.join(RECEIPTS_DIR, finalName)
+
+    const downloadUrl = `${TELEGRAM_API}/file/bot${env.TELEGRAM_BOT_TOKEN}/${fileRes.file_path}`
+    const res = await fetch(downloadUrl)
+    if (!res.ok) return null
+    const buffer = Buffer.from(await res.arrayBuffer())
+    await fs.promises.writeFile(dest, buffer)
+    return `/uploads/receipts/${finalName}`
+  } catch (err) {
+    console.error('[telegram] Gagal mengunduh foto:', err)
+    return null
+  }
+}
 
 const CATEGORY_OPTIONS = [
   { key: 'makan', label: 'Makan' },
@@ -439,7 +482,7 @@ function parseManualDate(text: string): string | null {
   return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
-function previewText(parsed: ReturnType<typeof parseResolved>, description: string): string {
+function previewText(parsed: ReturnType<typeof parseResolved>, description: string, imageUrl?: string | null): string {
   return [
     'Preview transaksi:',
     `Tipe: ${parsed.category_type === 'income' ? 'Pemasukan' : 'Pengeluaran'}`,
@@ -448,6 +491,7 @@ function previewText(parsed: ReturnType<typeof parseResolved>, description: stri
     `Metode: ${parsed.payment_method_name ?? '-'}`,
     `Keterangan: ${description || '-'}`,
     `Tanggal: ${formatDateWita(parsed.occurred_at)}`,
+    ...(imageUrl ? ['Bukti/Struk: Foto terlampir'] : []),
     '',
     parsed.confidence === 'high'
       ? 'Klik Simpan atau Batal.'
@@ -496,6 +540,7 @@ async function createPreview(
     paymentMethodId?: string | undefined
     editId?: string | undefined
     messageDate?: number | undefined
+    imageUrl?: string | null | undefined
   } = {},
 ): Promise<void> {
   const [categories, paymentMethods] = await Promise.all([
@@ -516,6 +561,11 @@ async function createPreview(
     : new Date().toISOString()
   const occurredAt = options.occurredAt ?? parsed.occurred_at ?? defaultOccurredAt
 
+  const imageUrl = options.imageUrl ?? pendingPhotos.get(chatId) ?? null
+  if (pendingPhotos.has(chatId)) {
+    pendingPhotos.delete(chatId)
+  }
+
   const confidence = (selectedCategory || paymentMethod) && parsed.amount && paymentMethodId ? 'high' : parsed.confidence
   const preview = {
     ...parsed,
@@ -531,12 +581,13 @@ async function createPreview(
     text,
     occurredAt,
     description,
+    imageUrl,
     ...(categoryId ? { categoryId } : {}),
     ...(categoryType ? { categoryType } : {}),
     ...(paymentMethodId ? { paymentMethodId } : {}),
     ...(options.editId ? { editId: options.editId } : {}),
   })
-  await sendMessage(chatId, previewText(preview, description), confidence === 'high' ? CONFIRM_KEYBOARD : menuKeyboard())
+  await sendMessage(chatId, previewText(preview, description, imageUrl), confidence === 'high' ? CONFIRM_KEYBOARD : menuKeyboard())
 }
 
 async function savePending(chatId: number): Promise<void> {
@@ -569,6 +620,7 @@ async function savePending(chatId: number): Promise<void> {
       description: current.description || null,
       occurred_at: current.occurredAt ?? parsed.occurred_at,
       needs_review: parsed.confidence === 'low',
+      image_url: current.imageUrl ?? null,
     })
     if (!updated) {
       pending.delete(chatId)
@@ -591,6 +643,7 @@ async function savePending(chatId: number): Promise<void> {
     telegram_chat_id: chatId,
     needs_review: parsed.confidence === 'low',
     occurred_at: current.occurredAt ?? parsed.occurred_at,
+    image_url: current.imageUrl ?? null,
   })
   pending.delete(chatId)
   await sendMessage(chatId, `Tersimpan: ${transaction.description ?? parsed.category_name ?? 'Transaksi'} — ${formatRp(Number(transaction.amount))}`, menuKeyboard())
@@ -775,7 +828,27 @@ async function handleCallback(callback: TelegramCallbackQuery): Promise<void> {
 
 async function handleText(message: TelegramMessage): Promise<void> {
   const chatId = message.chat.id
-  const text = message.text?.trim() ?? ''
+
+  if (message.photo && message.photo.length > 0) {
+    const largest = message.photo[message.photo.length - 1]!
+    const imageUrl = await downloadTelegramPhoto(largest.file_id)
+    const caption = message.caption?.trim()
+    if (caption) {
+      await createPreview(chatId, caption, { imageUrl, messageDate: message.date })
+      return
+    }
+    if (imageUrl) {
+      pendingPhotos.set(chatId, imageUrl)
+      await sendMessage(
+        chatId,
+        'Foto struk/bukti berhasil diterima.\n\nKetik detail transaksi (contoh: Makan 25rb cash) atau pilih menu:',
+        menuKeyboard(),
+      )
+      return
+    }
+  }
+
+  const text = message.text?.trim() ?? message.caption?.trim() ?? ''
   if (!text) return
 
   const command = text.toLowerCase()
@@ -929,7 +1002,7 @@ async function poll(offset: number): Promise<number> {
       if (chatId == null) continue
 
       const user = await resolveChatUser(chatId)
-      const linkCode = extractLinkCode(update.message?.text?.trim() ?? '')
+      const linkCode = extractLinkCode(update.message?.text?.trim() ?? update.message?.caption?.trim() ?? '')
       if (!user) {
         if (linkCode) {
           await handleLinkCommand(chatId, linkCode)

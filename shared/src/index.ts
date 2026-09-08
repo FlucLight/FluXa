@@ -54,6 +54,7 @@ export interface TransactionRecord {
   needs_review: boolean
   is_deleted: boolean
   deleted_at: Date | null
+  image_url: string | null
   created_at: Date
 }
 
@@ -147,6 +148,7 @@ export const createTransactionSchema = z.object({
   occurred_at: z.iso.datetime({ offset: true }).nullish(),
   source: transactionSourceSchema,
   needs_review: z.boolean().default(false),
+  image_url: z.string().max(1000).nullish(),
 })
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>
 

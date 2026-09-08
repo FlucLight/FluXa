@@ -193,6 +193,16 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ text, ...(occurredAt ? { occurred_at: occurredAt } : {}) }),
       }),
+    uploadReceipt: async (file: File) => {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch('/api/transactions/upload-receipt', { method: 'POST', body: fd, credentials: 'include' })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error((body as { error?: string }).error ?? 'Gagal mengunggah foto struk')
+      }
+      return res.json() as Promise<{ url: string; message: string }>
+    },
   },
 
   transfers: {

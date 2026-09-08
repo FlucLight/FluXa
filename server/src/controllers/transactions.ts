@@ -1,5 +1,43 @@
 import type { Request, Response } from 'express'
+import path from 'node:path'
+import fs from 'node:fs'
+import type { Express } from 'express'
 import * as repo from '../repositories/transactions'
+
+const RECEIPTS_DIR = path.join(__dirname, '..', '..', 'uploads', 'receipts')
+const ALLOWED_EXT = ['.jpg', '.jpeg', '.png', '.webp']
+
+function ensureReceiptsDir(): void {
+  if (!fs.existsSync(RECEIPTS_DIR)) {
+    fs.mkdirSync(RECEIPTS_DIR, { recursive: true })
+  }
+}
+
+export async function uploadReceipt(req: Request, res: Response): Promise<void> {
+  try {
+    const file = (req as Request & { file?: Express.Multer.File }).file
+    if (!file) {
+      res.status(400).json({ error: 'File gambar wajib disertakan' })
+      return
+    }
+
+    const ext = path.extname(file.originalname).toLowerCase()
+    if (!ALLOWED_EXT.includes(ext)) {
+      fs.rmSync(file.path, { force: true })
+      res.status(400).json({ error: 'Format harus JPG, PNG, atau WEBP' })
+      return
+    }
+
+    ensureReceiptsDir()
+    const finalName = `receipt-${Date.now()}-${Math.random().toString(36).substring(2, 9)}${ext}`
+    const finalPath = path.join(RECEIPTS_DIR, finalName)
+    fs.renameSync(file.path, finalPath)
+
+    res.status(200).json({ url: `/uploads/receipts/${finalName}`, message: 'Foto struk berhasil diunggah' })
+  } catch {
+    res.status(500).json({ error: 'Gagal mengunggah foto struk' })
+  }
+}
 
 function parsePageNumber(value: string | undefined, fallback: number): number {
   if (value === undefined) return fallback
