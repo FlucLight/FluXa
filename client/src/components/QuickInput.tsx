@@ -6,6 +6,7 @@ import { formatDateShort, formatRp, toLocalDateInput } from '../utils'
 import { Button } from './Button'
 import { DatePicker } from './DatePicker'
 import { CalendarIcon, ZapIcon } from './Icons'
+import { useToast } from './useToast'
 
 function toDateInput(iso: string | null | undefined): string {
   if (!iso) return ''
@@ -66,6 +67,7 @@ const FLAT_SUGGESTIONS = SUGGESTIONS.flatMap((group) => group.items)
 
 export function QuickInput() {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
   const [text, setText] = useState('')
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof api.transactions.parse>> | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -119,15 +121,22 @@ export function QuickInput() {
 
   const saveMutation = useMutation({
     mutationFn: () => api.transactions.quick(text, occurredAt),
-    onSuccess: () => {
+    onSuccess: (res) => {
       invalidateFinancialData()
+      const desc = res.transaction.description || res.parsed.description || 'Transaksi'
+      const amt = formatRp(res.transaction.amount)
+      success(`${desc} (${amt}) berhasil dicatat`, 'Transaksi Dicatat')
       setText('')
       setPreview(null)
       setError(null)
       setOccurredAt(toLocalDateInput())
       inputRef.current?.focus()
     },
-    onError: (e) => setError((e as Error).message),
+    onError: (e) => {
+      const msg = (e as Error).message
+      setError(msg)
+      toastError(msg, 'Gagal Mencatat')
+    },
   })
 
   useEffect(() => {

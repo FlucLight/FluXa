@@ -9,12 +9,14 @@ import { Field, Input, Textarea } from './Form'
 import { CategoryIcon } from './CategoryIcon'
 import { CreditCardIcon } from './Icons'
 import { Modal } from './Modal'
+import { useToast } from './useToast'
 import { fromLocalDateTimeInput, toLocalDateTimeInput } from '../utils'
 
 type Props = { existing?: TransactionRecord; onClose: () => void }
 
 export function TransactionForm({ existing, onClose }: Props) {
   const qc = useQueryClient()
+  const { success, error: toastError } = useToast()
   const { data: categories = [] } = useQuery({
     queryKey: ['categories'],
     queryFn: () => api.categories.list(),
@@ -56,7 +58,11 @@ export function TransactionForm({ existing, onClose }: Props) {
       qc.invalidateQueries({ queryKey: ['recent-transactions'] })
       qc.invalidateQueries({ queryKey: ['summary-balances'] })
       qc.invalidateQueries({ queryKey: ['budgets'] })
+      success(existing ? 'Perubahan transaksi disimpan' : 'Transaksi baru berhasil disimpan', 'Berhasil Disimpan')
       onClose()
+    },
+    onError: (err) => {
+      toastError((err as Error).message, 'Gagal Menyimpan')
     },
   })
 

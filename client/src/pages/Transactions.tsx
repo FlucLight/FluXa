@@ -26,6 +26,7 @@ export function Transactions() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState<TransactionRecord | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [confirmingBulkDelete, setConfirmingBulkDelete] = useState(false)
 
   const [typeFilter, setTypeFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
@@ -269,7 +270,7 @@ export function Transactions() {
             <Button variant="secondary" onClick={toggleSelectAll}>
               {filteredTxs.every((t) => selectedIds.has(t.id)) ? 'Batal Pilih' : 'Pilih Semua di Halaman'}
             </Button>
-            <Button variant="danger" onClick={() => bulkDelete([...selectedIds])}>
+            <Button variant="danger" onClick={() => setConfirmingBulkDelete(true)}>
               Hapus Terpilih ({selectedIds.size})
             </Button>
           </div>
@@ -527,6 +528,19 @@ export function Transactions() {
         }}
         onCancel={() => setDeletingId(null)}
         isLoading={deleteMutation.isPending}
+      />
+
+      <ConfirmModal
+        isOpen={confirmingBulkDelete}
+        title="Hapus Transaksi Terpilih"
+        message={`Apakah Anda yakin ingin memindahkan ${selectedIds.size} transaksi terpilih ke menu Terhapus?`}
+        confirmLabel="Hapus Semua"
+        variant="danger"
+        onConfirm={() => {
+          setConfirmingBulkDelete(false)
+          bulkDelete([...selectedIds])
+        }}
+        onCancel={() => setConfirmingBulkDelete(false)}
       />
     </div>
   )
