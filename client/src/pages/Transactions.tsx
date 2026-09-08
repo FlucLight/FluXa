@@ -21,9 +21,39 @@ import {
   type SortOrder,
 } from '../utils'
 
-function downloadReceiptFile(url: string, description: string) {
-  const cleanName = description.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'transaksi'
-  const filename = `struk-${cleanName}.jpg`
+function getFileExtension(url: string): string {
+  const cleanUrl = url.split('?')[0] ?? ''
+  const match = /\.(jpe?g|png|webp)$/i.exec(cleanUrl)
+  return match ? `.${match[1]!.toLowerCase()}` : '.jpg'
+}
+
+function formatFilenameDateTime(dateValue: string | Date | null | undefined): { dateStr: string; timeStr: string } {
+  const d = dateValue ? new Date(dateValue) : new Date()
+  const validDate = Number.isNaN(d.getTime()) ? new Date() : d
+
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Makassar',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(validDate)
+  const map = Object.fromEntries(parts.map((p) => [p.type, p.value]))
+  return {
+    dateStr: `${map['day'] ?? '01'}-${map['month'] ?? '01'}-${map['year'] ?? '2026'}`,
+    timeStr: `${map['hour'] ?? '00'}.${map['minute'] ?? '00'}`,
+  }
+}
+
+function downloadReceiptFile(url: string, description: string, dateValue: string | Date | null | undefined) {
+  const { dateStr, timeStr } = formatFilenameDateTime(dateValue)
+  const ext = getFileExtension(url)
+  const cleanDesc = description.trim().replace(/[^a-zA-Z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '').toLowerCase()
+  const descPart = cleanDesc ? `-${cleanDesc}` : ''
+  const filename = `transaksi${descPart}-pada-tanggal-${dateStr}-jam-${timeStr}${ext}`
+
   fetch(url)
     .then((res) => res.blob())
     .then((blob) => {
@@ -637,9 +667,9 @@ export function Transactions() {
                     <Button
                       variant="secondary"
                       className="!py-1 !px-2.5 text-xs"
-                      onClick={() => downloadReceiptFile(imgUrl, viewingReceipt.description || 'transaksi')}
+                      onClick={() => downloadReceiptFile(imgUrl, viewingReceipt.description || '', viewingReceipt.occurred_at)}
                     >
-                      Unduh Foto
+                      Unduh Foto Struk
                     </Button>
                   </div>
 
