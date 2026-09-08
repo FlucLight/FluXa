@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { api } from '../api'
 import { useProfile } from './profile-context'
 import { useToast } from './useToast'
+import { ConfirmModal } from './ConfirmModal'
 
 const MAX_SIZE = 512
 
@@ -58,6 +59,7 @@ export function AvatarEditor() {
   const { photoSrc, isDefault, applyLocal, applyServer, reset } = useProfile()
   const fileRef = useRef<HTMLInputElement>(null)
   const [busy, setBusy] = useState(false)
+  const [confirmingReset, setConfirmingReset] = useState(false)
   const toast = useToast()
 
   async function handleFile(file: File | undefined) {
@@ -111,7 +113,7 @@ export function AvatarEditor() {
         <button
           type="button"
           disabled={busy}
-          onClick={() => reset()}
+          onClick={() => setConfirmingReset(true)}
           aria-label="Hapus foto profil"
           className="flex items-center gap-1 text-[11px] text-[var(--color-negative)] transition-colors hover:opacity-80 disabled:opacity-60"
         >
@@ -119,6 +121,20 @@ export function AvatarEditor() {
           Hapus foto
         </button>
       )}
+
+      <ConfirmModal
+        isOpen={confirmingReset}
+        title="Hapus Foto Profil"
+        message="Foto profil Anda akan dihapus dan diganti dengan inisial. Lanjutkan?"
+        confirmLabel="Hapus Foto"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          setConfirmingReset(false)
+          reset()
+        }}
+        onCancel={() => setConfirmingReset(false)}
+      />
     </div>
   )
 }

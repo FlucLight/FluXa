@@ -41,6 +41,7 @@ export function Recurring() {
 
   const [showForm, setShowForm] = useState(false)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [togglingItem, setTogglingItem] = useState<{ id: string; is_active: boolean } | null>(null)
   const [statusFilter, setStatusFilter] = useState('')
   const [sort, setSort] = useState<SortOrder | ''>('')
   const [pageSize, setPageSize] = useState<PageSize>(10)
@@ -90,8 +91,12 @@ export function Recurring() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['recurring'] })
       success(data?.is_active ? 'Tagihan diaktifkan' : 'Tagihan dinonaktifkan')
+      setTogglingItem(null)
     },
-    onError: (err) => toastError((err as Error).message),
+    onError: (err) => {
+      toastError((err as Error).message)
+      setTogglingItem(null)
+    },
   })
 
   const deleteMut = useMutation({
@@ -276,7 +281,7 @@ export function Recurring() {
               <div className="flex w-full gap-1.5 sm:w-auto">
                 <Button
                   variant="secondary"
-                  onClick={() => toggleMut.mutate({ id: item.id, is_active: !item.is_active })}
+                  onClick={() => setTogglingItem({ id: item.id, is_active: !item.is_active })}
                 >
                   {item.is_active ? 'Nonaktifkan' : 'Aktifkan'}
                 </Button>
@@ -317,6 +322,23 @@ export function Recurring() {
         }}
         onCancel={() => setDeletingId(null)}
         isLoading={deleteMut.isPending}
+      />
+
+      <ConfirmModal
+        isOpen={Boolean(togglingItem)}
+        title={togglingItem?.is_active ? 'Aktifkan Lagi' : 'Nonaktifkan'}
+        message={
+          togglingItem?.is_active
+            ? 'Tagihan berulang ini akan dicatat lagi sesuai jadwalnya. Lanjutkan?'
+            : 'Jadwal tagihan ini akan dijeda dan tidak lagi dicatat otomatis. Anda bisa mengaktifkannya kembali kapan saja.'
+        }
+        confirmLabel={togglingItem?.is_active ? 'Aktifkan' : 'Nonaktifkan'}
+        variant={togglingItem?.is_active ? 'primary' : 'danger'}
+        onConfirm={() => {
+          if (togglingItem) toggleMut.mutate({ id: togglingItem.id, is_active: togglingItem.is_active })
+        }}
+        onCancel={() => setTogglingItem(null)}
+        isLoading={toggleMut.isPending}
       />
     </div>
   )
