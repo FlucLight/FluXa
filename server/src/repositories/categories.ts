@@ -68,6 +68,19 @@ export async function update(
   return rows[0] ?? null
 }
 
+export async function countUsage(id: string): Promise<{ transactions: number; budgets: number; recurring: number }> {
+  const [txRes, budgetRes, recRes] = await Promise.all([
+    pool.query<{ count: string }>('SELECT count(*) FROM transactions WHERE category_id = $1 AND user_id = $2', [id, userId()]),
+    pool.query<{ count: string }>('SELECT count(*) FROM budgets WHERE category_id = $1 AND user_id = $2', [id, userId()]),
+    pool.query<{ count: string }>('SELECT count(*) FROM recurring_transactions WHERE category_id = $1 AND user_id = $2', [id, userId()]),
+  ])
+  return {
+    transactions: parseInt(txRes.rows[0]?.count ?? '0', 10),
+    budgets: parseInt(budgetRes.rows[0]?.count ?? '0', 10),
+    recurring: parseInt(recRes.rows[0]?.count ?? '0', 10),
+  }
+}
+
 export async function remove(id: string): Promise<boolean> {
   const { rowCount } = await pool.query(
     'DELETE FROM categories WHERE id = $1 AND user_id = $2',

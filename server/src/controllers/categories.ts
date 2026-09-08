@@ -25,7 +25,30 @@ export async function update(req: Request, res: Response): Promise<void> {
 }
 
 export async function remove(req: Request, res: Response): Promise<void> {
-  const ok = await repo.remove(req.params['id'] as string)
-  if (!ok) { res.status(404).json({ error: 'Category not found' }); return }
+  const id = req.params['id'] as string
+  const cat = await repo.findById(id)
+  if (!cat) {
+    res.status(404).json({ error: 'Kategori tidak ditemukan' })
+    return
+  }
+
+  const usage = await repo.countUsage(id)
+  const total = usage.transactions + usage.budgets + usage.recurring
+  if (total > 0) {
+    const parts: string[] = []
+    if (usage.transactions > 0) parts.push(`${usage.transactions} transaksi`)
+    if (usage.budgets > 0) parts.push(`${usage.budgets} target budget`)
+    if (usage.recurring > 0) parts.push(`${usage.recurring} tagihan berulang`)
+    res.status(409).json({
+      error: `Kategori "${cat.name}" tidak dapat dihapus karena masih digunakan oleh ${parts.join(', ')}.`,
+    })
+    return
+  }
+
+  const ok = await repo.remove(id)
+  if (!ok) {
+    res.status(404).json({ error: 'Kategori tidak ditemukan' })
+    return
+  }
   res.status(204).send()
 }

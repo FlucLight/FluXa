@@ -11,5 +11,15 @@ export function errorHandler(
   _next: NextFunction,
 ): void {
   console.error(err)
-  res.status(500).json({ error: 'Internal server error' })
+
+  const pgErr = err as { code?: string; detail?: string; message?: string }
+  if (pgErr?.code === '23503') {
+    res.status(409).json({
+      error: 'Data tidak dapat dihapus karena masih digunakan atau terhubung dengan data lain (transaksi, transfer, atau budget).',
+    })
+    return
+  }
+
+  const message = err instanceof Error ? err.message : 'Internal server error'
+  res.status(500).json({ error: message })
 }

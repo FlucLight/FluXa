@@ -23,7 +23,30 @@ export async function update(req: Request, res: Response): Promise<void> {
 }
 
 export async function remove(req: Request, res: Response): Promise<void> {
-  const ok = await repo.remove(req.params['id'] as string)
-  if (!ok) { res.status(404).json({ error: 'Payment method not found' }); return }
+  const id = req.params['id'] as string
+  const pm = await repo.findById(id)
+  if (!pm) {
+    res.status(404).json({ error: 'Akun pembayaran tidak ditemukan' })
+    return
+  }
+
+  const usage = await repo.countUsage(id)
+  const total = usage.transactions + usage.transfers + usage.recurring
+  if (total > 0) {
+    const parts: string[] = []
+    if (usage.transactions > 0) parts.push(`${usage.transactions} transaksi`)
+    if (usage.transfers > 0) parts.push(`${usage.transfers} transfer`)
+    if (usage.recurring > 0) parts.push(`${usage.recurring} tagihan berulang`)
+    res.status(409).json({
+      error: `Akun "${pm.name}" tidak dapat dihapus karena masih digunakan oleh ${parts.join(', ')}. Ubah atau hapus data terkait terlebih dahulu.`,
+    })
+    return
+  }
+
+  const ok = await repo.remove(id)
+  if (!ok) {
+    res.status(404).json({ error: 'Akun pembayaran tidak ditemukan' })
+    return
+  }
   res.status(204).send()
 }

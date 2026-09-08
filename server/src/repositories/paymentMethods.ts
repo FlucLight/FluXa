@@ -62,6 +62,19 @@ export async function update(
   return rows[0] ?? null
 }
 
+export async function countUsage(id: string): Promise<{ transactions: number; transfers: number; recurring: number }> {
+  const [txRes, transferRes, recRes] = await Promise.all([
+    pool.query<{ count: string }>('SELECT count(*) FROM transactions WHERE payment_method_id = $1 AND user_id = $2', [id, userId()]),
+    pool.query<{ count: string }>('SELECT count(*) FROM account_transfers WHERE (from_payment_method_id = $1 OR to_payment_method_id = $1) AND user_id = $2', [id, userId()]),
+    pool.query<{ count: string }>('SELECT count(*) FROM recurring_transactions WHERE payment_method_id = $1 AND user_id = $2', [id, userId()]),
+  ])
+  return {
+    transactions: parseInt(txRes.rows[0]?.count ?? '0', 10),
+    transfers: parseInt(transferRes.rows[0]?.count ?? '0', 10),
+    recurring: parseInt(recRes.rows[0]?.count ?? '0', 10),
+  }
+}
+
 export async function remove(id: string): Promise<boolean> {
   const { rowCount } = await pool.query(
     'DELETE FROM payment_methods WHERE id = $1 AND user_id = $2',
