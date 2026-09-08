@@ -1,3 +1,5 @@
+import { cleanNumberString, formatThousands } from '../utils'
+
 type Props = { label: string; children: React.ReactNode; error?: string }
 
 export function Field({ label, children, error }: Props) {
@@ -15,6 +17,47 @@ const inputClass =
 
 export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
   return <input {...props} className={`${inputClass} ${props.className ?? ''}`} />
+}
+
+export interface CurrencyInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'onChange' | 'value'> {
+  value: string | number
+  onChange: (rawValue: string) => void
+  prefix?: string
+}
+
+export function CurrencyInput({
+  value,
+  onChange,
+  prefix = 'Rp',
+  placeholder = '0',
+  className = '',
+  ...props
+}: CurrencyInputProps) {
+  const displayValue = formatThousands(value)
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = cleanNumberString(e.target.value)
+    onChange(raw)
+  }
+
+  return (
+    <div className="relative flex items-center w-full">
+      {prefix && (
+        <span className="absolute left-2.5 text-xs font-semibold text-[var(--color-ink-muted)] pointer-events-none select-none">
+          {prefix}
+        </span>
+      )}
+      <input
+        type="text"
+        inputMode="numeric"
+        value={displayValue}
+        onChange={handleChange}
+        placeholder={placeholder}
+        className={`${inputClass} ${prefix ? '!pl-8' : ''} tabular-nums font-semibold text-[var(--color-ink)] ${className}`}
+        {...props}
+      />
+    </div>
+  )
 }
 
 export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {

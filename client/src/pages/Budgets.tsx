@@ -6,7 +6,7 @@ import { ConfirmModal } from '../components/ConfirmModal'
 import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
-import { Field, Input } from '../components/Form'
+import { CurrencyInput, Field } from '../components/Form'
 import { CloseIcon } from '../components/Icons'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { Modal } from '../components/Modal'
@@ -263,14 +263,12 @@ function BudgetForm({
           />
         </Field>
 
-        <Field label="Batas Maksimal Bulanan (Rp)">
-          <Input
-            type="number"
-            min="1"
+        <Field label="Batas Maksimal Bulanan">
+          <CurrencyInput
             required
             value={form.limit_amount}
-            onChange={(e) => set('limit_amount', e.target.value)}
-            placeholder="500000"
+            onChange={(val) => set('limit_amount', val)}
+            placeholder="500.000"
             className="!py-2"
           />
         </Field>

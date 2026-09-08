@@ -5,7 +5,7 @@ import { api } from '../api'
 import { Button } from './Button'
 import { CustomSelect, type SelectOption } from './CustomSelect'
 import { DateTimePicker } from './DatePicker'
-import { Field, Input, Textarea } from './Form'
+import { CurrencyInput, Field, Textarea } from './Form'
 import { CategoryIcon } from './CategoryIcon'
 import { CreditCardIcon } from './Icons'
 import { Modal } from './Modal'
@@ -116,16 +116,14 @@ export function TransactionForm({ existing, onClose }: Props) {
           />
         </Field>
 
-        <Field label="Jumlah (Rp)">
-          <Input
-            type="number"
-            min="1"
-            step="1"
+        <Field label="Jumlah Nominal">
+          <CurrencyInput
             required
             value={form.amount}
-            onChange={(e) => set('amount', e.target.value)}
-            placeholder="15000"
+            onChange={(val) => set('amount', val)}
+            placeholder="15.000"
             className="!py-2"
+            autoFocus={!existing}
           />
         </Field>
 

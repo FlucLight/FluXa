@@ -19,6 +19,17 @@ export function formatRp(value: string | number | null | undefined): string {
   }).format(num)
 }
 
+export function formatThousands(value: string | number | null | undefined): string {
+  if (value == null || value === '') return ''
+  const clean = String(value).replace(/\D/g, '')
+  if (!clean) return ''
+  return clean.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+export function cleanNumberString(value: string): string {
+  return value.replace(/\D/g, '')
+}
+
 function parseDateValue(value: string | Date | null | undefined): Date {
   if (value instanceof Date) return value
   if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {

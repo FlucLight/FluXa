@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
-import { Field, Input } from '../components/Form'
+import { CurrencyInput, Field } from '../components/Form'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
 import { formatRp } from '../utils'
@@ -76,7 +76,7 @@ export function Accounts() {
                   variant="secondary"
                   onClick={() => {
                     setEditingId(account.id)
-                    setInitialBalance(account.initial_balance ?? '0')
+                    setInitialBalance(account.initial_balance ? String(parseFloat(account.initial_balance)) : '0')
                   }}
                 >
                   Atur
@@ -103,14 +103,13 @@ export function Accounts() {
               updateMutation.mutate()
             }}
           >
-            <Field label="Saldo awal (Rp)">
-              <Input
-                type="number"
-                step="1"
+            <Field label="Saldo Awal">
+              <CurrencyInput
                 value={initialBalance}
-                onChange={(event) => setInitialBalance(event.target.value)}
+                onChange={setInitialBalance}
                 placeholder="0"
                 className="!py-2"
+                autoFocus
               />
             </Field>
             <p className="text-[11px] text-[var(--color-ink-faint)]">

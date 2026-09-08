@@ -8,7 +8,7 @@ import { FilterBar } from '../components/FilterBar'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { DateTimePicker } from '../components/DatePicker'
-import { Field, Input } from '../components/Form'
+import { CurrencyInput, Field, Input } from '../components/Form'
 import { CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
@@ -306,14 +306,12 @@ function TransferForm({
           />
         </Field>
 
-        <Field label="Jumlah (Rp)">
-          <Input
-            type="number"
-            min="1"
+        <Field label="Jumlah Transfer">
+          <CurrencyInput
             required
             value={form.amount}
-            onChange={(e) => set('amount', e.target.value)}
-            placeholder="50000"
+            onChange={(val) => set('amount', val)}
+            placeholder="50.000"
             className="!py-2"
           />
         </Field>

@@ -8,7 +8,7 @@ import { EmptyState, ErrorState, ListSkeleton } from '../components/ListStates'
 import { FilterBar } from '../components/FilterBar'
 import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
-import { Field, Input } from '../components/Form'
+import { CurrencyInput, Field, Input } from '../components/Form'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { CreditCardIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
@@ -441,14 +441,12 @@ function RecurringForm({
           />
         </Field>
 
-        <Field label="Jumlah (Rp)">
-          <Input
-            type="number"
-            min="1"
+        <Field label="Nominal Tagihan">
+          <CurrencyInput
             required
             value={form.amount}
-            onChange={(e) => set('amount', e.target.value)}
-            placeholder="350000"
+            onChange={(val) => set('amount', val)}
+            placeholder="350.000"
             className="!py-2"
           />
         </Field>
