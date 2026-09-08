@@ -28,6 +28,7 @@ interface TelegramMessage {
   message_id: number
   chat: TelegramChat
   from?: TelegramUser
+  date?: number
   text?: string
 }
 
@@ -400,14 +401,18 @@ function periodLabel(period: SummaryPeriod): string {
 }
 
 function formatDateWita(value: string | null): string {
-  if (!value) return 'hari ini'
-  return new Intl.DateTimeFormat('id-ID', {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    timeZone: 'Asia/Makassar',
-  }).format(new Date(value))
+  const date = value ? new Date(value) : new Date()
+  return (
+    new Intl.DateTimeFormat('id-ID', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Asia/Makassar',
+    }).format(date) + ' WITA'
+  )
 }
 
 function cleanDescription(text: string): string {
@@ -421,15 +426,17 @@ function cleanDescription(text: string): string {
 function parseManualDate(text: string): string | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text.trim())
   if (!match) return null
-  const date = new Date(`${match[1]}-${match[2]}-${match[3]}T12:00:00+08:00`)
-  if (Number.isNaN(date.getTime())) return null
-  const check = new Intl.DateTimeFormat('en-CA', {
+  const now = new Date()
+  const nowParts = new Intl.DateTimeFormat('en-GB', {
     timeZone: 'Asia/Makassar',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).format(date)
-  return check === `${match[1]}-${match[2]}-${match[3]}` ? date.toISOString() : null
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(now)
+  const values = Object.fromEntries(nowParts.map((p) => [p.type, p.value]))
+  const date = new Date(`${match[1]}-${match[2]}-${match[3]}T${values['hour'] ?? '12'}:${values['minute'] ?? '00'}:${values['second'] ?? '00'}+08:00`)
+  return Number.isNaN(date.getTime()) ? null : date.toISOString()
 }
 
 function previewText(parsed: ReturnType<typeof parseResolved>, description: string): string {
@@ -482,7 +489,14 @@ function findCategoryByKey(categories: Array<{ id: string; name: string; type: '
 async function createPreview(
   chatId: number,
   text: string,
-  options: { description?: string; occurredAt?: string | null; categoryKey?: string; paymentMethodId?: string; editId?: string } = {},
+  options: {
+    description?: string | undefined
+    occurredAt?: string | null | undefined
+    categoryKey?: string | undefined
+    paymentMethodId?: string | undefined
+    editId?: string | undefined
+    messageDate?: number | undefined
+  } = {},
 ): Promise<void> {
   const [categories, paymentMethods] = await Promise.all([
     categoryRepo.findAll(),
@@ -496,7 +510,12 @@ async function createPreview(
   const paymentMethodId = options.paymentMethodId ?? parsed.payment_method_id
   const paymentMethod = paymentMethods.find((method) => method.id === paymentMethodId)
   const description = options.description ?? parsed.description
-  const occurredAt = options.occurredAt ?? parsed.occurred_at
+
+  const defaultOccurredAt = options.messageDate
+    ? new Date(options.messageDate * 1000).toISOString()
+    : new Date().toISOString()
+  const occurredAt = options.occurredAt ?? parsed.occurred_at ?? defaultOccurredAt
+
   const confidence = (selectedCategory || paymentMethod) && parsed.amount && paymentMethodId ? 'high' : parsed.confidence
   const preview = {
     ...parsed,
@@ -736,9 +755,14 @@ async function handleCallback(callback: TelegramCallbackQuery): Promise<void> {
     return
   }
   if (data === 'date:today' || data === 'date:yesterday') {
-    builder.occurredAt = witaStart(data === 'date:yesterday' ? -1 : 0).toISOString()
+    if (data === 'date:today') {
+      builder.occurredAt = new Date().toISOString()
+    } else {
+      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000)
+      builder.occurredAt = yesterday.toISOString()
+    }
     builder.stage = 'details'
-    await editMessage(chatId, message.message_id, `Tanggal dipilih: ${formatDateWita(builder.occurredAt)}`, EMPTY_INLINE_KEYBOARD)
+    await editMessage(chatId, message.message_id, `Tanggal & Jam dipilih:\n${formatDateWita(builder.occurredAt)}`, EMPTY_INLINE_KEYBOARD)
     await sendMessage(chatId, 'Sekarang ketik keterangan transaksi.', DETAILS_KEYBOARD)
     return
   }
@@ -844,7 +868,7 @@ async function handleText(message: TelegramMessage): Promise<void> {
   const editId = editTargets.get(chatId)
   if (editId) {
     editTargets.delete(chatId)
-    await createPreview(chatId, text, { editId })
+    await createPreview(chatId, text, { editId, messageDate: message.date })
     return
   }
 
@@ -890,7 +914,7 @@ async function handleText(message: TelegramMessage): Promise<void> {
     return
   }
 
-  await createPreview(chatId, text)
+  await createPreview(chatId, text, { messageDate: message.date })
 }
 
 async function poll(offset: number): Promise<number> {
