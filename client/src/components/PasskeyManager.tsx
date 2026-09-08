@@ -4,6 +4,9 @@ import { api } from '../api'
 import type { PasskeyPublic } from '../api'
 import { useToast } from './useToast'
 import { ConfirmModal } from './ConfirmModal'
+import { Modal } from './Modal'
+import { Field, Input } from './Form'
+import { Button } from './Button'
 
 function formatDate(value: string | null): string {
   if (!value) return '—'
@@ -18,6 +21,8 @@ export function PasskeyManager() {
   const [credentials, setCredentials] = useState<PasskeyPublic[] | null>(null)
   const [busy, setBusy] = useState(false)
   const [removingId, setRemovingId] = useState<string | null>(null)
+  const [naming, setNaming] = useState<{ response: Awaited<ReturnType<typeof startRegistration>> } | null>(null)
+  const [deviceName, setDeviceName] = useState('')
 
   const load = useCallback(async () => {
     try {
@@ -42,13 +47,24 @@ export function PasskeyManager() {
     setBusy(true)
     try {
       const { options } = await api.webauthn.registerStart()
-      const deviceName = window.prompt('Nama perangkat ini (contoh: iPhone)', '')?.trim() ?? null
       const response = await startRegistration({ optionsJSON: options })
-      if (deviceName !== null) {
-        await api.webauthn.registerVerify(response, deviceName || undefined)
-      } else {
-        await api.webauthn.registerVerify(response)
-      }
+      setDeviceName('')
+      setNaming({ response })
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Gagal menambahkan perangkat')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function finishAdd(confirm: boolean) {
+    if (!naming || busy) return
+    const { response } = naming
+    setNaming(null)
+    setBusy(true)
+    try {
+      const name = confirm ? deviceName.trim() || undefined : undefined
+      await api.webauthn.registerVerify(response, name)
       toast.success('Perangkat berhasil ditambahkan')
       await load()
     } catch (err) {
@@ -146,6 +162,42 @@ export function PasskeyManager() {
         onCancel={() => setRemovingId(null)}
         isLoading={busy}
       />
+
+      <Modal
+        title="Tambah Perangkat"
+        onClose={() => {
+          if (naming && !busy) void finishAdd(false)
+        }}
+      >
+        <form
+          className="flex flex-col gap-3.5"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void finishAdd(true)
+          }}
+        >
+          <p className="text-xs leading-relaxed text-[var(--color-ink-muted)]">
+            Passkey berhasil dibuat di perangkat Anda. Beri nama agar mudah dikenali, lalu simpankan.
+          </p>
+          <Field label="Nama perangkat (opsional)">
+            <Input
+              value={deviceName}
+              onChange={(event) => setDeviceName(event.target.value)}
+              placeholder="contoh: iPhone"
+              className="!py-2"
+              disabled={busy}
+            />
+          </Field>
+          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] pt-3">
+            <Button variant="secondary" type="button" disabled={busy} onClick={() => void finishAdd(false)}>
+              Lewati
+            </Button>
+            <Button variant="primary" type="submit" disabled={busy}>
+              {busy ? 'Menyimpan…' : 'Simpan Perangkat'}
+            </Button>
+          </div>
+        </form>
+      </Modal>
     </div>
   )
 }

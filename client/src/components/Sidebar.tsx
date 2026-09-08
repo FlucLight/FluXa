@@ -16,6 +16,7 @@ import { ThemeToggle } from './ThemeToggle'
 import { AvatarEditor } from './AvatarEditor'
 import { PasskeyManager } from './PasskeyManager'
 import { TelegramLink } from './TelegramLink'
+import { ConfirmModal } from './ConfirmModal'
 import { useAuth } from './useAuth'
 import { useToast } from './useToast'
 
@@ -43,6 +44,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [confirmingLogout, setConfirmingLogout] = useState(false)
 
   async function handleLogout() {
     try {
@@ -214,7 +216,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             <div className="flex flex-col px-3">
               <button
                 type="button"
-                onClick={handleLogout}
+                onClick={() => setConfirmingLogout(true)}
                 className="flex items-center justify-center gap-1.5 w-full rounded-[6px] border border-[var(--color-negative)]/40 bg-[var(--color-negative-soft)] px-3 py-2 text-xs font-semibold text-[var(--color-negative)] transition-colors hover:border-[var(--color-negative)] hover:bg-[var(--color-negative)] hover:text-white cursor-pointer"
               >
                 Keluar
@@ -226,6 +228,20 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           </div>
         </div>
       </aside>
+
+      <ConfirmModal
+        isOpen={confirmingLogout}
+        title="Keluar dari Akun"
+        message="Sesi Anda akan diakhiri. Anda perlu masuk lagi untuk menggunakan FluXa."
+        confirmLabel="Keluar"
+        cancelLabel="Batal"
+        variant="danger"
+        onConfirm={() => {
+          setConfirmingLogout(false)
+          void handleLogout()
+        }}
+        onCancel={() => setConfirmingLogout(false)}
+      />
     </>
   )
 }

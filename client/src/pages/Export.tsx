@@ -2,6 +2,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRef, useState } from 'react'
 import { api } from '../api'
 import { Button } from '../components/Button'
+import { ConfirmModal } from '../components/ConfirmModal'
 import { useToast } from '../components/useToast'
 import { getWitaDateParts } from '../utils'
 
@@ -23,6 +24,7 @@ export function Export() {
   const qc = useQueryClient()
   const { success, error: toastError } = useToast()
   const [importing, setImporting] = useState(false)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
 
   function download(blob: Blob, filename: string) {
@@ -34,9 +36,17 @@ export function Export() {
     URL.revokeObjectURL(url)
   }
 
-  async function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleImport(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
     if (!file) return
+    setPendingFile(file)
+    if (fileRef.current) fileRef.current.value = ''
+  }
+
+  async function confirmImport() {
+    if (!pendingFile) return
+    const file = pendingFile
+    setPendingFile(null)
     setImporting(true)
     try {
       const text = await file.text()
@@ -53,7 +63,6 @@ export function Export() {
       toastError((err as Error).message, 'Gagal Import')
     } finally {
       setImporting(false)
-      if (fileRef.current) fileRef.current.value = ''
     }
   }
 
@@ -169,6 +178,18 @@ export function Export() {
           </Button>
         </div>
       </section>
+
+      <ConfirmModal
+        isOpen={pendingFile !== null}
+        title="Restore Data dari Backup"
+        message="Data dari file JSON ini akan digabungkan ke akun Anda. Data dengan ID yang sama akan dilewati (aman dari duplikasi). Lanjutkan proses import?"
+        confirmLabel="Import Data"
+        cancelLabel="Batal"
+        variant="primary"
+        onConfirm={() => void confirmImport()}
+        onCancel={() => setPendingFile(null)}
+        isLoading={importing}
+      />
     </div>
   )
 }
