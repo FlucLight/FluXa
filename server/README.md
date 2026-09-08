@@ -44,7 +44,7 @@ server/
 │   │   ├── env.ts                  # Parsing & validasi environment variables
 │   │   └── db.ts                   # Inisialisasi PostgreSQL connection pool
 │   ├── controllers/                # Handler logika endpoint REST API
-│   │   ├── auth.ts                 # Register, login, logout, refresh, pass
+│   │   ├── auth.ts                 # Register, login, logout, refresh, ganti password
 │   │   ├── oauth.ts                # Google OAuth callback & redirect
 │   │   ├── webauthn.ts             # Registrasi & autentikasi passkey biometrik
 │   │   ├── transactions.ts         # CRUD transaksi & quick input
@@ -86,7 +86,7 @@ Membedah kalimat transaksi bahasa Indonesia tanpa biaya LLM/AI eksternal:
 * Berjalan mandiri via **Long Polling** tanpa perlu konfigurasi Webhook publik atau SSL cert.
 * **Perekaman Waktu Realtime:** Jam, menit, dan detik transaksi dicatat sesuai waktu pengiriman pesan pengguna (Zona Waktu WITA / `Asia/Makassar`).
 * **Multi-User Linking:** Pengguna menautkan chat Telegram ke akun web via kode `/link KODE` yang kedaluwarsa dalam 10 menit.
-* **Perintah:**
+* **Perintah Bot:**
   * `/start` / `/help`: Tampilkan menu dan bantuan.
   * `/ringkasan [hari|minggu|bulan|semua]`: Menampilkan laporan pemasukan, pengeluaran, dan saldo bersih.
   * `/saldo`: Saldo realtime tiap akun dan rekening.
@@ -164,13 +164,15 @@ BACKUP_RETENTION_COUNT=14
 
 ---
 
-## Perintah Development & Operasional
+## Perintah Development & Menjalankan Backend
+
+Jalankan perintah berikut dari root repository:
 
 ```bash
-# Menjalankan server dev dengan auto-reload (tsx watch)
+# Menjalankan server backend dengan auto-reload (tsx watch) di http://localhost:5000
 npm run dev --workspace server
 
-# Menjalankan migrasi database UP
+# Menjalankan migrasi database PostgreSQL ke versi terbaru
 npm run migrate --workspace server
 
 # Melakukan rollback migrasi database DOWN
@@ -179,6 +181,8 @@ npm run migrate:down --workspace server
 # Menjalankan self-check unit test parser bahasa
 npm run test:parser --workspace server
 
-# Melakukan typecheck TypeScript backend
+# Memvalidasi tipe TypeScript backend
 npm run typecheck --workspace server
 ```
+
+Untuk petunjuk konfigurasi antarmuka pengguna web frontend, silakan baca dokumentasi di [**`client/README.md`**](../client/README.md).

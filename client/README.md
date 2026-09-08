@@ -97,7 +97,7 @@ client/
 * **Kelola Limit:** Ubah batas limit kapan saja dengan modal form dan pemisah ribuan otomatis.
 
 ### 7. Tagihan Berulang (`Recurring.tsx`)
-* Kelola template tagihan rutin (WiFi, sewa kost, gaji bulanan, langganan Netflix).
+* Kelola template tagihan rutin (WiFi, sewa kost, gaji bulanan, langganan).
 * Interval fleksibel: harian, mingguan, atau bulanan.
 * Tombol jeda/aktifkan kembali dengan modal konfirmasi.
 
@@ -114,28 +114,32 @@ client/
 
 ## Komponen Kunci & Desain Sistem
 
-### 1. `CurrencyInput` (Format Pemisah Ribuan Titik)
+### 1. CurrencyInput (Format Pemisah Ribuan Titik)
 Komponen input nominal uang otomatis memformat angka dengan tanda titik (`.`) secara *real-time* saat pengguna mengetik (contoh: ketik `25000` tampil `Rp 25.000`). Dilengkapi badge `Rp` dan mode keyboard numerik pada smartphone.
 
 ### 2. Modal Notifikasi Tengah Interaktif (`Toast.tsx`)
 Notifikasi sukses dan gagal muncul di tengah layar dengan backdrop gelap + blur, ikon animasi *pop*, pesan jelas, dan tombol interaktif (seperti *Tutup* atau *Undo*).
 
-### 3. `ConfirmModal`
+### 3. ConfirmModal
 Dialog konfirmasi aman untuk seluruh aksi penting (hapus transaksi, hapus rekening, hapus budget, logout, import data, lepas tautan Telegram, dan toggle tagihan).
 
 ---
 
-## Perintah Development
+## Perintah Development & Menjalankan Frontend
 
-Jalankan perintah ini dari root repository:
+Jalankan perintah berikut dari root repository:
 
 ```bash
-# Menjalankan server dev frontend (Vite)
+# Menjalankan server dev frontend (Vite) di http://localhost:5173
+npm run dev:client
+# atau
 npm run dev --workspace client
 
-# Melakukan typecheck & build produksi frontend
-npm run build --workspace client
+# Memvalidasi tipe TypeScript & build bundle produksi ke client/dist
+npm run build -w client
 
 # Menjalankan linter ESLint
-npm run lint --workspace client
+npm run lint -w client
 ```
+
+Untuk petunjuk konfigurasi backend, database, dan Telegram bot, silakan baca dokumentasi di [**`server/README.md`**](../server/README.md).
