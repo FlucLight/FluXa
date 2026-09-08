@@ -63,7 +63,7 @@ Setiap **akun baru otomatis di-seed** dengan kategori & payment method default m
 
 <div align="center">
 <img src="docs/screenshot-dashboardv2.png" width="820" alt="Dashboard FluXa">
-<p><i>Dashboard — ringkasan bulanan, tren, breakdown kategori, saldo per akun, dan progress budget</i></p>
+<p><i>Dashboard — ringkasan bulanan, tren, breakdown kategori, saldo per akun, dan progress budget.</i></p>
 </div>
 
 <br>
