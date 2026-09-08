@@ -57,13 +57,15 @@ export function PasskeyManager() {
     }
   }
 
-  async function finishAdd(confirm: boolean) {
+  async function finishAdd(save: boolean, withName = true) {
     if (!naming || busy) return
     const { response } = naming
     setNaming(null)
+    if (!save) return
+
     setBusy(true)
     try {
-      const name = confirm ? deviceName.trim() || undefined : undefined
+      const name = withName ? deviceName.trim() || undefined : undefined
       await api.webauthn.registerVerify(response, name)
       toast.success('Perangkat berhasil ditambahkan')
       await load()
@@ -163,41 +165,45 @@ export function PasskeyManager() {
         isLoading={busy}
       />
 
-      <Modal
-        title="Tambah Perangkat"
-        onClose={() => {
-          if (naming && !busy) void finishAdd(false)
-        }}
-      >
-        <form
-          className="flex flex-col gap-3.5"
-          onSubmit={(event) => {
-            event.preventDefault()
-            void finishAdd(true)
-          }}
+      {naming && (
+        <Modal
+          title="Tambah Perangkat"
+          onClose={() => setNaming(null)}
         >
-          <p className="text-xs leading-relaxed text-[var(--color-ink-muted)]">
-            Passkey berhasil dibuat di perangkat Anda. Beri nama agar mudah dikenali, lalu simpankan.
-          </p>
-          <Field label="Nama perangkat (opsional)">
-            <Input
-              value={deviceName}
-              onChange={(event) => setDeviceName(event.target.value)}
-              placeholder="contoh: iPhone"
-              className="!py-2"
-              disabled={busy}
-            />
-          </Field>
-          <div className="flex justify-end gap-2 border-t border-[var(--color-border)] pt-3">
-            <Button variant="secondary" type="button" disabled={busy} onClick={() => void finishAdd(false)}>
-              Lewati
-            </Button>
-            <Button variant="primary" type="submit" disabled={busy}>
-              {busy ? 'Menyimpan…' : 'Simpan Perangkat'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
+          <form
+            className="flex flex-col gap-3.5"
+            onSubmit={(event) => {
+              event.preventDefault()
+              void finishAdd(true, true)
+            }}
+          >
+            <p className="text-xs leading-relaxed text-[var(--color-ink-muted)]">
+              Passkey berhasil dibuat di perangkat Anda. Beri nama agar mudah dikenali.
+            </p>
+            <Field label="Nama perangkat (opsional)">
+              <Input
+                value={deviceName}
+                onChange={(event) => setDeviceName(event.target.value)}
+                placeholder="contoh: MacBook / iPhone"
+                className="!py-2"
+                disabled={busy}
+                autoFocus
+              />
+            </Field>
+            <div className="flex justify-end gap-2 border-t border-[var(--color-border)] pt-3">
+              <Button variant="ghost" type="button" disabled={busy} onClick={() => setNaming(null)}>
+                Batal
+              </Button>
+              <Button variant="secondary" type="button" disabled={busy} onClick={() => void finishAdd(true, false)}>
+                Lewati
+              </Button>
+              <Button variant="primary" type="submit" disabled={busy}>
+                {busy ? 'Menyimpan…' : 'Simpan Perangkat'}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   )
 }

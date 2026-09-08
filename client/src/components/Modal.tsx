@@ -87,7 +87,7 @@ export function Modal({ title, children, onClose }: Props) {
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-xs transition-opacity duration-200 sm:p-6"
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-y-auto bg-black/60 p-3 backdrop-blur-xs transition-opacity duration-200 animate-backdrop-in sm:p-6"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}

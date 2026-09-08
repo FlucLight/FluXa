@@ -114,7 +114,7 @@ function NotificationCard({ toast, leaving, onDismiss }: { toast: ToastMessage; 
 
       <div className="flex flex-col items-center gap-2.5 text-center">
         <span
-          className={`flex h-11 w-11 items-center justify-center rounded-full ${
+          className={`flex h-11 w-11 items-center justify-center rounded-full animate-icon-pop ${
             isError ? 'bg-[var(--color-negative)]/10 text-[var(--color-negative)]' : 'bg-[var(--color-positive)]/10 text-[var(--color-positive)]'
           }`}
         >
@@ -211,7 +211,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           <div
             aria-hidden="true"
             className={`absolute inset-0 bg-black/50 backdrop-blur-[2px] ${
-              leavingIds.includes(latestNotify.id) ? 'animate-backdrop-out' : ''
+              leavingIds.includes(latestNotify.id) ? 'animate-backdrop-out' : 'animate-backdrop-in'
             }`}
           />
           <NotificationCard
