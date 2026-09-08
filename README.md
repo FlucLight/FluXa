@@ -4,7 +4,7 @@
 
 ### Catat, pantau, dan kendalikan keuangan pribadimu — cukup lewat chat.
 
-FluXa adalah aplikasi pencatatan keuangan pribadi **modern, gratis, dan multi-pengguna** dengan dua pintu masuk: **Web App** yang responsif dan **Bot Telegram**. Tanpa spreadsheet berantakan, tanpa biaya token AI/LLM — semua pemahaman transaksi ditangani oleh parser rule-based lokal berkecepatan tinggi.
+FluXa adalah aplikasi pencatatan keuangan pribadi **modern, gratis, dan multi-pengguna** dengan dua pintu masuk utama: **Aplikasi Web** yang responsif dan **Bot Telegram**. Tanpa kerumitan spreadsheet manual dan tanpa biaya token AI/LLM — seluruh pemrosesan teks percakapan ditangani secara lokal oleh parser berbasis aturan (*rule-based NLP*) berkecepatan tinggi.
 
 </div>
 
@@ -12,24 +12,24 @@ FluXa adalah aplikasi pencatatan keuangan pribadi **modern, gratis, dan multi-pe
 
 ## Coba Langsung (Production)
 
-| Layanan | Tautan & Keterangan |
+| Layanan | Tautan Akses & Keterangan |
 |:---|:---|
-| Website | [https://fluclight.my.id](https://fluclight.my.id) — Akses via browser (desktop & smartphone) |
+| Website Aplikasi | [https://fluclight.my.id](https://fluclight.my.id) — Akses via browser (desktop & smartphone) |
 | Bot Telegram | [@fluclight_finance_bot](https://t.me/fluclight_finance_bot) — Catat transaksi langsung dari aplikasi chat |
-| Tautan Cepat | Buka bot lalu kirim `/start` untuk menu; tautkan ke akunmu via kode di web |
+| Tautan Cepat | Buka bot lalu kirim `/start` untuk menu; tautkan ke akunmu via kode dari web |
 
 > **Petunjuk Menghubungkan Akun ke Telegram:**
 > 1. Daftar atau login di web [https://fluclight.my.id](https://fluclight.my.id).
-> 2. Buka menu **Akun -> "Hubungkan Telegram"**, lalu klik **"Buat kode tautan"**.
-> 3. Klik **"Buka bot & kirim kode"**. Dalam hitungan detik chat Telegram kamu otomatis terhubung dan siap mencatat transaksi ke akunmu.
+> 2. Buka menu **Akun -> "Hubungkan Telegram"**, lalu klik tombol **"Buat kode tautan"**.
+> 3. Klik tombol **"Buka bot & kirim kode"**. Dalam hitungan detik chat Telegram kamu otomatis terhubung dan siap mencatat transaksi ke akunmu secara instan.
 
 ---
 
-## Tangkapan Layar
+## Tangkapan Layar Aplikasi
 
 <div align="center">
 <img src="docs/screenshot-dashboardv2.png" width="820" alt="Dashboard FluXa">
-<p><i>Dashboard — ringkasan bulanan, tren pengeluaran/pemasukan, breakdown kategori, saldo per akun, dan target budget.</i></p>
+<p><i>Dashboard Utama — ringkasan bulanan, tren pengeluaran/pemasukan, breakdown kategori, saldo berjalan per akun, dan target budget.</i></p>
 </div>
 
 <br>
@@ -38,64 +38,103 @@ FluXa adalah aplikasi pencatatan keuangan pribadi **modern, gratis, dan multi-pe
 <tr>
 <td width="50%" align="center">
 <img src="docs/screenshot-quick-input.png" width="380" alt="Quick Input">
-<p><i>Quick Input — ketik transaksi alami, hasil parsing terdeteksi otomatis</i></p>
+<p><i>Quick Input — ketik transaksi bergaya percakapan alami, hasil parsing terdeteksi otomatis sebelum disimpan</i></p>
 </td>
 <td width="50%" align="center">
 <img src="docs/screenshot-telegram-chat.png" width="380" alt="Bot Telegram">
-<p><i>Bot Telegram — catat transaksi dari chat lengkap dengan jam realtime</i></p>
+<p><i>Bot Telegram — catat transaksi dari chat lengkap dengan konfirmasi dan perekaman jam realtime</i></p>
 </td>
 </tr>
 <tr>
 <td width="50%" align="center">
 <img src="docs/screenshot-transactions.png" width="380" alt="Halaman Transaksi">
-<p><i>Halaman Transaksi — tabel data, filter multi-kriteria, dan hapus massal</i></p>
+<p><i>Halaman Transaksi — tabel data lengkap, filter multi-kriteria, pencarian teks, dan aksi hapus massal</i></p>
 </td>
 <td width="50%" align="center">
 <img src="docs/screenshot-dashboard.png" width="380" alt="Dashboard Alternatif">
-<p><i>Dashboard — tampilan alternatif ringkasan keuangan</i></p>
+<p><i>Dashboard — tampilan alternatif ringkasan keuangan dan visualisasi alokasi pengeluaran</i></p>
 </td>
 </tr>
 </table>
 
 ---
 
-## Panduan Menjalankan Aplikasi & Dokumentasi Terpisah
+## Panduan Menjalankan Aplikasi & Dokumentasi Direktori
 
-FluXa dibangun menggunakan arsitektur **Monorepo (npm workspaces)** yang memisahkan client frontend dan server backend.
+FluXa dibangun menggunakan arsitektur **Monorepo (npm workspaces)** yang memisahkan aplikasi antarmuka pengguna frontend dan backend API secara modular.
 
-Untuk instruksi menjalankan, konfigurasi mendalam, dan arsitektur spesifik tiap folder, **silakan baca dokumentasi masing-masing folder berikut**:
+Untuk instruksi menjalankan, panduan arsitektur, dan dokumentasi detail masing-masing komponen, **silakan pelajari dokumentasi spesifik pada masing-masing folder**:
 
-| Modul | Dokumen Panduan | Cakupan Penjelasan |
+| Modul | Dokumen Panduan | Cakupan Penjelasan & Instruksi |
 |:---|:---|:---|
-| **Frontend Web App** | [**`client/README.md`**](client/README.md) | Panduan menjalankan React 19 + Vite, daftar seluruh halaman (Dashboard, Transaksi, Akun Kustom, Transfer, Budget Arsip, Tagihan, Export), sistem modal interaktif, komponen `CurrencyInput` pemisah ribuan titik, dan perintah build frontend. |
-| **Backend & Bot Engine** | [**`server/README.md`**](server/README.md) | Panduan menjalankan Node.js Express 5 + PostgreSQL, sistem autentikasi JWT/OAuth/Passkey, mesin NLP parser kalimat bahasa Indonesia, mesin bot Telegram polling, daftar 10 file migrasi database, dan environment variables. |
-| **Shared Schema** | `shared/src/index.ts` | Definisi tipe TypeScript bersama dan skema validasi Zod untuk transaksi, akun, kategori, dan budget. |
+| **Frontend Web App** | [**`client/README.md`**](client/README.md) | Panduan lengkap menjalankan React 19 + Vite, daftar seluruh halaman (Dashboard, Transaksi, Akun Kustom, Transfer, Budget Arsip, Tagihan, Export), sistem modal interaktif, komponen `CurrencyInput` pemisah ribuan titik, dan perintah build frontend. |
+| **Backend & Bot Engine** | [**`server/README.md`**](server/README.md) | Panduan lengkap menjalankan Node.js Express 5 + PostgreSQL, sistem autentikasi JWT/OAuth/Passkey, mesin NLP parser kalimat bahasa Indonesia, mesin bot Telegram polling, daftar 10 file migrasi database, dan environment variables. |
+| **Shared Schema** | `shared/src/index.ts` | Definisi tipe data TypeScript bersama dan skema validasi Zod untuk transaksi, akun pembayaran, kategori, dan budget. |
 
 ---
 
-## Fitur Utama
+## Mengenal FluXa
 
-* **Bot Telegram Terintegrasi:** Catat transaksi via chat atau tombol terpandu, ringkasan berkala, cek saldo, undo transaksi terakhir, dan backup JSON langsung ke chat dengan pencatatan waktu realtime (WITA / Asia/Makassar).
-* **Quick Input Bar (NLP Rule-Based):** Auto-parse kalimat seperti `Makan siang 25rb cash kemarin` secara instan tanpa biaya token AI / LLM.
-* **Manajemen Akun & Rekening Kustom:** Tambahkan rekening bank (BCA, Mandiri, Kaltimtara, BRI), e-wallet/QRIS (DANA, Gopay, OVO, ShopeePay), kartu kredit (Visa), hingga uang tunai lengkap dengan alias kata kunci bot.
-* **Budget Bulanan & Arsip Riwayat:** Atur batas anggaran per kategori dan telusuri arsip performa budget bulan-bulan lampau via navigator bulan/tahun.
-* **Transfer Antar Akun:** Catat mutasi pemindahan dana antar rekening/dompet sendiri tanpa merusak kalkulasi cash flow.
+FluXa lahir dari kebutuhan pencatatan keuangan pribadi yang cepat tanpa gesekan (*frictionless*). Seringkali orang malas mencatat pengeluaran karena harus membuka aplikasi yang berat, memilih form yang rumit, atau mengetik di spreadsheet yang berantakan.
+
+### Konsep Utama:
+1. **Pencatatan Secepat Mengobrol:** Tulis kalimat seperti biasa (misalnya `Nasi padang 25rb cash kemarin` atau `Bensin 50rb kaltimtara`), dan sistem otomatis mengekstrak nominal uang, kategori pengeluaran, metode pembayaran, serta tanggal transaksi.
+2. **Tanpa Ketergantungan LLM/AI Berbayar:** Menggunakan algoritma tokenizer dan regex rule-based cerdas yang berjalan dalam hitungan milidetik secara lokal di server tanpa biaya API token.
+3. **Penyimpanan Terpusat PostgreSQL:** Data transaksi tersimpan aman di database relasional terstruktur dengan dukungan multi-user dan isolasi data per pengguna.
+4. **Dua Pintu Masuk:** Pengguna dapat mencatat saat santai lewat dashboard web atau saat sedang di jalan lewat bot Telegram di smartphone.
+
+---
+
+## Fitur Unggulan
+
+* **Integrasi Bot Telegram Penuh:** Catat transaksi via chat atau tombol terpandu, ringkasan berkala, cek saldo, batalkan transaksi terakhir (`/undo`), edit transaksi (`/edit`), dan backup database langsung ke ruang chat.
+* **Perekaman Waktu Realtime:** Jam, menit, dan detik transaksi dari Telegram bot tercatat akurat sesuai waktu pengiriman pesan (Zona Waktu WITA / `Asia/Makassar`).
+* **Quick Input Bar:** Auto-parse kalimat transaksi saat mengetik dengan mekanisme *debounce* dan tombol konfirmasi cepat.
+* **Kustomisasi Akun & Rekening Bebas:** Tambahkan rekening bank (BCA, Mandiri, Kaltimtara, BRI), e-wallet/QRIS (DANA, Gopay, OVO, ShopeePay), kartu kredit (Visa), hingga uang tunai lengkap dengan alias kata kunci bot.
+* **Budget Bulanan & Arsip Riwayat:** Tentukan target limit pengeluaran per kategori, evaluasi status overbudget vs hemat, dan jelajahi arsip riwayat bulan-bulan lampau via navigator bulan/tahun.
+* **Transfer Antar Akun:** Catat mutasi pemindahan dana antar rekening/dompet sendiri tanpa mempengaruhi laporan cash flow.
 * **Tagihan Berulang:** Penjadwalan tagihan rutin per hari, minggu, atau bulan dengan tombol aktif/jeda.
 * **Pemisah Ribuan Titik Otomatis:** Input nominal uang otomatis terformat titik (`10.000` -> `Rp 10.000`) di seluruh modal dan form.
 * **Modal Notifikasi Tengah Interaktif:** Setiap aksi menghasilkan umpan balik modal di tengah layar yang jelas dan interaktif.
 * **Multi-User & Keamanan Lengkap:** Login email/password (bcrypt), Google OAuth 2.0, Passkeys (WebAuthn), dan cookie HTTP-only JWT.
-* **Backup & Restore:** Ekspor ke CSV, Excel (XLSX), serta unduh/restore file backup database JSON.
+* **Backup & Restore Portabel:** Ekspor transaksi ke format Spreadsheet CSV, Excel (XLSX), serta unduh/restore file backup database JSON utuh.
 
 ---
 
-## Quick Start (Development Monorepo)
+## Arsitektur Sistem
 
-### Prasyarat
-* Node.js v22+
-* npm v10+
-* PostgreSQL v14+
+```text
+Telegram App (User Chat) ─────────────┐
+  │ Long Polling (getUpdates)          │
+  └─────────────────────────────┐      │
+                                ▼      ▼
+Browser (Web Client) ──── React 19 + TanStack Query ──> /api/ ──┐
+                                                                ▼
+                                                     Express REST API (Server)
+                                                         │  Middleware Auth
+                                                         │  (JWT HttpOnly Cookie)
+                                      ┌───────────┬──────┴────┬───────────┬──────────┐
+                                      ▼           ▼           ▼           ▼          ▼
+                                 Controllers Repositories NLP Parser Google OAuth Passkey
+                                      │           │           │           │          │
+                                      └───────────┴─────┬─────┴───────────┴──────────┘
+                                                        ▼
+                                             PostgreSQL 14+ Database
+                                                        │
+                                            Automated Scheduled Backup
+                                            (JSON files in server/backups)
+```
 
-### 1. Clone & Install Dependency
+---
+
+## Quick Start (Menjalankan Monorepo Lokal)
+
+### Prasyarat Sistem
+* **Node.js** versi 22+
+* **npm** versi 10+
+* **PostgreSQL** versi 14+
+
+### 1. Clone Repository & Install Dependency
 ```bash
 git clone https://github.com/FlucLight/FluXa.git
 cd FluXa
@@ -103,11 +142,11 @@ npm install
 ```
 
 ### 2. Konfigurasi Environment (`.env`)
-Salin file `.env.example` menjadi `.env` di root project:
+Salin file template `.env.example` menjadi `.env` di root project:
 ```bash
 cp .env.example .env
 ```
-Sesuaikan konfigurasi database PostgreSQL lokal kamu:
+Sesuaikan konfigurasi database PostgreSQL dan kunci rahasia:
 ```env
 PORT=5000
 DB_USER=postgres
@@ -119,50 +158,57 @@ JWT_SECRET=buat_string_rahasia_acak_minimal_32_karakter
 COOKIE_SECURE=0
 ```
 
-### 3. Migrasi Database & Menjalankan Monorepo
+### 3. Migrasi Database & Menjalankan Aplikasi
 ```bash
-# 1. Jalankan migrasi database PostgreSQL
+# 1. Jalankan seluruh migrasi database PostgreSQL ke versi terbaru
 npm run migrate
 
-# 2. Jalankan backend server & frontend client secara bersamaan
+# 2. Jalankan server backend dan frontend client secara bersamaan
 npm run dev
 ```
 
-* Backend REST API berjalan di: `http://localhost:5000`
-* Frontend Web App berjalan di: `http://localhost:5173`
+* Backend REST API aktif di: `http://localhost:5000`
+* Frontend Web App aktif di: `http://localhost:5173`
 
-> Untuk petunjuk menjalankan client atau server secara terpisah, silakan baca [**`client/README.md`**](client/README.md) dan [**`server/README.md`**](server/README.md).
+> **Instruksi Khusus:**
+> * Untuk menjalankan atau mengonfigurasi **Frontend saja**, buka panduan di [**`client/README.md`**](client/README.md).
+> * Untuk menjalankan atau mengonfigurasi **Backend & Bot Telegram saja**, buka panduan di [**`server/README.md`**](server/README.md).
 
 ---
 
-## Perintah Penting Monorepo
+## Daftar Perintah Kerja Monorepo
 
 | Perintah | Fungsi |
 |:---|:---|
-| `npm run dev` | Menjalankan backend server dan frontend client secara bersamaan |
-| `npm run dev:client` | Menjalankan hanya frontend Vite dev server |
-| `npm run migrate` | Menjalankan migrasi database PostgreSQL ke versi terbaru |
-| `npm run test:parser` | Menjalankan unit test untuk NLP rule-based parser |
-| `npm run build -w client` | Membangun bundle produksi frontend ke `client/dist` |
-| `npm run typecheck` | Memvalidasi tipe TypeScript di seluruh workspace |
+| `npm run dev` | Menjalankan backend server dan frontend client secara bersamaan (monorepo) |
+| `npm run dev:client` | Menjalankan hanya development server frontend Vite |
+| `npm run migrate` | Menjalankan seluruh migrasi skema database PostgreSQL ke versi terbaru |
+| `npm run migrate:down` | Melakukan rollback 1 langkah migrasi skema database |
+| `npm run test:parser` | Menjalankan unit test pengujian mandiri NLP rule-based parser |
+| `npm run build -w client` | Memvalidasi tipe dan mengompilasi bundle produksi frontend ke `client/dist` |
+| `npm run typecheck` | Memvalidasi tipe data TypeScript di seluruh workspace |
 
 ---
 
-## Deploy ke Server Produksi (VPS)
+## Panduan Deploy ke Server Produksi (VPS)
+
+Berikut langkah-langkah memperbarui atau mendeploy aplikasi pada server VPS (Ubuntu/Debian) yang menggunakan PM2 dan Nginx:
 
 ```bash
-# 1. Masuk ke folder project di server
+# 1. Masuk ke direktori aplikasi di server
 cd /home/superadmin/FluXa
 
-# 2. Ambil pembaruan kode terbaru dari GitHub
+# 2. Ambil pembaruan kode terbaru dari repositori GitHub
 git pull
 
-# 3. Jalankan migrasi jika ada skema database baru
+# 3. Jalankan migrasi database jika ada perubahan skema baru
 npm run migrate
 
-# 4. Restart backend via PM2
+# 4. Restart service backend via PM2
 pm2 restart fluxa-backend --update-env
 ```
+
+Untuk detail konfigurasi Nginx reverse proxy dan systemd service, silakan pelajari panduan deployment di [**`server/README.md`**](server/README.md).
 
 ---
 
