@@ -125,7 +125,7 @@ async function downloadTelegramPhoto(fileId: string): Promise<string | null> {
     if (!res.ok) return null
     const buffer = Buffer.from(await res.arrayBuffer())
     await fs.promises.writeFile(dest, buffer)
-    return `/uploads/receipts/${finalName}`
+    return `/api/uploads/receipts/${finalName}`
   } catch (err) {
     console.error('[telegram] Gagal mengunduh foto:', err)
     return null

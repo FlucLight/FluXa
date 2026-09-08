@@ -16,9 +16,30 @@ import {
   formatRp,
   fromLocalDateInput,
   getPresetDateRange,
+  resolveImageUrl,
   type PeriodPreset,
   type SortOrder,
 } from '../utils'
+
+function downloadReceiptFile(url: string, description: string) {
+  const cleanName = description.replace(/[^a-z0-9]/gi, '-').toLowerCase() || 'transaksi'
+  const filename = `struk-${cleanName}.jpg`
+  fetch(url)
+    .then((res) => res.blob())
+    .then((blob) => {
+      const blobUrl = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = blobUrl
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(blobUrl)
+    })
+    .catch(() => {
+      window.open(url, '_blank')
+    })
+}
 
 export function Transactions() {
   const qc = useQueryClient()
@@ -29,6 +50,8 @@ export function Transactions() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmingBulkDelete, setConfirmingBulkDelete] = useState(false)
   const [viewingReceipt, setViewingReceipt] = useState<TransactionRecord | null>(null)
+  const [isZoomed, setIsZoomed] = useState(false)
+  const [imageLoadError, setImageLoadError] = useState(false)
 
   const [typeFilter, setTypeFilter] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
@@ -462,7 +485,7 @@ export function Transactions() {
                             className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-[4px] bg-[var(--color-surface-sunken)] border border-[var(--color-border)] hover:border-[var(--color-focus)] text-[10px] font-semibold text-[var(--color-ink)] transition-colors cursor-pointer shrink-0"
                             title="Lihat foto bukti/struk"
                           >
-                            <img src={tx.image_url} alt="Struk" className="w-3.5 h-3.5 object-cover rounded-[2px]" />
+                        <img src={resolveImageUrl(tx.image_url)} alt="Struk" className="w-3.5 h-3.5 object-cover rounded-[2px]" />
                             <span>Struk</span>
                           </button>
                         )}
@@ -570,50 +593,114 @@ export function Transactions() {
       {viewingReceipt && viewingReceipt.image_url && (
         <Modal
           title="Foto Struk / Bukti Transaksi"
-          onClose={() => setViewingReceipt(null)}
+          onClose={() => {
+            setViewingReceipt(null)
+            setIsZoomed(false)
+            setImageLoadError(false)
+          }}
         >
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between text-xs pb-2 border-b border-[var(--color-border)]">
-              <div>
-                <p className="font-semibold text-sm text-[var(--color-ink)]">
-                  {viewingReceipt.description ?? 'Transaksi'}
-                </p>
-                <p className="text-[11px] text-[var(--color-ink-muted)]">
-                  {formatDate(viewingReceipt.occurred_at)}
-                </p>
+          {(() => {
+            const imgUrl = resolveImageUrl(viewingReceipt.image_url)
+            return (
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs pb-3 border-b border-[var(--color-border)]">
+                  <div>
+                    <p className="font-semibold text-sm text-[var(--color-ink)]">
+                      {viewingReceipt.description ?? 'Transaksi Tanpa Keterangan'}
+                    </p>
+                    <p className="text-[11px] text-[var(--color-ink-muted)]">
+                      {formatDate(viewingReceipt.occurred_at)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 sm:text-right">
+                    <span
+                      className={`text-base font-bold tabular-nums ${
+                        viewingReceipt.type === 'expense' ? 'text-[var(--color-negative)]' : 'text-[var(--color-positive)]'
+                      }`}
+                    >
+                      {viewingReceipt.type === 'expense' ? '- ' : '+ '}
+                      {formatRp(viewingReceipt.amount)}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Toolbar Preview Struk */}
+                <div className="flex items-center justify-between gap-2 px-1">
+                  <div className="flex items-center gap-1.5">
+                    <Button
+                      variant="secondary"
+                      className="!py-1 !px-2 text-xs"
+                      onClick={() => setIsZoomed((v) => !v)}
+                    >
+                      {isZoomed ? 'Sesuaikan Layar' : 'Perbesar 100%'}
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      className="!py-1 !px-2.5 text-xs"
+                      onClick={() => downloadReceiptFile(imgUrl, viewingReceipt.description || 'transaksi')}
+                    >
+                      Unduh Foto
+                    </Button>
+                  </div>
+
+                  <a
+                    href={imgUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[11px] font-semibold text-[var(--color-focus)] hover:underline"
+                  >
+                    Buka Tab Baru
+                  </a>
+                </div>
+
+                {/* Image Display Area */}
+                <div className="relative min-h-[160px] max-h-[62vh] overflow-auto rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] flex items-center justify-center p-2">
+                  {imageLoadError ? (
+                    <div className="flex flex-col items-center gap-2 p-6 text-center text-xs text-[var(--color-ink-muted)]">
+                      <p className="font-semibold text-[var(--color-negative)]">Foto tidak dapat dimuat</p>
+                      <p className="text-[11px] text-[var(--color-ink-faint)]">
+                        File foto mungkin belum tersinkronisasi atau link tidak dapat diakses.
+                      </p>
+                      <a
+                        href={imgUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1 inline-flex items-center text-xs font-semibold text-[var(--color-focus)] hover:underline"
+                      >
+                        Coba buka link langsung
+                      </a>
+                    </div>
+                  ) : (
+                    <img
+                      src={imgUrl}
+                      alt="Foto struk transaksi"
+                      onError={() => setImageLoadError(true)}
+                      className={`rounded-[6px] transition-all duration-200 ${
+                        isZoomed
+                          ? 'max-w-none w-auto cursor-zoom-out'
+                          : 'max-h-[58vh] w-auto max-w-full object-contain cursor-zoom-in shadow-xs'
+                      }`}
+                      onClick={() => setIsZoomed((v) => !v)}
+                      title={isZoomed ? 'Klik untuk sesuaikan layar' : 'Klik untuk perbesar foto'}
+                    />
+                  )}
+                </div>
+
+                <div className="flex justify-end pt-2 border-t border-[var(--color-border)]">
+                  <Button
+                    variant="secondary"
+                    onClick={() => {
+                      setViewingReceipt(null)
+                      setIsZoomed(false)
+                      setImageLoadError(false)
+                    }}
+                  >
+                    Tutup
+                  </Button>
+                </div>
               </div>
-              <span
-                className={`text-base font-bold tabular-nums ${
-                  viewingReceipt.type === 'expense' ? 'text-[var(--color-negative)]' : 'text-[var(--color-positive)]'
-                }`}
-              >
-                {viewingReceipt.type === 'expense' ? '- ' : '+ '}
-                {formatRp(viewingReceipt.amount)}
-              </span>
-            </div>
-
-            <div className="relative max-h-[60vh] overflow-hidden rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)] flex items-center justify-center p-1">
-              <img
-                src={viewingReceipt.image_url}
-                alt="Foto struk transaksi"
-                className="max-h-[58vh] w-auto max-w-full object-contain rounded-[6px]"
-              />
-            </div>
-
-            <div className="flex items-center justify-between pt-2 border-t border-[var(--color-border)]">
-              <a
-                href={viewingReceipt.image_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs font-semibold text-[var(--color-focus)] hover:underline"
-              >
-                Buka Ukuran Asli di Tab Baru
-              </a>
-              <Button variant="secondary" onClick={() => setViewingReceipt(null)}>
-                Tutup
-              </Button>
-            </div>
-          </div>
+            )
+          })()}
         </Modal>
       )}
     </div>

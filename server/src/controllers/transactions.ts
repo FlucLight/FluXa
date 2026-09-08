@@ -33,7 +33,7 @@ export async function uploadReceipt(req: Request, res: Response): Promise<void> 
     const finalPath = path.join(RECEIPTS_DIR, finalName)
     fs.renameSync(file.path, finalPath)
 
-    res.status(200).json({ url: `/uploads/receipts/${finalName}`, message: 'Foto struk berhasil diunggah' })
+    res.status(200).json({ url: `/api/uploads/receipts/${finalName}`, message: 'Foto struk berhasil diunggah' })
   } catch {
     res.status(500).json({ error: 'Gagal mengunggah foto struk' })
   }

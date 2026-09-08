@@ -26,7 +26,11 @@ import { requireAuth } from './middleware/auth'
 const app = express()
 
 app.set('trust proxy', 1)
-app.use(helmet())
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  }),
+)
 app.use(compression())
 app.use(morgan('dev'))
 
@@ -51,7 +55,18 @@ app.use('/api', rateLimit({
 app.use(express.json({ limit: '10mb' }))
 app.use(cookieParser())
 
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')))
+const uploadsDir = path.join(__dirname, '..', 'uploads')
+const staticUploadsMiddleware = [
+  (_req: express.Request, res: express.Response, next: express.NextFunction) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    next()
+  },
+  express.static(uploadsDir),
+]
+
+app.use('/api/uploads', ...staticUploadsMiddleware)
+app.use('/uploads', ...staticUploadsMiddleware)
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() })

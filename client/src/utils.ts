@@ -237,3 +237,10 @@ export function categoryColor(name: string, dark = false): string {
   const generic = dark ? GENERIC_PALETTE_DARK : GENERIC_PALETTE_LIGHT
   return generic[hashStr(name) % generic.length]!
 }
+
+export function resolveImageUrl(url: string | null | undefined): string {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  if (url.startsWith('/uploads/')) return `/api${url}`
+  return url
+}

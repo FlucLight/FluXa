@@ -10,7 +10,7 @@ import { CategoryIcon } from './CategoryIcon'
 import { BankIcon, CreditCardIcon, WalletIcon } from './Icons'
 import { Modal } from './Modal'
 import { useToast } from './useToast'
-import { fromLocalDateTimeInput, toLocalDateTimeInput } from '../utils'
+import { fromLocalDateTimeInput, resolveImageUrl, toLocalDateTimeInput } from '../utils'
 
 type Props = { existing?: TransactionRecord; onClose: () => void }
 
@@ -193,10 +193,10 @@ export function TransactionForm({ existing, onClose }: Props) {
             <div className="flex items-center gap-3 p-2.5 rounded-[8px] border border-[var(--color-border)] bg-[var(--color-surface-sunken)]">
               <div className="h-16 w-16 shrink-0 overflow-hidden rounded-[6px] border border-[var(--color-border)] bg-[var(--color-surface)]">
                 <img
-                  src={form.image_url}
+                  src={resolveImageUrl(form.image_url)}
                   alt="Struk transaksi"
                   className="h-full w-full object-cover cursor-pointer"
-                  onClick={() => window.open(form.image_url, '_blank')}
+                  onClick={() => window.open(resolveImageUrl(form.image_url), '_blank')}
                   title="Klik untuk melihat foto penuh"
                 />
               </div>
