@@ -10,7 +10,7 @@ import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { CurrencyInput, Field, Input } from '../components/Form'
 import { CategoryIcon } from '../components/CategoryIcon'
-import { CreditCardIcon } from '../components/Icons'
+import { BankIcon, CreditCardIcon, WalletIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
 import { formatDateShort, formatRp, type SortOrder } from '../utils'
@@ -350,7 +350,7 @@ function RecurringForm({
   onClose,
 }: {
   categories: Array<{ id: string; name: string; icon: string | null; type: string }>
-  pms: Array<{ id: string; name: string }>
+  pms: Array<{ id: string; name: string; type?: string }>
   onClose: () => void
 }) {
   const qc = useQueryClient()
@@ -404,10 +404,16 @@ function RecurringForm({
     icon: <CategoryIcon name={c.name} size={14} />,
   }))
 
+  const getPmIcon = (type?: string) => {
+    if (type === 'bank') return <BankIcon size={14} />
+    if (type === 'ewallet') return <CreditCardIcon size={14} />
+    return <WalletIcon size={14} />
+  }
+
   const pmOptions: SelectOption[] = pms.map((p) => ({
     value: p.id,
     label: p.name,
-    icon: <CreditCardIcon size={14} />,
+    icon: getPmIcon(p.type),
   }))
 
   return (

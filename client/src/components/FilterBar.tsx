@@ -1,6 +1,6 @@
 import { CustomSelect, type SelectOption } from './CustomSelect'
 import { DatePicker } from './DatePicker'
-import { CalendarIcon, CloseIcon, CreditCardIcon } from './Icons'
+import { BankIcon, CalendarIcon, CloseIcon, CreditCardIcon, WalletIcon } from './Icons'
 import { CategoryIcon } from './CategoryIcon'
 import { Input } from './Form'
 import { PRESET_OPTIONS, SORT_OPTIONS, type PeriodPreset, type SortOrder } from '../utils'
@@ -112,13 +112,19 @@ export function FilterBar({
     })),
   ]
 
-  // Opsi Metode Pembayaran dengan icon kartu
+  const getPmFilterIcon = (type?: string) => {
+    if (type === 'bank') return <BankIcon size={13} />
+    if (type === 'ewallet') return <CreditCardIcon size={13} />
+    return <WalletIcon size={13} />
+  }
+
+  // Opsi Metode Pembayaran dengan icon sesuai tipe
   const pmOptions: SelectOption[] = [
     { value: '', label: 'Semua Metode' },
     ...paymentMethods.map((pm) => ({
       value: pm.id,
       label: pm.name,
-      icon: <CreditCardIcon size={13} />,
+      icon: getPmFilterIcon(pm.type),
       badge: pm.type,
     })),
   ]

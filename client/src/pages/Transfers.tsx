@@ -9,7 +9,7 @@ import { Pagination, type PageSize } from '../components/Pagination'
 import { CustomSelect, type SelectOption } from '../components/CustomSelect'
 import { DateTimePicker } from '../components/DatePicker'
 import { CurrencyInput, Field, Input } from '../components/Form'
-import { CreditCardIcon } from '../components/Icons'
+import { BankIcon, CreditCardIcon, WalletIcon } from '../components/Icons'
 import { Modal } from '../components/Modal'
 import { useToast } from '../components/useToast'
 import {
@@ -258,10 +258,16 @@ function TransferForm({
     },
   })
 
+  const getPmIcon = (type?: string) => {
+    if (type === 'bank') return <BankIcon size={14} />
+    if (type === 'ewallet') return <CreditCardIcon size={14} />
+    return <WalletIcon size={14} />
+  }
+
   const fromOptions: SelectOption[] = pms.map((p) => ({
     value: p.id,
     label: p.name,
-    icon: <CreditCardIcon size={14} />,
+    icon: getPmIcon(p.type),
     badge: p.type,
   }))
 
@@ -270,7 +276,7 @@ function TransferForm({
     .map((p) => ({
       value: p.id,
       label: p.name,
-      icon: <CreditCardIcon size={14} />,
+      icon: getPmIcon(p.type),
       badge: p.type,
     }))
 
@@ -316,11 +322,11 @@ function TransferForm({
           />
         </Field>
 
-        <Field label="Keterangan">
+        <Field label="Keterangan / Catatan Transfer (Opsional)">
           <Input
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
-            placeholder="mis. Tarik tunai ATM, Top up ShopeePay"
+            placeholder="mis. Tarik tunai ATM, Top up ShopeePay, Transfer ke rek teman"
             className="!py-2"
           />
         </Field>

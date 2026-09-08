@@ -7,7 +7,7 @@ import { CustomSelect, type SelectOption } from './CustomSelect'
 import { DateTimePicker } from './DatePicker'
 import { CurrencyInput, Field, Textarea } from './Form'
 import { CategoryIcon } from './CategoryIcon'
-import { CreditCardIcon } from './Icons'
+import { BankIcon, CreditCardIcon, WalletIcon } from './Icons'
 import { Modal } from './Modal'
 import { useToast } from './useToast'
 import { fromLocalDateTimeInput, toLocalDateTimeInput } from '../utils'
@@ -88,10 +88,16 @@ export function TransactionForm({ existing, onClose }: Props) {
     icon: <CategoryIcon name={c.name} size={14} />,
   }))
 
+  const getPmIcon = (type: string) => {
+    if (type === 'bank') return <BankIcon size={14} />
+    if (type === 'ewallet') return <CreditCardIcon size={14} />
+    return <WalletIcon size={14} />
+  }
+
   const pmOptions: SelectOption[] = paymentMethods.map((p) => ({
     value: p.id,
     label: p.name,
-    icon: <CreditCardIcon size={14} />,
+    icon: getPmIcon(p.type),
     badge: p.type,
   }))
 
