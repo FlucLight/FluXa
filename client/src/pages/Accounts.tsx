@@ -104,7 +104,6 @@ export function Accounts() {
   const adjustingAccountObj = accounts.find((a) => a.id === adjustingId)
   const deletingAccountObj = accounts.find((a) => a.id === deletingId)
 
-  // Calculate totals
   const totalBalance = balances.reduce((sum, b) => sum + (Number(b.balance) || 0), 0)
   const totalBank = accounts
     .filter((a) => a.type === 'bank')
@@ -130,7 +129,6 @@ export function Accounts() {
         </Button>
       </div>
 
-      {/* Summary Cards */}
       {!isLoading && !isError && !isBalancesError && accounts.length > 0 && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <div className="rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3.5 shadow-xs">
@@ -187,7 +185,6 @@ export function Accounts() {
         />
       )}
 
-      {/* Grid of Accounts */}
       {!isLoading && !isError && !isBalancesError && accounts.length > 0 && (
         <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-3">
           {accounts.map((account) => {
@@ -234,7 +231,6 @@ export function Accounts() {
                     </div>
                   </div>
 
-                  {/* Balance Display */}
                   <div className="mt-3.5 rounded-[8px] bg-[var(--color-surface-sunken)] p-3 border border-[var(--color-border)]/60">
                     <p className="text-[10px] font-medium text-[var(--color-ink-faint)] uppercase tracking-wider">
                       Saldo Berjalan
@@ -248,7 +244,6 @@ export function Accounts() {
                     </div>
                   </div>
 
-                  {/* Aliases Tags */}
                   {aliases.length > 0 && (
                     <div className="mt-3 flex flex-wrap items-center gap-1">
                       <span className="text-[10px] text-[var(--color-ink-faint)]">Kata kunci bot:</span>
@@ -264,7 +259,6 @@ export function Accounts() {
                   )}
                 </div>
 
-                {/* Bottom Action */}
                 <div className="mt-4 pt-3 border-t border-[var(--color-border)] flex items-center justify-between gap-2">
                   <Button
                     variant="secondary"
@@ -283,7 +277,6 @@ export function Accounts() {
         </div>
       )}
 
-      {/* Add / Edit Account Modal */}
       {(showAddModal || editingAccount) && (
         <AccountFormModal
           existing={editingAccount ?? undefined}
@@ -299,7 +292,6 @@ export function Accounts() {
         />
       )}
 
-      {/* Quick Adjust Initial Balance Modal */}
       {adjustingAccountObj && (
         <Modal
           title={`Atur Saldo Awal — ${adjustingAccountObj.name}`}
@@ -336,7 +328,6 @@ export function Accounts() {
         </Modal>
       )}
 
-      {/* Confirm Delete Modal */}
       <ConfirmModal
         isOpen={Boolean(deletingId)}
         title="Hapus Akun Pembayaran"

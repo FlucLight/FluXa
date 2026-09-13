@@ -56,7 +56,6 @@ export function Budgets() {
   const [pageSize, setPageSize] = useState<PageSize>(10)
   const [page, setPage] = useState(0)
 
-  // Calculate date range for the selected month & year
   const daysInSelectedMonth = getDaysInMonth(selectedYear, selectedMonth)
   const monthPad = String(selectedMonth).padStart(2, '0')
   const fromIso = fromLocalDateInput(`${selectedYear}-${monthPad}-01`)
@@ -109,7 +108,6 @@ export function Budgets() {
     onError: (err) => toastError((err as Error).message, 'Gagal Menyimpan'),
   })
 
-  // Calculations
   const budgetsWithSpend = budgets.map((b) => {
     const spent = txs
       .filter((t) => t.category_id === b.category_id && t.type === 'expense')
@@ -131,7 +129,6 @@ export function Budgets() {
     ? budgetsWithSpend
     : budgetsWithSpend.slice(budgetPage * pageSize, (budgetPage + 1) * pageSize)
 
-  // Navigation handlers
   const handlePrevMonth = () => {
     if (selectedMonth === 1) {
       setSelectedMonth(12)
@@ -167,7 +164,6 @@ export function Budgets() {
 
   return (
     <div className="w-full min-w-0 max-w-5xl animate-fade-in p-4 sm:p-6 md:p-8 flex flex-col gap-6">
-      {/* Header & Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-[var(--color-ink)] font-display">
@@ -182,7 +178,6 @@ export function Budgets() {
         </Button>
       </div>
 
-      {/* Month & Year Navigator */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-3.5 shadow-xs">
         <div className="flex items-center gap-1.5">
           <Button variant="secondary" onClick={handlePrevMonth} aria-label="Bulan sebelumnya" className="!p-2">
@@ -240,7 +235,6 @@ export function Budgets() {
         </div>
       </div>
 
-      {/* Monthly Budget Summary Banner */}
       {!budgetsLoading && !isError && budgetsWithSpend.length > 0 && (
         <section className="rounded-[12px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-5 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -275,7 +269,6 @@ export function Budgets() {
             </div>
           </div>
 
-          {/* Overall Progress Bar */}
           <div className="mt-4">
             <div className="flex items-center justify-between text-[11px] text-[var(--color-ink-muted)] mb-1">
               <span>Penggunaan Budget</span>
@@ -297,10 +290,8 @@ export function Budgets() {
         </section>
       )}
 
-      {/* Loading Skeleton */}
       {budgetsLoading && <ListSkeleton rows={4} />}
 
-      {/* Error State */}
       {!budgetsLoading && (isError || isTxsError || isCategoriesError) && (
         <ErrorState
           title="Gagal memuat data budget"
@@ -313,7 +304,6 @@ export function Budgets() {
         />
       )}
 
-      {/* Empty State */}
       {!budgetsLoading && !isError && !isTxsError && !isCategoriesError && budgetsWithSpend.length === 0 && (
         <EmptyState
           title={`Belum ada target budget di ${MONTH_NAMES[selectedMonth - 1]} ${selectedYear}`}
@@ -321,7 +311,6 @@ export function Budgets() {
         />
       )}
 
-      {/* Budget Categories Grid */}
       {!budgetsLoading && !isError && !isTxsError && !isCategoriesError && budgetsWithSpend.length > 0 && (
         <div className="flex flex-col gap-3">
           <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
@@ -369,7 +358,6 @@ export function Budgets() {
                       </div>
                     </div>
 
-                    {/* Spend vs Limit */}
                     <div className="mt-3.5 flex items-baseline justify-between text-xs">
                       <div>
                         <span className="text-[10px] uppercase text-[var(--color-ink-faint)] tracking-wider">Terpakai</span>
@@ -385,7 +373,6 @@ export function Budgets() {
                       </div>
                     </div>
 
-                    {/* Progress Bar */}
                     <div className="mt-2.5">
                       <div className="h-2 w-full overflow-hidden rounded-full bg-[var(--color-surface-sunken)] border border-[var(--color-border)]/50">
                         <div
@@ -402,7 +389,6 @@ export function Budgets() {
                     </div>
                   </div>
 
-                  {/* Status footer */}
                   <div className="mt-3 flex items-center justify-between text-[11px] border-t border-[var(--color-border)]/40 pt-2 text-[var(--color-ink-muted)] tabular-nums">
                     <span>
                       {isOver
@@ -429,7 +415,6 @@ export function Budgets() {
         </div>
       )}
 
-      {/* Add Budget Modal */}
       {showForm && (
         <BudgetFormModal
           categories={categories}
@@ -444,7 +429,6 @@ export function Budgets() {
         />
       )}
 
-      {/* Edit Budget Limit Modal */}
       {editingBudget && (
         <Modal
           title={`Ubah Limit Budget — ${editingBudget.category_name}`}
@@ -479,7 +463,6 @@ export function Budgets() {
         </Modal>
       )}
 
-      {/* Confirm Delete Modal */}
       <ConfirmModal
         isOpen={Boolean(deletingId)}
         title="Hapus Batas Budget"
