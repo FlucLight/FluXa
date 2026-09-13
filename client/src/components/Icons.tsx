@@ -519,7 +519,7 @@ export function CategorySymbolIcon({
     )
   }
 
-  if (n.includes('hiburan') || n.includes('game') || n.includes('nonton') || n.includes('film')) {
+  if (n.includes('hiburan') || n.includes('game') || n.includes('top up') || n.includes('topup') || n.includes('diamond') || n.includes('nonton') || n.includes('film')) {
     return (
       <svg
         width={size}
@@ -537,6 +537,24 @@ export function CategorySymbolIcon({
         <path d="M8 10v4" />
         <circle cx="15" cy="12" r=".5" />
         <circle cx="18" cy="12" r=".5" />
+      </svg>
+    )
+  }
+
+  if (n.includes('transfer') || n.includes('kirim')) {
+    return (
+      <svg
+        width={size}
+        height={size}
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+      >
+        <path d="m17 8 4 4m0 0-4 4m4-4H3" />
       </svg>
     )
   }

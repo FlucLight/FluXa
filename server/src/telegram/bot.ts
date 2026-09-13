@@ -137,6 +137,7 @@ const CATEGORY_OPTIONS = [
   { key: 'transport', label: 'Transportasi' },
   { key: 'belanja', label: 'Belanja' },
   { key: 'tagihan', label: 'Tagihan' },
+  { key: 'game', label: 'Game / Top Up' },
   { key: 'gaji', label: 'Gaji' },
   { key: 'lainnya', label: 'Lainnya' },
 ] as const
@@ -146,6 +147,7 @@ const CATEGORY_AMOUNTS: Record<string, string[]> = {
   transport: ['10rb', '20rb', '30rb', '50rb', '100rb'],
   belanja: ['25rb', '50rb', '100rb', '200rb', '500rb'],
   tagihan: ['50rb', '100rb', '150rb', '300rb', '500rb'],
+  game: ['20rb', '50rb', '100rb', '250rb', '500rb'],
   gaji: ['500rb', '1jt', '2jt', '3jt', '4jt'],
   lainnya: ['10rb', '25rb', '50rb', '100rb', '200rb'],
 }
@@ -295,7 +297,8 @@ function menuKeyboard(): InlineKeyboardMarkup {
     inline_keyboard: [
       CATEGORY_OPTIONS.slice(0, 2).map((option) => ({ text: option.label, callback_data: `cat:${option.key}` })),
       CATEGORY_OPTIONS.slice(2, 4).map((option) => ({ text: option.label, callback_data: `cat:${option.key}` })),
-      CATEGORY_OPTIONS.slice(4).map((option) => ({ text: option.label, callback_data: `cat:${option.key}` })),
+      CATEGORY_OPTIONS.slice(4, 6).map((option) => ({ text: option.label, callback_data: `cat:${option.key}` })),
+      CATEGORY_OPTIONS.slice(6).map((option) => ({ text: option.label, callback_data: `cat:${option.key}` })),
       [
         { text: 'Ringkasan', callback_data: 'summary:month' },
         { text: 'Saldo akun', callback_data: 'summary:balances' },
