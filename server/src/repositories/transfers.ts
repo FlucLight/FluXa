@@ -79,6 +79,25 @@ export async function create(data: {
   return rows[0]!
 }
 
+export async function update(
+  id: string,
+  data: { amount?: number; description?: string | null; occurred_at?: string | null },
+): Promise<AccountTransferRecord | null> {
+  const fields: string[] = []
+  const values: unknown[] = []
+  let idx = 1
+  if (data.amount !== undefined) { fields.push(`amount = $${idx++}`); values.push(data.amount) }
+  if (data.description !== undefined) { fields.push(`description = $${idx++}`); values.push(data.description) }
+  if (data.occurred_at !== undefined) { fields.push(`occurred_at = $${idx++}`); values.push(data.occurred_at) }
+  if (fields.length === 0) return null
+  values.push(id, userId())
+  const { rows } = await pool.query<AccountTransferRecord>(
+    `UPDATE account_transfers SET ${fields.join(', ')} WHERE id = $${idx++} AND user_id = $${idx} AND is_deleted = false RETURNING *`,
+    values,
+  )
+  return rows[0] ?? null
+}
+
 export async function softDelete(id: string): Promise<boolean> {
   const { rowCount } = await pool.query(
     `UPDATE account_transfers SET is_deleted = true, deleted_at = now()

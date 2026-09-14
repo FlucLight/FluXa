@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express'
 import * as repo from '../repositories/transfers'
-import type { CreateTransferInput } from 'shared'
+import type { CreateTransferInput, UpdateTransferInput } from 'shared'
 
 function parsePageNumber(value: string | undefined, fallback: number): number {
   if (value === undefined) return fallback
@@ -45,6 +45,17 @@ export async function create(req: Request, res: Response): Promise<void> {
     occurred_at: body.occurred_at ?? null,
   })
   res.status(201).json(row)
+}
+
+export async function update(req: Request, res: Response): Promise<void> {
+  const body = req.body as UpdateTransferInput
+  const patch: { amount?: number; description?: string | null; occurred_at?: string | null } = {}
+  if (body.amount !== undefined) patch.amount = body.amount
+  if (body.description !== undefined) patch.description = body.description
+  if (body.occurred_at !== undefined) patch.occurred_at = body.occurred_at
+  const row = await repo.update(req.params['id'] as string, patch)
+  if (!row) { res.status(404).json({ error: 'Transfer tidak ditemukan' }); return }
+  res.json(row)
 }
 
 export async function softDelete(req: Request, res: Response): Promise<void> {

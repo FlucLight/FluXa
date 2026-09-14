@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import type { TransactionRecord } from 'shared'
+import type { AccountTransferRecord, TransactionRecord } from 'shared'
 import { api } from '../api'
 import { Button } from '../components/Button'
 import { CategoryIcon } from '../components/CategoryIcon'
@@ -36,6 +36,8 @@ export function Transfers() {
   const [initialFormMode, setInitialFormMode] = useState<'internal' | 'external'>('internal')
   const [deletingInternalId, setDeletingInternalId] = useState<string | null>(null)
   const [deletingExternalId, setDeletingExternalId] = useState<string | null>(null)
+  const [editingInternal, setEditingInternal] = useState<AccountTransferRecord | null>(null)
+  const [editingExternal, setEditingExternal] = useState<TransactionRecord | null>(null)
 
   const [preset, setPreset] = useState<PeriodPreset>('this_month')
   const [customFrom, setCustomFrom] = useState('')
@@ -282,12 +284,20 @@ export function Transfers() {
                           {formatRp(t.amount)}
                         </td>
                         <td className="px-4 py-3 text-right">
-                          <Button
-                            variant="danger"
-                            onClick={() => setDeletingInternalId(t.id)}
-                          >
-                            Hapus
-                          </Button>
+                          <div className="flex gap-1.5 justify-end">
+                            <Button
+                              variant="ghost"
+                              onClick={() => setEditingInternal(t)}
+                            >
+                              Edit
+                            </Button>
+                            <Button
+                              variant="danger"
+                              onClick={() => setDeletingInternalId(t.id)}
+                            >
+                              Hapus
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -368,12 +378,20 @@ export function Transfers() {
                             - {formatRp(tx.amount)}
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <Button
-                              variant="danger"
-                              onClick={() => setDeletingExternalId(tx.id)}
-                            >
-                              Hapus
-                            </Button>
+                            <div className="flex gap-1.5 justify-end">
+                              <Button
+                                variant="ghost"
+                                onClick={() => setEditingExternal(tx)}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                variant="danger"
+                                onClick={() => setDeletingExternalId(tx.id)}
+                              >
+                                Hapus
+                              </Button>
+                            </div>
                           </td>
                         </tr>
                       )
@@ -398,12 +416,18 @@ export function Transfers() {
       )}
 
       {/* Form Modal */}
-      {showForm && (
+      {(showForm || editingInternal || editingExternal) && (
         <TransferForm
-          initialMode={initialFormMode}
+          initialMode={editingExternal ? 'external' : initialFormMode}
+          existingInternal={editingInternal ?? undefined}
+          existingExternal={editingExternal ?? undefined}
           pms={pms}
           categories={categories}
-          onClose={() => setShowForm(false)}
+          onClose={() => {
+            setShowForm(false)
+            setEditingInternal(null)
+            setEditingExternal(null)
+          }}
         />
       )}
 
@@ -442,11 +466,15 @@ export function Transfers() {
 
 function TransferForm({
   initialMode,
+  existingInternal,
+  existingExternal,
   pms,
   categories,
   onClose,
 }: {
   initialMode: 'internal' | 'external'
+  existingInternal?: AccountTransferRecord
+  existingExternal?: TransactionRecord
   pms: Array<{ id: string; name: string; type?: string }>
   categories: Array<{ id: string; name: string; type: string }>
   onClose: () => void
@@ -454,23 +482,29 @@ function TransferForm({
   const qc = useQueryClient()
   const { success, error: toastError } = useToast()
 
+  const isEditMode = Boolean(existingInternal || existingExternal)
   const [mode, setMode] = useState<'internal' | 'external'>(initialMode)
 
   // Default transfer category jika ada
   const defaultTransferCat = categories.find((c) => c.name.toLowerCase().includes('transfer')) ?? categories[0]
 
   const [form, setForm] = useState({
-    from: pms[0]?.id ?? '',
-    to: pms[1]?.id ?? '',
-    amount: '',
-    description: '',
-    occurred_at: toLocalDateTimeInput(),
-    // Field khusus transfer ke orang lain
+    from: existingInternal?.from_payment_method_id ?? existingExternal?.payment_method_id ?? pms[0]?.id ?? '',
+    to: existingInternal?.to_payment_method_id ?? pms[1]?.id ?? '',
+    amount: existingInternal
+      ? String(parseFloat(existingInternal.amount))
+      : existingExternal
+      ? String(parseFloat(existingExternal.amount))
+      : '',
+    description: existingInternal?.description ?? '',
+    occurred_at: toLocalDateTimeInput(
+      existingInternal?.occurred_at ?? existingExternal?.occurred_at,
+    ),
     recipientName: '',
     targetBank: '',
     targetAccountNo: '',
-    category_id: defaultTransferCat?.id ?? '',
-    notes: '',
+    category_id: existingExternal?.category_id ?? defaultTransferCat?.id ?? '',
+    notes: existingExternal?.description ?? '',
   })
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }))
 
@@ -482,19 +516,26 @@ function TransferForm({
     qc.invalidateQueries({ queryKey: ['budgets'] })
   }
 
-  // Mutasi 1: Transfer Antar Rekening Sendiri (Internal)
   const internalMut = useMutation({
-    mutationFn: () =>
-      api.transfers.create({
-        from_payment_method_id: form.from,
-        to_payment_method_id: form.to,
+    mutationFn: () => {
+      const payload = {
         amount: parseFloat(form.amount),
         description: form.description || undefined,
         occurred_at: fromLocalDateTimeInput(form.occurred_at),
-      }),
+      }
+      if (existingInternal) return api.transfers.update(existingInternal.id, payload)
+      return api.transfers.create({
+        ...payload,
+        from_payment_method_id: form.from,
+        to_payment_method_id: form.to,
+      })
+    },
     onSuccess: () => {
       invalidateAll()
-      success('Transfer antar akun sendiri berhasil dicatat', 'Transfer Berhasil')
+      success(
+        existingInternal ? 'Transfer antar akun berhasil diperbarui' : 'Transfer antar akun sendiri berhasil dicatat',
+        'Transfer Berhasil',
+      )
       onClose()
     },
     onError: (err) => {
@@ -502,7 +543,6 @@ function TransferForm({
     },
   })
 
-  // Mutasi 2: Transfer ke Orang Lain (External -> Masuk Transaksi Expense & Dashboard)
   const externalMut = useMutation({
     mutationFn: () => {
       const recipient = form.recipientName.trim()
@@ -510,23 +550,28 @@ function TransferForm({
       const acc = form.targetAccountNo.trim()
       const notes = form.notes.trim()
 
-      const composedDescription = `Transfer ke ${recipient} (${bank}${acc ? ` - ${acc}` : ''})${notes ? ` · ${notes}` : ''}`
+      const composedDescription = recipient
+        ? `Transfer ke ${recipient} (${bank}${acc ? ` - ${acc}` : ''})${notes ? ` · ${notes}` : ''}`
+        : notes
 
-      return api.transactions.create({
-        type: 'expense',
+      const payload = {
+        type: 'expense' as const,
         amount: parseFloat(form.amount),
         payment_method_id: form.from,
         category_id: form.category_id || (defaultTransferCat?.id ?? categories[0]!.id),
-        description: composedDescription,
+        description: composedDescription || null,
         occurred_at: fromLocalDateTimeInput(form.occurred_at),
-        source: 'web',
+        source: 'web' as const,
         needs_review: false,
-      })
+      }
+
+      if (existingExternal) return api.transactions.update(existingExternal.id, payload)
+      return api.transactions.create(payload)
     },
     onSuccess: () => {
       invalidateAll()
       success(
-        `Transfer ke ${form.recipientName} (${formatRp(form.amount)}) berhasil dicatat dan muncul di Dashboard`,
+        existingExternal ? 'Transfer berhasil diperbarui' : `Transfer ke ${form.recipientName} berhasil dicatat`,
         'Transfer Keluar Berhasil',
       )
       onClose()
@@ -572,35 +617,38 @@ function TransferForm({
       if (!form.from || !form.to || !form.amount) return
       internalMut.mutate()
     } else {
-      if (!form.from || !form.recipientName.trim() || !form.targetBank.trim() || !form.amount) return
+      if (!form.from || !form.amount) return
+      if (!isEditMode && (!form.recipientName.trim() || !form.targetBank.trim())) return
       externalMut.mutate()
     }
   }
 
   return (
-    <Modal title="Catat Transfer Dana" onClose={onClose}>
+    <Modal title={isEditMode ? 'Ubah Transfer Dana' : 'Catat Transfer Dana'} onClose={onClose}>
       <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
         {/* Toggle Mode Transfer */}
         <div className="flex rounded-[8px] bg-[var(--color-surface-sunken)] p-1 border border-[var(--color-border)]">
           <button
             type="button"
             onClick={() => setMode('internal')}
-            className={`flex-1 rounded-[6px] py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+            disabled={isEditMode}
+            className={`flex-1 rounded-[6px] py-1.5 text-xs font-semibold transition-all ${
               mode === 'internal'
                 ? 'bg-[var(--color-surface-raised)] text-[var(--color-ink)] shadow-xs'
                 : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-            }`}
+            } ${isEditMode ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
           >
             Antar Rekening Sendiri
           </button>
           <button
             type="button"
             onClick={() => setMode('external')}
-            className={`flex-1 rounded-[6px] py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+            disabled={isEditMode}
+            className={`flex-1 rounded-[6px] py-1.5 text-xs font-semibold transition-all ${
               mode === 'external'
                 ? 'bg-[var(--color-surface-raised)] text-[var(--color-focus)] shadow-xs'
                 : 'text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]'
-            }`}
+            } ${isEditMode ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
           >
             Ke Rekening Orang Lain
           </button>
@@ -672,7 +720,7 @@ function TransferForm({
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <Field label="Nama Penerima">
                 <Input
-                  required
+                  required={!isEditMode}
                   value={form.recipientName}
                   onChange={(e) => set('recipientName', e.target.value)}
                   placeholder="mis. Budi Santoso, Toko Buku"
@@ -683,7 +731,7 @@ function TransferForm({
 
               <Field label="Bank / E-Wallet Penerima">
                 <Input
-                  required
+                  required={!isEditMode}
                   value={form.targetBank}
                   onChange={(e) => set('targetBank', e.target.value)}
                   placeholder="mis. BCA, Mandiri, DANA, GoPay"
@@ -745,6 +793,8 @@ function TransferForm({
           <Button type="submit" disabled={isPending}>
             {isPending
               ? 'Menyimpan...'
+              : isEditMode
+              ? 'Simpan Perubahan'
               : mode === 'internal'
               ? 'Simpan Transfer Internal'
               : 'Simpan Transfer ke Orang Lain'}

@@ -214,6 +214,8 @@ export const api = {
       ),
     create: (data: { from_payment_method_id: string; to_payment_method_id: string; amount: number; description?: string; occurred_at?: string }) =>
       req<AccountTransferRecord>('/transfers', { method: 'POST', body: JSON.stringify(data) }),
+    update: (id: string, data: { amount?: number; description?: string | null; occurred_at?: string }) =>
+      req<AccountTransferRecord>(`/transfers/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
     remove: (id: string) => req<void>(`/transfers/${id}`, { method: 'DELETE' }),
   },
 
