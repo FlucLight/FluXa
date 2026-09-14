@@ -74,10 +74,18 @@ test('categoryColor returns a different light color for distinct categories', ()
   assert.notEqual(categoryColor('Transport'), categoryColor('Tagihan'))
 })
 
-test('categoryColor gives Transfer Keluar its own distinct blue, separate from Makan', () => {
+test('categoryColor gives Transfer Keluar its own blue, distinct from Game', () => {
   assert.equal(categoryColor('Transfer Keluar', false), '#2563EB')
   assert.equal(categoryColor('Transfer Keluar', true), '#60A5FA')
-  assert.notEqual(categoryColor('Transfer Keluar'), categoryColor('Makan'))
+  assert.notEqual(categoryColor('Transfer Keluar'), categoryColor('Game & Top Up'))
+})
+
+test('all named categories have mutually distinct colors in light and dark mode', () => {
+  const names = ['Makan', 'Transport', 'Belanja', 'Tagihan', 'Gaji', 'Game & Top Up', 'Sekolah', 'Kesehatan', 'Transfer Keluar']
+  for (const dark of [false, true]) {
+    const colors = names.map((n) => categoryColor(n, dark))
+    assert.equal(new Set(colors).size, names.length)
+  }
 })
 
 test('categoryColor dark palette differs from light and stays valid', () => {

@@ -23,6 +23,25 @@ function witaCalendar(now: Date): Date {
   return new Date(Date.UTC(Number(values['year']), Number(values['month']) - 1, Number(values['day'])))
 }
 
+export function witaNowTime(now: Date = new Date()): { hour: number; minute: number } {
+  const parts = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Makassar',
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+  }).formatToParts(now)
+  return {
+    hour: Number(parts.find((p) => p.type === 'hour')?.value ?? 0),
+    minute: Number(parts.find((p) => p.type === 'minute')?.value ?? 0),
+  }
+}
+
+export function combineDateWithWitaNow(dateOnly: string, now: Date = new Date()): string {
+  const { hour, minute } = witaNowTime(now)
+  const hm = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+  return new Date(`${dateOnly}T${hm}:00+08:00`).toISOString()
+}
+
 function atWitaNoon(date: Date): Date {
   const year = date.getUTCFullYear()
   const month = String(date.getUTCMonth() + 1).padStart(2, '0')

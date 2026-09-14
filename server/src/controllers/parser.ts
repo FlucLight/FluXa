@@ -3,6 +3,14 @@ import * as categoryRepo from '../repositories/categories'
 import * as pmRepo from '../repositories/paymentMethods'
 import * as txRepo from '../repositories/transactions'
 import { parseResolved } from '../parser'
+import { combineDateWithWitaNow } from '../parser/date'
+
+const DATE_ONLY_RE = /^\d{4}-\d{2}-\d{2}$/
+
+function resolveOccurredAt(value?: string | null): string {
+  if (value && DATE_ONLY_RE.test(value)) return combineDateWithWitaNow(value)
+  return value ?? new Date().toISOString()
+}
 
 export async function parsePreview(req: Request, res: Response): Promise<void> {
   const { text } = req.body as { text?: string }
@@ -44,7 +52,7 @@ export async function parseAndSave(req: Request, res: Response): Promise<void> {
   }
 
   const resolvedOccurredAt =
-    occurred_at ?? result.occurred_at ?? new Date().toISOString()
+    occurred_at ? resolveOccurredAt(occurred_at) : resolveOccurredAt(result.occurred_at)
 
   const tx = await txRepo.create({
     type: result.category_type ?? 'expense',

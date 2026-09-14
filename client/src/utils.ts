@@ -187,24 +187,24 @@ export const SORT_OPTIONS: Array<{ value: SortOrder | ''; label: string }> = [
 const CATEGORY_PALETTE_LIGHT: Array<[string, string[]]> = [
   ['#B23A3A', ['makan', 'food', 'kuliner', 'snack']],
   ['#2E7D5B', ['transport', 'bensin', 'ojek', 'bbm']],
-  ['#8A6D1F', ['belanja', 'toko', 'supermarket', 'minimarket']],
-  ['#9A4D2E', ['tagihan', 'listrik', 'wifi', 'pulsa', 'pdam', 'internet']],
-  ['#5B4FA3', ['gaji', 'bonus', 'pendapatan', 'bisnis']],
-  ['#1F6F8B', ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film']],
-  ['#6B7A14', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
-  ['#A34F6B', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
+  ['#B7791F', ['belanja', 'toko', 'supermarket', 'minimarket']],
+  ['#C2410C', ['tagihan', 'listrik', 'wifi', 'pulsa', 'pdam', 'internet']],
+  ['#6D28D9', ['gaji', 'bonus', 'pendapatan', 'bisnis']],
+  ['#0F766E', ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film']],
+  ['#4D7C0F', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
+  ['#DB2777', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
   ['#2563EB', ['transfer', 'kirim']],
 ]
 
 const CATEGORY_PALETTE_DARK: Array<[string, string[]]> = [
   ['#F87171', ['makan', 'food', 'kuliner', 'snack']],
   ['#4ADE80', ['transport', 'bensin', 'ojek', 'bbm']],
-  ['#FACC15', ['belanja', 'toko', 'supermarket', 'minimarket']],
+  ['#FBBF24', ['belanja', 'toko', 'supermarket', 'minimarket']],
   ['#FB923C', ['tagihan', 'listrik', 'wifi', 'pulsa', 'pdam', 'internet']],
   ['#A78BFA', ['gaji', 'bonus', 'pendapatan', 'bisnis']],
-  ['#38BDF8', ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film']],
+  ['#2DD4BF', ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film']],
   ['#A3E635', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
-  ['#F472B6', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
+  ['#E879F9', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
   ['#60A5FA', ['transfer', 'kirim']],
 ]
 

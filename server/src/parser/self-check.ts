@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { extractDatePhrase } from './date'
+import { combineDateWithWitaNow, extractDatePhrase } from './date'
 import { parseResolved } from './index'
 
 const paymentMethods = [
@@ -37,5 +37,8 @@ assert.equal(groupedComma.amount, 15_000)
 const fixedNow = new Date('2026-09-02T05:00:00+08:00')
 const yesterday = extractDatePhrase('bayar kemarin', fixedNow)
 assert.equal(yesterday?.date.toISOString(), '2026-09-01T04:00:00.000Z')
+
+const dateOnlyAtWita = combineDateWithWitaNow('2026-09-02', fixedNow)
+assert.equal(dateOnlyAtWita, '2026-09-01T21:00:00.000Z')
 
 console.log('parser self-check passed')
