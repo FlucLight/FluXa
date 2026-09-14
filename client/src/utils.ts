@@ -193,7 +193,7 @@ const CATEGORY_PALETTE_LIGHT: Array<[string, string[]]> = [
   ['#1F6F8B', ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film']],
   ['#6B7A14', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
   ['#A34F6B', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
-  ['#E11D48', ['transfer', 'kirim']],
+  ['#2563EB', ['transfer', 'kirim']],
 ]
 
 const CATEGORY_PALETTE_DARK: Array<[string, string[]]> = [
@@ -205,7 +205,7 @@ const CATEGORY_PALETTE_DARK: Array<[string, string[]]> = [
   ['#38BDF8', ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film']],
   ['#A3E635', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
   ['#F472B6', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
-  ['#FB7185', ['transfer', 'kirim']],
+  ['#60A5FA', ['transfer', 'kirim']],
 ]
 
 const GENERIC_PALETTE_LIGHT = ['#3A3C42', '#5A5C61', '#7A7D84', '#9A9DA4', '#B7B7B2']
