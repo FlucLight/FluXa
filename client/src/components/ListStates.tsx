@@ -1,5 +1,8 @@
 import { Button } from './Button'
 
+const PANEL_CLASS =
+  'flex flex-col items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-8 text-center shadow-xs'
+
 interface EmptyStateProps {
   title: string
   description?: string
@@ -9,7 +12,7 @@ interface EmptyStateProps {
 
 export function EmptyState({ title, description, actionLabel, onAction }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-8 text-center shadow-xs">
+    <div className={PANEL_CLASS}>
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface-sunken)] text-lg font-bold text-[var(--color-ink-faint)]">
         —
       </div>
@@ -34,7 +37,7 @@ interface ErrorStateProps {
 
 export function ErrorState({ title = 'Gagal memuat data', description, onRetry }: ErrorStateProps) {
   return (
-    <div role="alert" className="flex flex-col items-center gap-3 rounded-[10px] border border-[var(--color-border)] bg-[var(--color-surface-raised)] p-8 text-center shadow-xs">
+    <div role="alert" className={PANEL_CLASS}>
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-surface-sunken)] text-lg font-bold text-[var(--color-negative)]">
         !
       </div>
