@@ -3,6 +3,13 @@ import { createPortal } from 'react-dom'
 import { CalendarIcon, CloseIcon } from './Icons'
 import { toLocalDateInput } from '../utils'
 
+const MONTH_NAMES = [
+  'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+  'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
+]
+
+const DAY_NAMES = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+
 interface DatePickerProps {
   value: string
   onChange: (value: string) => void
@@ -76,12 +83,6 @@ export function DatePicker({
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
   const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay()
-
-  const monthNames = [
-    'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember',
-  ]
-  const dayNames = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
 
   const handlePrevMonth = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -205,7 +206,7 @@ export function DatePicker({
             </button>
 
             <span className="text-xs font-bold text-[var(--color-ink)] font-display">
-              {monthNames[viewMonth]} {viewYear}
+              {MONTH_NAMES[viewMonth]} {viewYear}
             </span>
 
             <button
@@ -221,7 +222,7 @@ export function DatePicker({
           </div>
 
           <div className="grid grid-cols-7 gap-1 text-center mb-1">
-            {dayNames.map((d) => (
+            {DAY_NAMES.map((d) => (
               <span key={d} className="text-[10px] font-semibold text-[var(--color-ink-faint)]">
                 {d}
               </span>
