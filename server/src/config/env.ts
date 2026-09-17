@@ -51,31 +51,40 @@ function toNumber(value: string | undefined, fallback: number): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback
 }
 
+function toString(value: string | undefined, fallback: string): string {
+  return value ?? fallback
+}
+
+function buildDatabaseUrl(): string {
+  return (
+    process.env.DATABASE_URL ??
+    `postgres://${toString(process.env.DB_USER, 'postgres')}:${encodeURIComponent(toString(process.env.DB_PASSWORD, ''))}@${toString(process.env.DB_HOST, 'localhost')}:${toNumber(process.env.DB_PORT, 5432)}/${toString(process.env.DB_NAME, 'financial_management')}`
+  )
+}
+
 export const env: Env = {
   PORT: toNumber(process.env.PORT, 5000),
-  DB_HOST: process.env.DB_HOST ?? 'localhost',
+  DB_HOST: toString(process.env.DB_HOST, 'localhost'),
   DB_PORT: toNumber(process.env.DB_PORT, 5432),
-  DB_USER: process.env.DB_USER ?? 'postgres',
-  DB_PASSWORD: process.env.DB_PASSWORD ?? '',
-  DB_NAME: process.env.DB_NAME ?? 'financial_management',
-  DATABASE_URL:
-    process.env.DATABASE_URL ??
-    `postgres://${process.env.DB_USER ?? 'postgres'}:${encodeURIComponent(process.env.DB_PASSWORD ?? '')}@${process.env.DB_HOST ?? 'localhost'}:${toNumber(process.env.DB_PORT, 5432)}/${process.env.DB_NAME ?? 'financial_management'}`,
-  TELEGRAM_BOT_TOKEN: process.env.TELEGRAM_BOT_TOKEN ?? '',
-  TELEGRAM_ALLOWED_CHAT_IDS: process.env.TELEGRAM_ALLOWED_CHAT_IDS ?? '',
+  DB_USER: toString(process.env.DB_USER, 'postgres'),
+  DB_PASSWORD: toString(process.env.DB_PASSWORD, ''),
+  DB_NAME: toString(process.env.DB_NAME, 'financial_management'),
+  DATABASE_URL: buildDatabaseUrl(),
+  TELEGRAM_BOT_TOKEN: toString(process.env.TELEGRAM_BOT_TOKEN, ''),
+  TELEGRAM_ALLOWED_CHAT_IDS: toString(process.env.TELEGRAM_ALLOWED_CHAT_IDS, ''),
   BACKUP_INTERVAL_HOURS: toNumber(process.env.BACKUP_INTERVAL_HOURS, 24),
   BACKUP_RETENTION_COUNT: toNumber(process.env.BACKUP_RETENTION_COUNT, 14),
-  JWT_SECRET: process.env.JWT_SECRET ?? '',
+  JWT_SECRET: toString(process.env.JWT_SECRET, ''),
   JWT_ACCESS_TTL_MINUTES: toNumber(process.env.JWT_ACCESS_TTL_MINUTES, 15),
   AUTH_SESSION_DAYS: toNumber(process.env.AUTH_SESSION_DAYS, 30),
   COOKIE_SECURE: process.env.COOKIE_SECURE !== 'false' && process.env.COOKIE_SECURE !== '0',
-  PUBLIC_BASE: process.env.PUBLIC_BASE ?? '',
-  CLIENT_ORIGIN: process.env.CLIENT_ORIGIN ?? '',
-  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID ?? '',
-  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET ?? '',
-  SMTP_HOST: process.env.SMTP_HOST ?? '',
+  PUBLIC_BASE: toString(process.env.PUBLIC_BASE, ''),
+  CLIENT_ORIGIN: toString(process.env.CLIENT_ORIGIN, ''),
+  GOOGLE_CLIENT_ID: toString(process.env.GOOGLE_CLIENT_ID, ''),
+  GOOGLE_CLIENT_SECRET: toString(process.env.GOOGLE_CLIENT_SECRET, ''),
+  SMTP_HOST: toString(process.env.SMTP_HOST, ''),
   SMTP_PORT: toNumber(process.env.SMTP_PORT, 587),
-  SMTP_USER: process.env.SMTP_USER ?? '',
-  SMTP_PASS: process.env.SMTP_PASS ?? '',
-  SMTP_FROM: process.env.SMTP_FROM ?? '',
+  SMTP_USER: toString(process.env.SMTP_USER, ''),
+  SMTP_PASS: toString(process.env.SMTP_PASS, ''),
+  SMTP_FROM: toString(process.env.SMTP_FROM, ''),
 }
