@@ -4,9 +4,14 @@ import { pool } from '../config/db'
 import { env } from '../config/env'
 
 const BACKUP_DIR = resolve(process.cwd(), 'backups')
+const FILENAME_REPLACE = /[:.]/g
 
 export function backupDirectory(): string {
   return BACKUP_DIR
+}
+
+function backupFilename(now: Date = new Date()): string {
+  return `backup-${now.toISOString().replace(FILENAME_REPLACE, '-')}.json`
 }
 
 async function rows(table: string): Promise<unknown[]> {
@@ -43,8 +48,7 @@ export async function createBackup(): Promise<string> {
     recurring,
   }
   await mkdir(BACKUP_DIR, { recursive: true })
-  const filename = `backup-${new Date().toISOString().replace(/[:.]/g, '-')}.json`
-  const filepath = resolve(BACKUP_DIR, filename)
+  const filepath = resolve(BACKUP_DIR, backupFilename())
   await writeFile(filepath, JSON.stringify(backup, null, 2), 'utf8')
   await pruneBackups()
   return filepath
