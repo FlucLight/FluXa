@@ -8,6 +8,9 @@ type Props = { title: string; children: React.ReactNode; onClose: () => void }
 const FORM_CONTROL_SELECTOR =
   'input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [role="option"]'
 
+const FOCUSABLE_SELECTOR =
+  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+
 export function Modal({ title, children, onClose }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const previouslyFocused = useRef<HTMLElement | null>(null)
@@ -26,8 +29,6 @@ export function Modal({ title, children, onClose }: Props) {
     }
     document.addEventListener('keydown', handler)
 
-    const focusableSelector =
-      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
     const dialog = ref.current
 
     const focusFirst = () => {
@@ -37,14 +38,14 @@ export function Modal({ title, children, onClose }: Props) {
         control.focus()
         return
       }
-      const first = dialog.querySelector<HTMLElement>(focusableSelector)
+      const first = dialog.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
       ;(first ?? dialog).focus()
     }
 
     const trap = (e: KeyboardEvent) => {
       if (e.key !== 'Tab' || !dialog) return
       const focusable = Array.from(
-        dialog.querySelectorAll<HTMLElement>(focusableSelector),
+        dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR),
       ).filter((el) => el.offsetParent !== null || el === document.activeElement)
       if (focusable.length === 0) {
         e.preventDefault()
