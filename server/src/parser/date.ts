@@ -66,6 +66,13 @@ function previousWeekday(now: Date, wd: number): Date {
   return atWitaNoon(today)
 }
 
+const FIXED_DATE_PHRASES: Array<{ re: RegExp; daysAgo: number }> = [
+  { re: /\b(hari\s+ini|sekarang)\b/, daysAgo: 0 },
+  { re: /\bkemarin\s+lusa\b/, daysAgo: 2 },
+  { re: /\bhari\s+kemarin\b/, daysAgo: 1 },
+  { re: /\bkemarin\b/, daysAgo: 1 },
+]
+
 export function extractDatePhrase(text: string, now = new Date()): ParsedDate | null {
   const lower = text.toLowerCase()
 
@@ -99,14 +106,8 @@ export function extractDatePhrase(text: string, now = new Date()): ParsedDate | 
   if (weekdaySpecific) return weekdaySpecific
 
   // 3. Frasa tetap.
-  const fixed = [
-    { re: /\b(hari\s+ini|sekarang)\b/, fn: () => atNPeriodsAgo(now, 'hari', 0) },
-    { re: /\bkemarin\s+lusa\b/, fn: () => atNPeriodsAgo(now, 'hari', 2) },
-    { re: /\bhari\s+kemarin\b/, fn: () => atNPeriodsAgo(now, 'hari', 1) },
-    { re: /\bkemarin\b/, fn: () => atNPeriodsAgo(now, 'hari', 1) },
-  ]
-  for (const f of fixed) {
-    const r = tryMatch(f.re, f.fn)
+  for (const f of FIXED_DATE_PHRASES) {
+    const r = tryMatch(f.re, () => atNPeriodsAgo(now, 'hari', f.daysAgo))
     if (r) return r
   }
 
