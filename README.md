@@ -221,6 +221,8 @@ npm run migrate
 pm2 restart fluxa-backend --update-env
 ```
 
+> **Tips:** Untuk memantau log aplikasi secara realtime, gunakan `pm2 logs fluxa-backend`.
+
 Untuk detail konfigurasi Nginx reverse proxy dan systemd service, silakan pelajari panduan deployment di [**`server/README.md`**](server/README.md).
 
 ---
