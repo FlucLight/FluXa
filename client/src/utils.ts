@@ -184,28 +184,16 @@ export const SORT_OPTIONS: Array<{ value: SortOrder | ''; label: string }> = [
   { value: 'least', label: 'Tersedikit → Terbanyak' },
 ]
 
-const CATEGORY_PALETTE_LIGHT: Array<[string, string[]]> = [
-  ['#B23A3A', ['makan', 'food', 'kuliner', 'snack']],
-  ['#2E7D5B', ['transport', 'bensin', 'ojek', 'bbm']],
-  ['#B7791F', ['belanja', 'toko', 'supermarket', 'minimarket']],
-  ['#C2410C', ['tagihan', 'listrik', 'wifi', 'pulsa', 'pdam', 'internet']],
-  ['#6D28D9', ['gaji', 'bonus', 'pendapatan', 'bisnis']],
-  ['#0F766E', ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film']],
-  ['#4D7C0F', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
-  ['#DB2777', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
-  ['#2563EB', ['transfer', 'kirim']],
-]
-
-const CATEGORY_PALETTE_DARK: Array<[string, string[]]> = [
-  ['#F87171', ['makan', 'food', 'kuliner', 'snack']],
-  ['#4ADE80', ['transport', 'bensin', 'ojek', 'bbm']],
-  ['#FBBF24', ['belanja', 'toko', 'supermarket', 'minimarket']],
-  ['#FB923C', ['tagihan', 'listrik', 'wifi', 'pulsa', 'pdam', 'internet']],
-  ['#A78BFA', ['gaji', 'bonus', 'pendapatan', 'bisnis']],
-  ['#2DD4BF', ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film']],
-  ['#A3E635', ['sekolah', 'pendidikan', 'buku', 'kuliah']],
-  ['#E879F9', ['kesehatan', 'obat', 'dokter', 'rumah sakit']],
-  ['#60A5FA', ['transfer', 'kirim']],
+const CATEGORY_COLORS: Array<{ light: string; dark: string; keywords: string[] }> = [
+  { light: '#B23A3A', dark: '#F87171', keywords: ['makan', 'food', 'kuliner', 'snack'] },
+  { light: '#2E7D5B', dark: '#4ADE80', keywords: ['transport', 'bensin', 'ojek', 'bbm'] },
+  { light: '#B7791F', dark: '#FBBF24', keywords: ['belanja', 'toko', 'supermarket', 'minimarket'] },
+  { light: '#C2410C', dark: '#FB923C', keywords: ['tagihan', 'listrik', 'wifi', 'pulsa', 'pdam', 'internet'] },
+  { light: '#6D28D9', dark: '#A78BFA', keywords: ['gaji', 'bonus', 'pendapatan', 'bisnis'] },
+  { light: '#0F766E', dark: '#2DD4BF', keywords: ['hiburan', 'game', 'top up', 'topup', 'diamond', 'nonton', 'film'] },
+  { light: '#4D7C0F', dark: '#A3E635', keywords: ['sekolah', 'pendidikan', 'buku', 'kuliah'] },
+  { light: '#DB2777', dark: '#E879F9', keywords: ['kesehatan', 'obat', 'dokter', 'rumah sakit'] },
+  { light: '#2563EB', dark: '#60A5FA', keywords: ['transfer', 'kirim'] },
 ]
 
 const GENERIC_PALETTE_LIGHT = ['#3A3C42', '#5A5C61', '#7A7D84', '#9A9DA4', '#B7B7B2']
@@ -221,10 +209,8 @@ function hashStr(value: string): number {
 
 function categoryPaletteIndex(name: string): number | null {
   const n = name.toLowerCase()
-  const palette = CATEGORY_PALETTE_LIGHT
-  for (let i = 0; i < palette.length; i += 1) {
-    const [, keywords] = palette[i]!
-    if (keywords.some((keyword) => n.includes(keyword))) return i
+  for (let i = 0; i < CATEGORY_COLORS.length; i += 1) {
+    if (CATEGORY_COLORS[i]!.keywords.some((keyword) => n.includes(keyword))) return i
   }
   return null
 }
@@ -232,9 +218,8 @@ function categoryPaletteIndex(name: string): number | null {
 export function categoryColor(name: string, dark = false): string {
   const idx = categoryPaletteIndex(name)
   if (idx !== null) {
-    return dark
-      ? CATEGORY_PALETTE_DARK[idx]![0]
-      : CATEGORY_PALETTE_LIGHT[idx]![0]
+    const entry = CATEGORY_COLORS[idx]!
+    return dark ? entry.dark : entry.light
   }
   const generic = dark ? GENERIC_PALETTE_DARK : GENERIC_PALETTE_LIGHT
   return generic[hashStr(name) % generic.length]!
