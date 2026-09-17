@@ -97,7 +97,7 @@ FluXa lahir dari kebutuhan pencatatan keuangan pribadi yang cepat tanpa gesekan 
 * **Pemisah Ribuan Titik Otomatis:** Input nominal uang otomatis terformat titik (`10.000` -> `Rp 10.000`) di seluruh modal dan form.
 * **Modal Notifikasi Tengah Interaktif:** Setiap aksi menghasilkan umpan balik modal di tengah layar yang jelas dan interaktif.
 * **Multi-User & Keamanan Lengkap:** Login email/password (bcrypt), Google OAuth 2.0, Passkeys (WebAuthn), dan cookie HTTP-only JWT.
-* **Backup & Restore Portabel:** Ekspor transaksi ke format Spreadsheet CSV, Excel (XLSX), serta unduh/restore file backup database JSON utuh.
+* **Backup & Restore Portabel:** Ekspor transaksi ke format Spreadsheet CSV, Excel (XLSX), serta unduh/restore file backup database JSON utuh (file backup otomatis tersimpan di folder `server/backups/`).
 
 ---
 
