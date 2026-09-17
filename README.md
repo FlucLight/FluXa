@@ -280,6 +280,6 @@ Proyek ini dirilis di bawah lisensi **MIT License**. Anda bebas menggunakan, men
 <br>
 <br>
 
-<sub>Dilindungi di bawah lisensi MIT License</sub>
+<sub>Dilindungi di bawah lisensi MIT License.</sub>
 
 </div>
