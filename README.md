@@ -212,6 +212,12 @@ Untuk detail konfigurasi Nginx reverse proxy dan systemd service, silakan pelaja
 
 ---
 
+## Lisensi
+
+Proyek ini dirilis di bawah lisensi **MIT License**. Anda bebas menggunakan, menyalin, memodifikasi, dan mendistribusikan kode ini untuk keperluan apa pun, dengan syarat tetap mencantumkan pemberitahuan hak cipta dan lisensi asli.
+
+---
+
 <br>
 
 <div align="center">
