@@ -203,6 +203,22 @@ npm run dev
 
 ---
 
+## FAQ
+
+**Apakah FluXa gratis digunakan?**
+Ya, FluXa sepenuhnya gratis dan tidak bergantung pada token API AI/LLM berbayar.
+
+**Apakah data saya aman?**
+Data tersimpan di database PostgreSQL dan terisolasi per pengguna. Autentikasi dilindungi cookie HTTP-only JWT serta opsi Login Google dan Passkey.
+
+**Bagaimana cara mencatat transaksi lewat Telegram?**
+Buka bot [@fluclight_finance_bot](https://t.me/fluclight_finance_bot), hubungkan akunmu dengan kode tautan dari web, lalu ketik transaksi dalam bahasa sehari-hari misalnya *"beli nasi padang 25rb cash"*.
+
+**Bisa membuat backup data?**
+Bisa. Gunakan fitur Backup & Restore di aplikasi; file JSON tersimpan otomatis di `server/backups/`.
+
+---
+
 ## Panduan Deploy ke Server Produksi (VPS)
 
 Berikut langkah-langkah memperbarui atau mendeploy aplikasi pada server VPS (Ubuntu/Debian) yang menggunakan PM2 dan Nginx:
