@@ -121,9 +121,22 @@ Browser (Web Client) ──── React 19 + TanStack Query ──> /api/ ──
                                                         ▼
                                              PostgreSQL 14+ Database
                                                         │
-                                            Automated Scheduled Backup
-                                            (JSON files in server/backups)
+Automated Scheduled Backup
+                                             (JSON files in server/backups)
 ```
+
+---
+
+## Teknologi yang Digunakan
+
+| Lapisan | Teknologi |
+|:---|:---|
+| **Frontend** | React 19, Vite, TanStack Query, dan komponen UI modern |
+| **Backend** | Node.js, Express 5, TypeScript |
+| **Database** | PostgreSQL 14+ dengan sistem migrasi bertahap |
+| **Bot** | Telegram Bot API (long polling) |
+| **Auth** | JWT HttpOnly Cookie, Google OAuth 2.0, Passkey (WebAuthn) |
+| **NLP** | Rule-based parser lokal (tanpa biaya token LLM) |
 
 ---
 
