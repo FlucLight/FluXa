@@ -41,6 +41,19 @@ function queryString(params?: QueryParams): string {
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+type UploadResponse = { url: string; message: string }
+
+async function uploadFile(path: string, file: File, fallbackError: string): Promise<UploadResponse> {
+  const fd = new FormData()
+  fd.append('file', file)
+  const res = await fetch(BASE + path, { method: 'POST', body: fd, credentials: 'include' })
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}))
+    throw new Error((body as { error?: string }).error ?? fallbackError)
+  }
+  return res.json() as Promise<UploadResponse>
+}
+
 async function rawFetch(path: string, init?: RequestInit): Promise<Response> {
   const controller = new AbortController()
   const timeout = setTimeout(() => controller.abort(), TIMEOUT_MS)
@@ -193,16 +206,7 @@ export const api = {
         method: 'POST',
         body: JSON.stringify({ text, ...(occurredAt ? { occurred_at: occurredAt } : {}) }),
       }),
-    uploadReceipt: async (file: File) => {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch('/api/transactions/upload-receipt', { method: 'POST', body: fd, credentials: 'include' })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error((body as { error?: string }).error ?? 'Gagal mengunggah foto struk')
-      }
-      return res.json() as Promise<{ url: string; message: string }>
-    },
+    uploadReceipt: (file: File) => uploadFile('/transactions/upload-receipt', file, 'Gagal mengunggah foto struk'),
   },
 
   transfers: {
@@ -297,16 +301,7 @@ export const api = {
   },
 
   profile: {
-    upload: async (file: File) => {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch('/api/profile/photo', { method: 'POST', body: fd, credentials: 'include' })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error((body as { error?: string }).error ?? 'Gagal mengunggah foto profil')
-      }
-      return res.json() as Promise<{ url: string; message: string }>
-    },
+    upload: (file: File) => uploadFile('/profile/photo', file, 'Gagal mengunggah foto profil'),
   },
 }
 
